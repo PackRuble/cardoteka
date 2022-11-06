@@ -10,8 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  riverpod: ^2.1.1
   shared_preferences: ^2.0.15
+  state_notifier: ^0.7.2+1
+  meta: ^1.8.0
 
 dev_dependencies:
   flutter_test:
