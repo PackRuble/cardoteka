@@ -1,17 +1,12 @@
-// todo: This is how you can convert Color in reactive_db ^)
+// todo: add Enum
 
 import 'package:flutter/material.dart';
 
-extension SaveColor on Color {
-  String toDb() => value.toString();
+class Converter {
+  Converter._();
 
-  Color fromDb(String value) => Color(int.parse(value));
+  static String colorToString(Color color) => color.value.toString();
+
+  static Color colorFromString(String value) => Color(int.parse(value));
 }
 
-methodName() {
-  const color = Colors.blue;
-
-  color.toDb();
-
-  color.fromDb('value');
-}

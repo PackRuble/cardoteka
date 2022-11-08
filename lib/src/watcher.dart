@@ -1,27 +1,44 @@
+import 'package:meta/meta.dart';
+import 'package:reactive_db/src/i_watcher.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import 'core.dart';
+import 'i_rkey.dart';
 
-// Todo: посмотреть, будут ли обновляться все провайдеры при обновлении одного значения.
-// если будут, то тогда сложность O(n).
-// по большому счету это задача слушателей фильтровать изменения.
-
-/// Adds the ability to notify listeners of database changes.
-mixin Watcher on DbBase {
-  final WatcherNotifier _watcher = WatcherNotifier();
+/// Provides methods to be able to listen for changes in the database.
+mixin Watcher on RDatabase implements IWatcher {
+  late final _WatcherNotifier _notifier = _WatcherNotifier(super.get);
 
   @override
-  WatcherNotifier get watcher => _watcher;
+  @internal
+  IWatcher get watcher => this;
+
+  @override
+  @visibleForTesting
+  Map<RKey, dynamic> getWatchers() => _notifier.debugState;
+
+  @override
+  void actualizeValue<T>(RKey<T> rKey, T value) =>
+      _notifier.addWatcher<T>(rKey, value);
+
+  @override
+  T listen<T>(
+    RKey<T> rKey,
+    Function(T value) cb, [
+    void Function(void Function())? onDispose,
+  ]) =>
+      _notifier.listen(rKey, cb, onDispose);
 }
 
-class WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
-  WatcherNotifier() : super(const <RKey, dynamic>{});
+class _WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
+  _WatcherNotifier(this.getSavedValue) : super(<RKey, dynamic>{});
+
+  final T Function<T>(RKey<T> rKey) getSavedValue;
 
   /// Update the state of the notifier if it needs to do so (i.e. is a listener).
   void addWatcher<T>(RKey<T> rKey, T value) {
     final bool isContain = state.containsKey(rKey);
     print('addWatcher - ${rKey.key}: $value - $isContain');
-    print(state);
 
     if (isContain) {
       _updateState(rKey, value);
@@ -29,7 +46,7 @@ class WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
   }
 
   /// Internal method for correctly updating the state with the new value.
-  void _updateState(RKey rKey, value) {
+  void _updateState<T>(RKey<T> rKey, T value) {
     state[rKey] = value;
     state = {...state};
   }
@@ -42,16 +59,17 @@ class WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
     Function(T value) cb, [
     void Function(void Function())? onDispose,
   ]) {
-    print('listen -> Watcher: ${rKey.key}');
-    // state.update(storeKey, (_) => storeKey.defaultValue); // mistake
-    // _updateState(storeKey, storeKey.defaultValue); // mistake
+    final T savedValue = getSavedValue.call<T>(rKey);
 
-    // пополняем коллекцию новым значением. [updateShouldNotify] при этом решает,
-    // что изменений не произошло
-    state = {
-      ...{rKey: rKey.defaultValue},
-      ...state
-    };
+    // _updateState(rKey, rKey.defaultValue); // mistake  if state const map
+    // state = {
+    //   ...{rKey: savedValue},
+    //   ...state
+    // };
+
+    // используем данный метод добавления, чтобы не запускать процесс изменения состояния
+    // по сути, мутируем объект
+    state.addAll({rKey: savedValue});
 
     // в дальнейшем данная функция будет срабатывать каждый раз,
     // когда происходит изменение состояния
@@ -62,15 +80,10 @@ class WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
     });
 
     onDispose?.call(() {
-      print(this.hasListeners);
-      print(this.state);
-      print('<counterProvider> disposed');
-      print(state.remove(rKey));
+      state.remove(rKey);
       remover.call();
-      print(this.hasListeners);
-      print(this.state);
     });
 
-    return rKey.defaultValue;
+    return savedValue;
   }
 }

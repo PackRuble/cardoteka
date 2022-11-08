@@ -1,38 +1,22 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'watcher.dart';
-
-enum TypeSaved { bool, int, double, string, stringList }
+import 'converter.dart';
+import 'i_rkey.dart';
+import 'i_watcher.dart';
 
 /// Global Todo:
 ///  1. Реализовать мигратор
 ///  2. Добавить больше поддерживаемых типов для сохранения (Color, Enum, ...)
 ///  3. Подумать о написании правильных тестов.
-///  4. Понять, правильно ли работает изначальная синхронизация [DbBase]
+///  4. Понять, правильно ли работает изначальная синхронизация [RDatabase]
+///  5. Добавить TypeSaved.custom и добавить возможность указать там свои forBd, Tobd
 
-/// Key instance for using the [DbBase] service.
-/// (!) When creating keys, be sure to use a generic type that matches your value.
-///
-/// [type] -> type of data to be saved;
-/// [key] -> the [DbBase] service uses this key to access [SharedPreferences];
-/// [defaultValue] -> default value for this key. Could be null.
-///
-///
-/// It is assumed to be implemented with [Enum] for key definition.
-/// However, a regular 'class' will also work.
-abstract class RKey<T> {
-  TypeSaved get type;
-
-  T get defaultValue;
-
-  String get key;
-}
-
-class DbBase {
-  DbBase() {
-
+class RDatabase {
+  RDatabase() {
     // todo: добавить метод асинхронной прогрузки базы данных
     // с учетом отслеживания текущего статуса (если будет запущено повторно)
   }
@@ -45,7 +29,8 @@ class DbBase {
   bool _isInitialized = false;
 
   /// Specify if listeners should be notified of new values in the database.
-  WatcherNotifier? watcher;
+  @internal
+  IWatcher? get watcher => null;
 
   // todo: Implement
   /// Specify if the keys are to be overwritten.
@@ -57,8 +42,8 @@ class DbBase {
   /// If it returns true, you can start making queries.
   bool get isInitialized => _isInitialized;
 
-  /// Initialization [DbBase]. You must provide keys of type [RKey].
-  Future<DbBase> init(List<RKey> rKeys) async {
+  /// Initialization [RDatabase]. You must provide keys of type [RKey].
+  Future<RDatabase> init(List<RKey> rKeys) async {
     if (!_isInitialized) {
       _rKeys = rKeys;
       _prefs = await SharedPreferences.getInstance();
@@ -68,11 +53,11 @@ class DbBase {
     return this;
   }
 
-  /// Get [DbBase] instance synchronously. It's a plug. !!! For further use of
+  /// Get [RDatabase] instance synchronously. It's a plug. !!! For further use of
   /// this class it is necessary to execute with waiting [init].
   ///
-  /// Check the [DbBase] initialization with [isInitialized].
-  DbBase initSync() => this;
+  /// Check the [RDatabase] initialization with [isInitialized].
+  RDatabase initSync() => this;
 
   /// Returns Map{key: value} of all stored values from [SharedPreferences].
   Map<String, dynamic> getSavedData() {
@@ -92,7 +77,8 @@ class DbBase {
   // Todo: в будущем может понадобиться указывать версию ключа.
   //  + необходим обратный способ конвертирования ключа.
   /// Get the key to use it in the [SharedPreferences].
-  String _getKeyForDb(RKey rKey) => 'rKey_${rKey.key}';
+  String _getKeyForDb(RKey rKey) =>
+      'rKey_${rKey.key}'; // todo это может быть необязательным?
 
   /// Get value from [SharedPreferences] using key type [RKey].
   /// (!) You don't have to specify a generic type.
@@ -118,7 +104,7 @@ class DbBase {
   ///
   Future<bool> set<T>(RKey<T> rKey, T value) async {
     if (watcher != null) {
-      watcher?.addWatcher<T>(rKey, value);
+      watcher?.actualizeValue<T>(rKey, value);
     }
 
     return _setValueToDb<T>(rKey, value);
@@ -126,6 +112,8 @@ class DbBase {
 
   /// Internal method to retrieve data from [SharedPreferences].
   T? _getValueFromDb<T>(RKey<T> rKey) {
+    final key = _getKeyForDb(rKey);
+
     return () {
       switch (rKey.type) {
         case TypeSaved.bool:
@@ -138,9 +126,14 @@ class DbBase {
           return _prefs.getString;
         case TypeSaved.stringList:
           return _prefs.getStringList;
+        case TypeSaved.color:
+          return (String key) {
+            final value = _prefs.getString(key);
+            if (value != null) return Converter.colorFromString(value);
+          };
       }
     }()
-        .call(rKey.key) as T?;
+        .call(key) as T?;
   }
 
   /// Internal method to save data in [SharedPreferences].
@@ -158,6 +151,9 @@ class DbBase {
         return _prefs.setString(key, value as String);
       case TypeSaved.stringList:
         return _prefs.setStringList(key, value as List<String>);
+      case TypeSaved.color:
+        final converted = Converter.colorToString(value as Color);
+        return _prefs.setString(key, converted);
     }
   }
 

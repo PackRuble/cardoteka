@@ -1,10 +1,6 @@
-
-include: package:lint/analysis_options_package.yaml
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+include: package:lint/analysis_options.yaml
 
 linter:
   rules:
+    unawaited_futures: true
     always_use_package_imports: false
-    unawaited_future: true

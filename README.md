@@ -3,7 +3,7 @@
 
 1. Identify the DB object with the necessary mixins (optional)
    ```dart
-   class DbUser extends DbBase with Watcher {}
+   class DbUser extends RDatabase with CRUD, Watcher {}
    ```
 2. Define your key list. Read more about all methods [here](#how-to-implement-key-storage?)
    ```dart
@@ -52,6 +52,36 @@
    db.set<int>(KeyStore.banana, 'mistake!'); // a mistake
    db.set<bool>(KeyStore.banana, true); // a mistake (KeyStore.banana is int type)
 ```
+
+## How to use with Riverpod?
+Use mixin `Watcher` and method `listen`
+```dart
+
+class DbUser extends RDatabase with Watcher {}
+
+final db = Provider<DbUser>((ref) => DbUser());
+
+// Note: if the value is absent in the database, the default value will be returned. 
+// Pass also parameter onDispose if provider can be disposed. This will free up 
+// related resources
+final bananaProvider = Provider.autoDispose<int>((ref) {
+    return ref.watch(db).listen<int>(
+          KeyStore1.banana,
+          (value) => ref.state = value,
+          ref.onDispose,
+        );
+  });
+```
+
+And now we save the data to the database by our key  `KeyStore1.banana` using method:
+```dart
+// You can either pass ref as a parameter or use a class where that ref is an
+// initialized field.
+void saveValue(int value) =>
+      ref.read(db).set(KeyStore1.banana, value);
+```
+
+As a result, the new value will be saved in the database `DbUser` and the provider `bananaProvider` will be automatically updated.
 
 ## How to implement key storage?
 
