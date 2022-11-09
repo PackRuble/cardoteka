@@ -22,3 +22,38 @@ abstract class RKey<T> {
   /// The key to access the value in the database.
   String get key;
 }
+
+mixin RKeySomeField on RKey {
+  double? get someField;
+}
+
+abstract class RKeyWithSomeField extends RKey with RKeySomeField {}
+
+// MISTAKE: 'RKeySomeField<dynamic>' can't be mixed onto 'Enum' because 'Enum' doesn't implement 'RKey<dynamic>
+// enum KeyStore<T> with RKeySomeField implements RKey {
+enum KeyStore<T> implements RKeyWithSomeField {
+  banana<int>(TypeSaved.int, 0),
+  ;
+
+  const KeyStore(this.type, this.defaultValue);
+
+  @override
+  final TypeSaved type;
+
+  @override
+  final T defaultValue;
+
+  @override
+  String get key => name;
+
+  @override
+  double get someField => 5; // ...to do something
+}
+
+main() {
+  const RKey enumKeysStore = KeyStore.banana;
+
+  if (enumKeysStore is RKeySomeField) {
+    enumKeysStore.someField;
+  }
+}
