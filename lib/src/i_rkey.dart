@@ -1,3 +1,4 @@
+/// Type of data to be saved.
 enum TypeSaved { bool, int, double, string, stringList, color }
 
 /// Key instance for using the [DbBase] service.
@@ -12,9 +13,12 @@ enum TypeSaved { bool, int, double, string, stringList, color }
 /// However, a regular 'class' will also work.
 ///
 abstract class RKey<T> {
+  /// Type of data to be saved.
   TypeSaved get type;
 
+  /// The default value for this key.
   T get defaultValue;
 
+  /// The key to access the value in the database.
   String get key;
 }

@@ -7,13 +7,13 @@ mixin CRUD on RDatabase {
   T read<T>(RKey<T> rKey) => super.get<T>(rKey);
 
   /// Calls a function [RDatabase.set] with  default value.
-  Future<bool> create<T>(RKey<T> rKey) async =>
-      super.set<T>(rKey, rKey.defaultValue);
+  Future<bool> create<T extends Object>(RKey<T> rKey, [T? newValue]) async =>
+      super.set<T>(rKey, newValue ?? rKey.defaultValue);
 
   /// Calls a function [RDatabase.set].
   /// (!) Always use a generic type. This will allow not to make a mistake,
   /// if the type of the provided value will be different from the base type of the key.
-  Future<bool> update<T>(RKey<T> rKey, T newValue) async =>
+  Future<bool> update<T extends Object>(RKey<T> rKey, T newValue) async =>
       super.set<T>(rKey, newValue);
 
   /// Calls a function [RDatabase.remove].

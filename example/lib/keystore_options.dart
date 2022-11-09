@@ -1,12 +1,4 @@
-enum TypeSaved { bool, int, double, string, stringList }
-
-abstract class RKey<T> {
-  TypeSaved get type;
-
-  T get defaultValue;
-
-  String get key;
-}
+import 'package:reactive_db/reactive_db.dart';
 
 /// Conventional key store.
 enum KeyStore<T> implements RKey<T> {
@@ -75,8 +67,4 @@ class KeyStore2<T> implements RKey<T> {
 
   @override
   final String key;
-}
-
-main() {
-  print(KeyStore2.carrot.runtimeType);
 }

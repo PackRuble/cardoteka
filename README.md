@@ -5,7 +5,7 @@
    ```dart
    class DbUser extends RDatabase with CRUD, Watcher {}
    ```
-2. Define your key list. Read more about all methods [here](#how-to-implement-key-storage?)
+2. Define your key list. Read more about all methods [here](#how-to-implement-key-storage)
    ```dart
    enum KeyStore<T> implements RKey<T> {
      banana<int>(TypeSaved.int, 5),
@@ -190,8 +190,9 @@ class KeyStore2<T> implements RKey<T> {
 ## TODO
 1. [ ] Add info about watchers
 2. [ ] Add info about operation instrument
-3. [ ] Add info about convertes
-3. [ ] Add info about supported types
+3. [ ] Add info about convertes and complex objects
+4. [ ] Add info about supported types
+5. [ ] Add info uses maigrator
 
 
 ## Additional information

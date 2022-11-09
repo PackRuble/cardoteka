@@ -1,12 +1,7 @@
-// todo: add Enum
+/// Use to transform a complex model.
+abstract class RConverter<T, S> {
+  const RConverter();
 
-import 'package:flutter/material.dart';
-
-class Converter {
-  Converter._();
-
-  static String colorToString(Color color) => color.value.toString();
-
-  static Color colorFromString(String value) => Color(int.parse(value));
+  T fromDb(S value);
+  S toDb(T object);
 }
-

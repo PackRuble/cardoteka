@@ -5,10 +5,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'banana_count.dart';
 import 'counters.dart';
 import 'db_provider.dart';
-
-//возвращаем правильное значение из дб в вотчере
-//делаем функцию конвертации Enum и может ещё какие
-//сохраняем в гит
+import 'using_converter.dart';
 
 Future main() async {
   FlutterError.demangleStackTrace = (StackTrace stack) {
@@ -20,7 +17,10 @@ Future main() async {
   final container = ProviderContainer(observers: [Logger()]);
 
   final DbUser db = container.read(dbProvider);
-  await db.init(KeyStore1.values);
+  await db.init(
+    KeyStore1.values,
+    converters: {KeyStore1.myCar: const DataModelConverter()},
+  );
 
   runApp(
     UncontrolledProviderScope(
@@ -95,7 +95,10 @@ class HomePage extends ConsumerWidget {
     return Column(
       children: const [
         BananaCounterWidget(),
+        Divider(),
         CountersWidget(),
+        Divider(),
+        DataModelWidget(),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
+import 'package:reactive_db/src/custom_converters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'converter.dart';
@@ -37,15 +38,22 @@ class RDatabase {
   /// Map<oldKey, newKey>
   Map<RKey, RKey>? migrator;
 
+  /// Provide a converter for complex objects
+  late final Map<RKey, RConverter>? _converters;
+
   /// Indicates whether the database is initialized.
   ///
   /// If it returns true, you can start making queries.
   bool get isInitialized => _isInitialized;
 
   /// Initialization [RDatabase]. You must provide keys of type [RKey].
-  Future<RDatabase> init(List<RKey> rKeys) async {
+  Future<RDatabase> init(
+    List<RKey> rKeys, {
+    Map<RKey, RConverter>? converters,
+  }) async {
     if (!_isInitialized) {
       _rKeys = rKeys;
+      if (converters != null) _converters = {}..addAll(converters);
       _prefs = await SharedPreferences.getInstance();
       _isInitialized = true;
     }
@@ -74,11 +82,14 @@ class RDatabase {
   /// Получить все ключи.
   Set<String> getAllKeys<T>() => Set<String>.from(_rKeys.map(_getKeyForDb));
 
+  // todo это может быть необязательным?
   // Todo: в будущем может понадобиться указывать версию ключа.
   //  + необходим обратный способ конвертирования ключа.
   /// Get the key to use it in the [SharedPreferences].
-  String _getKeyForDb(RKey rKey) =>
-      'rKey_${rKey.key}'; // todo это может быть необязательным?
+  String _getKeyForDb(RKey rKey) => 'rKey_${rKey.key}';
+
+  // todo: need?
+  //  String _getKeyForDbPattern(String suffix, String key, String prefix) => '$suffix$key$prefix';
 
   /// Get value from [SharedPreferences] using key type [RKey].
   /// (!) You don't have to specify a generic type.
@@ -102,7 +113,8 @@ class RDatabase {
   /// Save the new value in [SharedPreferences] using a key of type [RKey].
   /// (!) Always specify the generic type!
   ///
-  Future<bool> set<T>(RKey<T> rKey, T value) async {
+  /// [value] cannot be `null`.
+  Future<bool> set<T extends Object>(RKey<T> rKey, T value) async {
     if (watcher != null) {
       watcher?.actualizeValue<T>(rKey, value);
     }
@@ -114,7 +126,7 @@ class RDatabase {
   T? _getValueFromDb<T>(RKey<T> rKey) {
     final key = _getKeyForDb(rKey);
 
-    return () {
+    final Object? value = () {
       switch (rKey.type) {
         case TypeSaved.bool:
           return _prefs.getBool;
@@ -129,30 +141,42 @@ class RDatabase {
         case TypeSaved.color:
           return (String key) {
             final value = _prefs.getString(key);
-            if (value != null) return Converter.colorFromString(value);
+            if (value != null) return const ColorConverter().fromDb(value);
           };
       }
     }()
-        .call(key) as T?;
+        .call(key);
+
+    if (value == null) {
+      return value as T?;
+    } else {
+      final RConverter? converter = _converters?[rKey];
+
+      return (converter?.fromDb(value) ?? value) as T?;
+    }
   }
 
   /// Internal method to save data in [SharedPreferences].
-  Future<bool> _setValueToDb<T>(RKey<T> rKey, T value) async {
+  Future<bool> _setValueToDb<T extends Object>(RKey<T> rKey, T value) async {
     final key = _getKeyForDb(rKey);
+
+    final RConverter? converter = _converters?[rKey];
+    final raw = converter?.toDb(value);
+
     // todo: узнать, что возвращает конкретно вызов set?
     switch (rKey.type) {
       case TypeSaved.bool:
-        return _prefs.setBool(key, value as bool);
+        return _prefs.setBool(key, (raw ?? value) as bool);
       case TypeSaved.int:
-        return _prefs.setInt(key, value as int);
+        return _prefs.setInt(key, (raw ?? value) as int);
       case TypeSaved.double:
-        return _prefs.setDouble(key, value as double);
+        return _prefs.setDouble(key, (raw ?? value) as double);
       case TypeSaved.string:
-        return _prefs.setString(key, value as String);
+        return _prefs.setString(key, (raw ?? value) as String);
       case TypeSaved.stringList:
-        return _prefs.setStringList(key, value as List<String>);
+        return _prefs.setStringList(key, (raw ?? value) as List<String>);
       case TypeSaved.color:
-        final converted = Converter.colorToString(value as Color);
+        final converted = const ColorConverter().toDb(value as Color);
         return _prefs.setString(key, converted);
     }
   }

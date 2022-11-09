@@ -21,6 +21,12 @@ enum KeyStore<T> implements RKey<T> {
 
   @override
   String get key => name;
+
+  @override
+  T Function<K>(RKey<T> rKey, K data)? get fromDb => null;
+
+  @override
+  K Function<K>(RKey<T> rKey, T model)? get toDb => null;
 }
 
 Future<void> main() async {
