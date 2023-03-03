@@ -1,89 +1,76 @@
 import 'package:meta/meta.dart';
-import 'package:reactive_db/src/i_watcher.dart';
-import 'package:state_notifier/state_notifier.dart';
 
 import 'core.dart';
-import 'i_rkey.dart';
+import 'i_card.dart';
+import 'i_watcher.dart';
+
+// ignore_for_file: prefer_function_declarations_over_variables
+
+typedef CbWatcher<V> = void Function(V bait);
+
+typedef Detacher = void Function(void Function());
 
 /// Provides methods to be able to listen for changes in the database.
-mixin Watcher on RDatabase implements IWatcher {
-  late final _WatcherNotifier _notifier = _WatcherNotifier(super.get);
+mixin Watcher on CardDb implements IWatcher {
+  @override
+  IWatcher get watcher => this;
+
+  final _watchers = <ICard, List<CbWatcher>>{};
+
+  Map<ICard, List<CbWatcher>> debugGetWatchers() => _watchers;
 
   @override
   @internal
-  IWatcher get watcher => this;
+  void notify<V>(ICard<V?> key, V value) {
+    final ws = _watchers[key];
 
-  @override
-  @visibleForTesting
-  Map<RKey, dynamic> getWatchers() => _notifier.debugState;
-
-  @override
-  void actualizeValue<T>(RKey<T> rKey, T value) =>
-      _notifier.addWatcher<T>(rKey, value);
-
-  @override
-  T listen<T>(
-    RKey<T> rKey,
-    Function(T value) cb, [
-    void Function(void Function())? onDispose,
-  ]) =>
-      _notifier.listen(rKey, cb, onDispose);
-}
-
-class _WatcherNotifier extends StateNotifier<Map<RKey, dynamic>> {
-  _WatcherNotifier(this.getSavedValue) : super(<RKey, dynamic>{});
-
-  final T Function<T>(RKey<T> rKey) getSavedValue;
-
-  /// Update the state of the notifier if it needs to do so (i.e. is a listener).
-  void addWatcher<T>(RKey<T> rKey, T value) {
-    final bool isContain = state.containsKey(rKey);
-    print('addWatcher - ${rKey.key}: $value - $isContain');
-
-    if (isContain) {
-      _updateState(rKey, value);
+    if (ws != null) {
+      for (final watcher in ws) {
+        watcher.call(value);
+      }
     }
   }
 
-  /// Internal method for correctly updating the state with the new value.
-  void _updateState<T>(RKey<T> rKey, T value) {
-    state[rKey] = value;
-    state = {...state};
+  /// Attach a [CbWatcher] to your [ICard]. A [watcher] will be called whenever
+  /// the [key] value changes.
+  ///
+  /// Use this method when you want to track changes in the value for [key].
+  /// As soon as you call [CardDb.set] the value is passed to the listener [watcher].
+  /// If your listener can be deleted, pass [detacher], thereby freeing up related resources.
+  /// The first call returns the default value [ICard.defaultValue] for the given [key].
+  V attach<V>(
+    ICard<V> key,
+    CbWatcher<V> watcher, [
+    Detacher? detacher,
+  ]) {
+    final w = (Object? food) => watcher(food as V);
+
+    _watchers[key] = [...?_watchers[key], w];
+
+    detacher?.call(() {
+      _watchers[key]?.remove(w);
+
+      // Remove the key from the [_watchers], if the list is empty
+      if (_watchers[key]?.isEmpty ?? false) {
+        _watchers.remove(key);
+      }
+    });
+
+    return key.defaultValue;
   }
 
-  /// Adds a listener that will receive new values when the database state changes.
-  ///
-  /// Provide the [onDispose] method if your listener can be removed.
-  T listen<T>(
-    RKey<T> rKey,
-    Function(T value) cb, [
-    void Function(void Function())? onDispose,
-  ]) {
-    final T savedValue = getSavedValue.call<T>(rKey);
+  @visibleForTesting
+  void printAllWatchers() {
+    final buffer = StringBuffer();
 
-    // _updateState(rKey, rKey.defaultValue); // mistake  if state const map
-    // state = {
-    //   ...{rKey: savedValue},
-    //   ...state
-    // };
+    for (final entry in _watchers.entries) {
+      buffer.writeln('Key: ${entry.key}, List of listeners: ${entry.value}');
+    }
 
-    // используем данный метод добавления, чтобы не запускать процесс изменения состояния
-    // по сути, мутируем объект
-    state.addAll({rKey: savedValue});
+    if (buffer.isEmpty) buffer.writeln('There are no listeners.');
 
-    // в дальнейшем данная функция будет срабатывать каждый раз,
-    // когда происходит изменение состояния
-    final remover = addListener(fireImmediately: false, (state) {
-      final value = state[rKey] as T;
-
-      cb.call(value);
-    });
-
-    onDispose?.call(() {
-      state.remove(rKey);
-      remover.call();
-    });
-
-    return savedValue;
+    print('''
+All listeners are represented at the moment:
+$buffer''');
   }
 }

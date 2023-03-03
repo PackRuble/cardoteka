@@ -1,6 +1,6 @@
-/// Use to transform a complex model.
-abstract class RConverter<T, S> {
-  const RConverter();
+/// Use to transform a complex model for work to database.
+abstract class IConverter<T, S> {
+  const IConverter();
 
   T fromDb(S value);
   S toDb(T object);

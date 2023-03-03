@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'converter.dart';
 
 /// The converter allows you to save the [Color] class to the database as [String].
-class ColorConverter implements RConverter<Color, String> {
+class ColorConverter implements IConverter<Color, String> {
   const ColorConverter();
 
   @override
