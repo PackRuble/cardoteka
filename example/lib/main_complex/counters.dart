@@ -12,7 +12,7 @@ class CountersWidgetController {
   final Ref _ref;
 
   static final counter1Provider = Provider.autoDispose<int>((ref) {
-    return ref.watch(dbProvider).listen<int>(
+    return ref.watch(dbProvider).attach<int>(
           KeyStore1.counter1,
           (value) => ref.state = value,
           ref.onDispose,
@@ -20,7 +20,7 @@ class CountersWidgetController {
   }, name: 'counter1Provider');
 
   static final counter2Provider = Provider.autoDispose<int>((ref) {
-    return ref.watch(dbProvider).listen<int>(
+    return ref.watch(dbProvider).attach<int>(
           KeyStore1.counter2,
           (value) => ref.state = value,
           ref.onDispose,

@@ -17,10 +17,7 @@ Future main() async {
   final container = ProviderContainer(observers: [Logger()]);
 
   final DbUser db = container.read(dbProvider);
-  await db.init(
-    KeyStore1.values,
-    converters: {KeyStore1.myCar: const DataModelConverter()},
-  );
+  await db.init();
 
   runApp(
     UncontrolledProviderScope(
@@ -66,7 +63,7 @@ class HelperButtonsWidget extends ConsumerWidget {
       children: [
         TextButton(
           onPressed: () {
-            final state = db.getWatchers();
+            final state = db.debugGetWatchers();
             print(state);
           },
           child: const Text('Get watchers'),
@@ -114,7 +111,7 @@ class HomePageController {
   static final instance = Provider.autoDispose(HomePageController.new);
 
   /// Reload our database.
-  void reloadDb() => _ref.refresh(dbProvider).init(KeyStore1.values);
+  void reloadDb() => _ref.refresh(dbProvider).init();
 }
 
 class Logger implements ProviderObserver {

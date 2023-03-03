@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_db/reactive_db.dart';
 
-class DbUser extends RDatabase with Watcher {}
+class DbUser extends CardDb with Watcher {
+  DbUser({required super.cards});
+}
 
 /// Storage of [Enum] type with possibility of using custom key.
-enum KeyStore<T> implements RKey<T> {
-  banana<int>(TypeSaved.int, 5),
-  melon<int?>(TypeSaved.int, 44),
-  cucumber<int>(TypeSaved.int, -3),
-  watermelon<int>(TypeSaved.int, 2),
+enum KeyStore<T> implements ICard<T> {
+  banana<int>(TypeData.int, 5),
+  melon<int?>(TypeData.int, 44),
+  cucumber<int>(TypeData.int, -3),
+  watermelon<int>(TypeData.int, 2),
   ;
 
   const KeyStore(this.type, this.defaultValue);
 
   @override
-  final TypeSaved type;
+  final TypeData type;
 
   @override
   final T defaultValue;
@@ -23,15 +25,12 @@ enum KeyStore<T> implements RKey<T> {
   String get key => name;
 
   @override
-  T Function<K>(RKey<T> rKey, K data)? get fromDb => null;
-
-  @override
-  K Function<K>(RKey<T> rKey, T model)? get toDb => null;
+  CardConfig get config => CardConfig(name: 'KeyStore1');
 }
 
 Future<void> main() async {
-  final DbUser db = DbUser();
-  await db.init(KeyStore.values);
+  final DbUser db = DbUser(cards: KeyStore.values);
+  await db.init();
 
   // If there is no value, it will return the default value.
   // Will always return the type specified in the key.
@@ -40,19 +39,19 @@ Future<void> main() async {
 
   // You can specify [ifAbsent] if you want to return your value
   // instead of [defaultValue] in case the key is absent in the database.
-  final bananaNull = db.get(KeyStore.banana, () => null);
+  final bananaNull = db.get(KeyStore.banana);
   print(bananaNull);
 
   // When you save a new value to the database, be sure to specify the generic type.
-  db.set(KeyStore.banana,
+  await db.set(KeyStore.banana,
       5); // says it's not a mistake (it's really not a mistake)
-  db.set(KeyStore.banana, 'mistake!'); // says it's not a mistake
-  db.set(KeyStore.banana, true); // says it's not a mistake
-  db.set<int>(KeyStore.banana, 5); // right call
+  await db.set(KeyStore.banana, 'mistake!'); // says it's not a mistake
+  await db.set(KeyStore.banana, true); // says it's not a mistake
+  await db.set<int>(KeyStore.banana, 5); // right call
   // db.set<int>(KeyStore.banana, 'mistake!'); // a mistake
   // db.set<bool>(KeyStore.banana, true); // a mistake (KeyStore.banana is int type)
 
-  db.listen(
+  db.attach(
     KeyStore.banana,
     (value) => print('$value - we know the number of bananas'),
   );

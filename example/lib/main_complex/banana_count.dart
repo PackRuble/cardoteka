@@ -8,7 +8,7 @@ import 'db_provider.dart';
 final bananaProvider = Provider.autoDispose<int>((ref) {
   final db = ref.watch(dbProvider);
 
-  return db.watcher.listen<int>(
+  return db.attach<int>(
     KeyStore1.banana,
     (value) => ref.state = value,
     ref.onDispose,
@@ -47,7 +47,7 @@ class BananaControllerUI {
 
   /// You can even use watcher if you want, although it is preferable to use mixin [Watcher]
   static final bananaProvider = Provider.autoDispose<int>((ref) {
-    return ref.watch(instance).db.watcher.listen<int>(
+    return ref.watch(instance).db.attach<int>(
           KeyStore1.banana,
           (value) => ref.state = value,
           ref.onDispose,

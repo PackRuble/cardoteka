@@ -6,22 +6,24 @@ import 'package:reactive_db/reactive_db.dart';
 
 final dbProvider = Provider<DbUser>((ref) => DbUser());
 
-class DbUser extends RDatabase with Watcher, CRUD {}
+class DbUser extends CardDb with Watcher, CRUD {
+  DbUser() : super(cards: KeyStore1.values);
+}
 
 /// Storage of [Enum] type with possibility of using custom key.
-enum KeyStore1<T> implements RKey<T> {
-  banana<int>(TypeSaved.int, 0),
-  counter1<int>(TypeSaved.int, 0),
-  counter2<int>(TypeSaved.int, 0),
-  counterCustom<int>(TypeSaved.int, 2, 'custom_counter_key'),
-  skyColor<Color>(TypeSaved.color, Colors.blue),
-  myCar<Car>(TypeSaved.string, Car.notCar()),
+enum KeyStore1<T> implements ICard<T> {
+  banana<int>(TypeData.int, 0),
+  counter1<int>(TypeData.int, 0),
+  counter2<int>(TypeData.int, 0),
+  counterCustom<int>(TypeData.int, 2, 'custom_counter_key'),
+  skyColor<Color>(TypeData.color, Colors.blue),
+  myCar<Car>(TypeData.string, Car.notCar()),
   ;
 
   const KeyStore1(this.type, this.defaultValue, [this.customKey]);
 
   @override
-  final TypeSaved type;
+  final TypeData type;
 
   @override
   final T defaultValue;
@@ -30,10 +32,16 @@ enum KeyStore1<T> implements RKey<T> {
 
   @override
   String get key => customKey ?? EnumName(this).name;
+
+  @override
+  CardConfig get config => CardConfig(
+        name: 'KeyStore1',
+        converters: {KeyStore1.myCar: const CarConverter()},
+      );
 }
 
-class DataModelConverter implements RConverter<Car, String> {
-  const DataModelConverter();
+class CarConverter implements IConverter<Car, String> {
+  const CarConverter();
 
   @override
   Car fromDb(String value) =>

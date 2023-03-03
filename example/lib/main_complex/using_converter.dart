@@ -6,12 +6,12 @@ import 'package:reactive_db/reactive_db.dart';
 
 import 'db_provider.dart';
 
-/// Shows how you can use [RConverter]
+/// Shows how you can use [IConverter]
 
 final myCarProvider = Provider<Car>((ref) {
   final db = ref.watch(dbProvider);
 
-  return db.listen<Car>(
+  return db.attach<Car>(
     KeyStore1.myCar,
     (value) => ref.state = value,
   );
