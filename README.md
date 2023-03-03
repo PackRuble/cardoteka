@@ -194,6 +194,9 @@ class KeyStore2<T> implements RKey<T> {
 4. [ ] Add info about supported types
 5. [ ] Add info uses maigrator
 
+## TODO implement
+1. [ ] To implement the work of the key migrator.
+2. [ ] To implement other converters, e.g. DateTimeConverter
 
 ## Additional information
 
