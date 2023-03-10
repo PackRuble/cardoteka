@@ -232,7 +232,7 @@ class CardDb {
     final resultKeys = <ICard>{};
 
     for (final card in cards) {
-      if (allStoredKey.contains(card.key)) {
+      if (allStoredKey.contains(_getKeyForDb(card))) {
         resultKeys.add(card);
       }
     }
