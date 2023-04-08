@@ -1,6 +1,11 @@
-include: package:lint/analysis_options.yaml
+include: package:lint/package.yaml
+
+analyzer:
+  exclude:
+    - 'example/**'
 
 linter:
   rules:
     unawaited_futures: true
     always_use_package_imports: false
+    sort_pub_dependencies: false
