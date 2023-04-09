@@ -1,7 +1,10 @@
 /// Use to transform a complex model for work to database.
-abstract class IConverter<T, S> {
+abstract class IConverter<V extends Object?, T extends Object> {
   const IConverter();
 
-  T fromDb(S value);
-  S toDb(T object);
+  V fromDb(T value);
+  T toDb(V object);
+
+  @override
+  String toString() => 'fromDb: $V, toDb: $T';
 }
