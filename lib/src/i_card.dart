@@ -1,26 +1,25 @@
 import 'dart:core' as dart_core;
 import 'dart:ui' as ui show Color;
-import 'converter.dart';
 
 /// Type of data to be saved.
 enum TypeData {
   /// Represents type [dart_core.bool].
-  bool,
+  bool(),
 
   /// Represents type [dart_core.int].
-  int,
+  int(),
 
   /// Represents type [dart_core.double].
-  double,
+  double(),
 
   /// Represents type [dart_core.String].
-  string,
+  string(),
 
   /// Represents type [dart_core.List]<String>.
-  stringList,
+  stringList(),
 
   /// Represents type [ui.Color].
-  color
+  color()
 }
 
 /// Key instance for using the [CardDb] service.
@@ -34,7 +33,7 @@ enum TypeData {
 /// It is assumed to be implemented with [Enum] for key definition.
 /// However, a regular 'class' will also work.
 ///
-abstract class ICard<V> {
+abstract class ICard<V extends dart_core.Object?> {
   /// Type of data to be saved.
   TypeData get type;
 
@@ -43,27 +42,4 @@ abstract class ICard<V> {
 
   /// The key to access the value [defaultValue] in the database [CardDb].
   dart_core.String get key;
-
-  CardConfig get config;
 }
-
-class CardConfig<V> {
-  CardConfig({
-    required this.name,
-    this.converters,
-  });
-
-  /// The name of your database. The [storeName] must be unique and not used in
-  /// other instances [CardDb].
-  ///
-  /// The name is used as a prefix for keys.
-  final dart_core.String name;
-
-  /// Преобразование сложных моделей для сохранения в бд и обратно
-  ///
-  /// Переопределите, чтобы добавить [IConverter]
-  final dart_core.Map<ICard<V>, IConverter>? converters;
-
-  // final migrator;
-}
-
