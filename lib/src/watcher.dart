@@ -6,7 +6,7 @@ import 'i_watcher.dart';
 
 // ignore_for_file: prefer_function_declarations_over_variables
 
-typedef CbWatcher<V> = void Function(V bait);
+typedef CbWatcher<V> = void Function(V value);
 
 typedef Detacher = void Function(void Function());
 
@@ -17,11 +17,12 @@ mixin Watcher on CardDb implements IWatcher {
 
   final _watchers = <ICard, List<CbWatcher>>{};
 
+  @visibleForTesting
   Map<ICard, List<CbWatcher>> debugGetWatchers() => _watchers;
 
   @override
   @internal
-  void notify<V>(ICard<V?> key, V value) {
+  void notify<V extends Object>(ICard<V?> key, V? value) {
     final ws = _watchers[key];
 
     if (ws != null) {
@@ -37,13 +38,17 @@ mixin Watcher on CardDb implements IWatcher {
   /// Use this method when you want to track changes in the value for [key].
   /// As soon as you call [CardDb.set] the value is passed to the listener [watcher].
   /// If your listener can be deleted, pass [detacher], thereby freeing up related resources.
-  /// The first call returns the default value [ICard.defaultValue] for the given [key].
-  V attach<V>(
+  ///
+  /// The first call returns the stored value from the database. If null, returned
+  /// default value [ICard.defaultValue] for the given [key].
+  V attach<V extends Object?>(
     ICard<V> key,
-    CbWatcher<V> watcher, [
-    Detacher? detacher,
-  ]) {
-    final w = (Object? food) => watcher(food as V);
+    CbWatcher<V> watcher, {
+    // The obligativeness of the argument [detacher] is due to the high degree
+    //  of forgetfulness of its instruction
+    required Detacher? detacher,
+  }) {
+    final w = (Object? value) => watcher(value as V);
 
     _watchers[key] = [...?_watchers[key], w];
 
@@ -56,7 +61,7 @@ mixin Watcher on CardDb implements IWatcher {
       }
     });
 
-    return key.defaultValue;
+    return getOrNull(key) ?? key.defaultValue;
   }
 
   @visibleForTesting
