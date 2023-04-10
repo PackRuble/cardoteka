@@ -290,6 +290,22 @@ mixin AccessToSP on CardDb {
     return CardDb._prefs;
   }
 
+  /// The original [SharedPreferences.setPrefix] method.
+  static void setPrefix(String prefix) => SharedPreferences.setPrefix(prefix);
+
+  /// The original [SharedPreferences.resetStatic] method.
+  @visibleForTesting
+  // ignore: invalid_use_of_visible_for_testing_member
+  static void resetStatic() => SharedPreferences.resetStatic();
+
+  /// The original [SharedPreferences.getInstance] method.
+  ///
+  /// Useful in tests after call [SharedPreferences.setMockInitialValues].
+  @visibleForTesting
+  static Future<void> reInit() async {
+    CardDb._prefs = await SharedPreferences.getInstance();
+  }
+
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
       {for (final key in prefs.getKeys()) key: prefs.get(key)!};
