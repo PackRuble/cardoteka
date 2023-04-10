@@ -158,25 +158,31 @@ class CardDb {
   Future<bool> _setValueToDb<T extends Object>(ICard<T?> card, T value) async {
     final key = _keyForSP(card);
 
-    final IConverter? converter = _config.converters?[card];
-    final Object? raw = converter?.toDb(value);
+    final resultValue = _getConverter(card)?.toDb(value) ?? value;
 
+    // optimize: use a pre-made map?
     switch (card.type) {
-      case TypeData.bool:
-        return _prefs.setBool(key, (raw ?? value) as bool);
-      case TypeData.int:
-        return _prefs.setInt(key, (raw ?? value) as int);
-      case TypeData.double:
-        return _prefs.setDouble(key, (raw ?? value) as double);
-      case TypeData.string:
-        return _prefs.setString(key, (raw ?? value) as String);
-      case TypeData.stringList:
-        return _prefs.setStringList(
-            key, ((raw ?? value) as List).cast<String>());
-      case TypeData.color:
-        final converted = const ColorConverter().toDb(value as Color);
-        return _prefs.setString(key, converted);
+      case DataType.bool:
+        return _prefs.setBool(key, resultValue as bool);
+      case DataType.int:
+        return _prefs.setInt(key, resultValue as int);
+      case DataType.double:
+        return _prefs.setDouble(key, resultValue as double);
+      case DataType.string:
+        return _prefs.setString(key, resultValue as String);
+      case DataType.stringList:
+        return _prefs.setStringList(key, (resultValue as List).cast<String>());
     }
+  }
+
+  IConverter? _getConverter(ICard card) {
+    final Map<ICard, IConverter>? converters = _config.converters;
+    if (converters != null) {
+      if (converters.containsKey(card)) {
+        return converters[card]!;
+      }
+    }
+    return null;
   }
 
   /// Acts according to the [SharedPreferences.remove] method of the same name.
