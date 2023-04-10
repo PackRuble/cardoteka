@@ -2,29 +2,28 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reactive_db/reactive_db.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'source/forest_key_store.dart';
 
 class ForestDb extends CardDb {
-  ForestDb({required super.cards});
+  const ForestDb({required super.cards, required super.config});
 }
 
 void main() {
-  SharedPreferences.setMockInitialValues({});
+  const db = ForestDb(
+    cards: ForestCard.values,
+    config: forestCardConfig,
+  );
+
+  db.setMockInitialValues({});
 
   test('Simple getting/setting by Enum.key', () async {
     // we may to call ForestDb() - it's the same thing
-    final db = ForestDb(cards: ForestCard.values);
 
     await db.init();
 
     // Simple reading by key
     for (final key in ForestCard.values) {
-      // if (key == ForestCard.keepAcaciaWithNull) {
-      //   db.getOrNull(key);
-      //   continue;
-      // }
       db.getOrNull(key);
     }
 

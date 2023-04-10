@@ -1,4 +1,6 @@
 
+[//]: # (todo: The documentation needs a serious update!)
+
 ## How to started?
 
 1. Identify the DB object with the necessary mixins (optional)
@@ -190,13 +192,15 @@ class KeyStore2<T> implements RKey<T> {
 ## TODO
 1. [ ] Add info about watchers
 2. [ ] Add info about operation instrument
-3. [ ] Add info about convertes and complex objects
+3. [ ] Add info about converters and complex objects
 4. [ ] Add info about supported types
-5. [ ] Add info uses maigrator
+5. [ ] Add info uses migrator
 
 ## TODO implement
-1. [ ] To implement the work of the key migrator.
-2. [ ] To implement other converters, e.g. DateTimeConverter
+1. [ ] Migrator of data
+2. [ ] To implement other converters, e.g. DateTimeConverter, Color, Enum, Map, Set
+3. [ ] Tests
+4. [ ] License
 
 ## Additional information
 

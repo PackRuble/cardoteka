@@ -1,0 +1,7 @@
+include: package:lint/strict.yaml
+
+linter:
+  rules:
+    unawaited_futures: true
+    always_use_package_imports: false
+    sort_pub_dependencies: false

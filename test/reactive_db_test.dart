@@ -5,16 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Storage of [Enum] type with possibility of using custom key.
 enum FruitCard<T> implements ICard<T> {
-  banana<int>(TypeData.int, 4),
-  counter1<int>(TypeData.int, 0),
-  counter2<int>(TypeData.int, 0),
-  counterCustom<int>(TypeData.int, 2, 'custom_counter_key'),
+  banana<int>(DataType.int, 4),
+  bananaNull<int?>(DataType.int, 4),
+  counter1<int>(DataType.int, 0),
+  counter2<int>(DataType.int, 0),
+  counterCustom<int>(DataType.int, 2, 'custom_counter_key'),
   ;
 
   const FruitCard(this.type, this.defaultValue, [this.customKey]);
 
   @override
-  final TypeData type;
+  final DataType type;
 
   @override
   final T defaultValue;
@@ -23,16 +24,18 @@ enum FruitCard<T> implements ICard<T> {
 
   @override
   String get key => customKey ?? EnumName(this).name;
-
-  @override
-  CardConfig get config => CardConfig(name: 'FruitCard');
 }
 
 class DbUser extends CardDb with Watcher {
-  DbUser({required super.cards});
+  DbUser({required super.cards, required super.config});
 }
 
-final dbProvider = Provider<DbUser>((ref) => DbUser(cards: FruitCard.values));
+final dbProvider = Provider<DbUser>(
+  (ref) => DbUser(
+    cards: FruitCard.values,
+    config: const ConfigDB(name: 'FruitCard'),
+  ),
+);
 
 const initCountBanana = 0;
 
@@ -40,7 +43,7 @@ final bananaProvider = Provider<int>((ref) {
   ref.watch(dbProvider).attach<int>(
         FruitCard.banana,
         (value) => ref.state = value,
-        ref.onDispose,
+        detacher: ref.onDispose,
       );
 
   return initCountBanana;
@@ -50,7 +53,7 @@ final bananaProviderWithAutoDispose = Provider.autoDispose<int>((ref) {
   final banana = ref.watch(dbProvider).attach<int>(
         FruitCard.banana,
         (value) => ref.state = value,
-        ref.onDispose,
+        detacher: ref.onDispose,
       );
 
   return banana;
@@ -63,7 +66,10 @@ void main() {
   SharedPreferences.setMockInitialValues({});
 
   test('Watcher', () async {
-    final db = DbUser(cards: FruitCard.values);
+    final db = DbUser(
+      cards: FruitCard.values,
+      config: const ConfigDB(name: 'FruitCard'),
+    );
 
     await db.init();
 
@@ -72,6 +78,7 @@ void main() {
     final int value = db.attach(
       FruitCard.banana,
       (v) => newValue = v,
+      detacher: null,
     );
     expect(
       db.debugGetWatchers(),
@@ -97,7 +104,8 @@ void main() {
     expect(
       newValue,
       newCount,
-      reason: 'after call [DbCard.set] + before [Watcher.attach], we expect notify',
+      reason:
+          'after call [DbCard.set] + before [Watcher.attach], we expect notify',
     );
   });
 

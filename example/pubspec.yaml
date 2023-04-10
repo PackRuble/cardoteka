@@ -14,15 +14,13 @@ dependencies:
   reactive_db:
     path: '../../reactive_db'
 
-  flutter_riverpod:   ^2.1.1
+  flutter_riverpod: ^2.3.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  lint: ^1.10.0
-
-  meta: ^1.8.0
+  lint: ^2.0.1
 
 flutter:
   uses-material-design: true
