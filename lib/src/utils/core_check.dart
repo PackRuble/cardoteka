@@ -1,14 +1,52 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:reactive_db/reactive_db.dart';
+
+import '../config_db.dart';
+import '../converter.dart';
+import '../extensions/data_type_ext.dart';
+import '../i_card.dart';
+
+// TODO:
+// 1. Translate everything into custom errors.
 
 /// Comprehensive verification of input data.
-bool checkConfiguration(
-    {required ConfigDB config, required List<ICard> cards}) {
+bool checkConfiguration({
+  required ConfigDB config,
+  required List<ICard> cards,
+}) {
   _checkKeys(cards);
+  _checkProvidedDataType(cards, config.converters);
   _checkConverterForComplexObject(cards, config.converters);
   _checkMatchingConverters(cards, config.converters);
+
+  return true;
+}
+
+/// Check if the specified type [DataType] matches the provided type [ICard.defaultValue].
+///
+/// Note:
+/// - can't check when value is nullable type
+/// - in web can't check when value is [double] or [int]
+bool _checkProvidedDataType<T>(
+  List<ICard<T>> cards,
+  Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
+) {
+  for (final card in cards) {
+    final Object? value = card.defaultValue;
+
+    // we cannot determine the type for sure if the value is null.
+    if (value == null) continue;
+
+    /// we will check it in [_checkMatchingConverters].
+    if (converters?.containsKey(card) ?? false) continue;
+
+    if (!card.type.isCorrectType(value)) {
+      debugPrint('''
+The provided type <${card.type}> does not match the type of the $card.defaultValue: <${card.defaultValue.runtimeType}>.
+Expected type: <${card.type.getDartType()}>
+''');
+      throw AssertionError();
+    }
+  }
 
   return true;
 }
@@ -21,22 +59,16 @@ bool _checkKeys<T>(List<ICard<T>> cards) {
 }
 
 /// Check for a converter for complex objects.
+///
+/// We cannot check [Null] values (for all platforms).
 bool _checkConverterForComplexObject(
-  List<ICard> cards,
+  List<ICard<Object?>> cards,
   Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
 ) {
-  // some checks are based on "runtimeType", which may not be accurate on the web.
-  // todo: can be rewritten by checking for expected types
-  if (!kIsWeb) {
-    return true;
-  }
-
-  final supportedDataTypes = TypeData.values.map((e) => e.dartType);
-
   for (final card in cards) {
     if (card.defaultValue == null) continue;
 
-    if (supportedDataTypes.contains(card.defaultValue.runtimeType)) {
+    if (_isSimpleData(card)) {
       continue;
     } else if (converters?.containsKey(card) ?? false) {
       continue;
@@ -62,9 +94,10 @@ $availableConverters}
 
 /// Checking for matching [ICard] and [CardConfig.converters].
 ///
-/// It can fail in the web.
+/// Note: We cannot guarantee verification of the [double] and [int] types in the web.
+/// Also, we cannot check [Null] values (for all platforms).
 bool _checkMatchingConverters(
-  List<ICard> cards,
+  List<ICard<Object?>> cards,
   Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
 ) {
   if (converters?.isEmpty ?? true) return true;
@@ -73,9 +106,12 @@ bool _checkMatchingConverters(
     final card = entry.key;
     final converter = entry.value;
 
-    if (card.defaultValue is! Object) continue;
+    final Object? value = card.defaultValue;
 
-    if (card.type.dartType != converter.toDb(card.defaultValue).runtimeType) {
+    // we cannot determine the type for sure if the value is null.
+    if (value == null) continue;
+
+    if (card.type.getDartType() != converter.toDb(value).runtimeType) {
       debugPrint('''
 The $card does not match the $converter.
 
@@ -109,38 +145,16 @@ bool _checkDuplicatesKeys(List<ICard> cards) {
   return true;
 }
 
-/// Вернет true, усли
-bool _isSimpleData(ICard card) {
-  bool? result;
+/// Returns true if the type is valid (one of [DataType]).
+///
+/// Note: in the web double can be equal to int.
+bool _isSimpleData(ICard<Object?> card) {
+  final Object? value = card.defaultValue;
 
-  if (card.defaultValue == null) result = true;
+  // we cannot determine the type for sure if the value is null.
+  if (value == null) return true;
 
-  switch (card.type) {
-    case TypeData.bool:
-      result = card.defaultValue is bool;
-      break;
-    case TypeData.int:
-      result = card.defaultValue is int;
-      break;
-    case TypeData.double:
-      result = card.defaultValue is double;
-      break;
-    case TypeData.string:
-      result = card.defaultValue is String;
-      break;
-    case TypeData.stringList:
-      result = card.defaultValue is List<String>;
-      break;
-    case TypeData.color:
-      result = card.defaultValue is Color;
-      break;
-  }
-
-  // if (result == false) {
-  //   result = card.config.converters?.containsKey(card) ?? false;
-  // }
-
-  return result;
+  return card.type.isCorrectType(value);
 }
 
 // ignore: avoid_positional_boolean_parameters

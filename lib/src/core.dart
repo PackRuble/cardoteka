@@ -5,9 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config_db.dart';
 import 'converter.dart';
-import 'core_debug.dart';
 import 'i_card.dart';
 import 'i_watcher.dart';
+import 'utils/core_check.dart';
 
 /// A handy wrapper for typed use [SharedPreferences].
 ///
