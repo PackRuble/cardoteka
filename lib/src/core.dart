@@ -88,31 +88,19 @@ class CardDb {
   T? _getValueFromDb<T>(ICard<T?> card) {
     final key = _keyForSP(card);
 
-    final Object? value = () {
-      switch (card.type) {
-        case TypeData.bool:
-          return _prefs.getBool;
-        case TypeData.int:
-          return _prefs.getInt;
-        case TypeData.double:
-          return _prefs.getDouble;
-        case TypeData.string:
-          return _prefs.getString;
-        case TypeData.stringList:
-          return _prefs.getStringList;
-        case TypeData.color:
-          return (String key) {
-            final value = _prefs.getString(key);
-            if (value != null) return const ColorConverter().fromDb(value);
-          };
-      }
-    }.call().call(key);
+    final Object? value;
+    if (card.type == DataType.stringList) {
+      value = _prefs.getStringList(key);
+    } else {
+      // simple types do not need "as" now
+      value = _prefs.get(key);
+    }
 
     if (value == null) {
+      // value was not in the storage
       return value as T?;
     } else {
-      final IConverter? converter = _config.converters?[card];
-      return (converter?.fromDb(value) ?? value) as T?;
+      return (_getConverter(card)?.fromDb(value) ?? value) as T?;
     }
   }
 
