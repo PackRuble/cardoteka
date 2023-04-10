@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-import 'package:reactive_db/src/custom_converters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config_db.dart';
@@ -11,12 +9,9 @@ import 'core_debug.dart';
 import 'i_card.dart';
 import 'i_watcher.dart';
 
-/// Global Todo:
-/// 1. Implement a migrator
-/// 2. Add more supported types for saving (Color, Enum, ...)
-/// 3. Think about writing the right tests.
-
 /// A handy wrapper for typed use [SharedPreferences].
+///
+/// Todo: example for use
 class CardDb {
   const CardDb({
     required this.cards,
@@ -29,7 +24,7 @@ class CardDb {
   /// Configuration file.
   final ConfigDB _config;
 
-  static late final SharedPreferences _prefs;
+  static late SharedPreferences _prefs;
 
   /// Specify if listeners should be notified of new values in the database.
   ///
@@ -75,7 +70,7 @@ class CardDb {
     return _getValueFromDb<T>(storeCard) ?? storeCard.defaultValue;
   }
 
-  /// The return null will mean there is no value in the db [SharedPreferences].
+  /// The return null will mean there is no value in the persistent storage.
   ///
   /// [ICard.defaultValue] is not used in this case.
   T? getOrNull<T extends Object?>(ICard<T?> storeCard) {
@@ -105,9 +100,9 @@ class CardDb {
   }
 
   /// Save the new value in [SharedPreferences] using a key of type [ICard].
-  /// (!Note!) Always specify the generic type and do so according to [ICard.type]
+  /// NOTE: Always specify the generic type and do so according to [ICard.type]
   ///
-  /// [value] cannot be `null`.
+  /// The [value] cannot be `null`. Use [setOrNull] when you want to simulate null.
   ///
   /// All [watcher]s will be notified.
   Future<bool> set<T extends Object>(ICard<T?> storeCard, T value) async {
@@ -122,7 +117,7 @@ class CardDb {
   /// Otherwise the value will be deleted from the database to simulate null.
   ///
   /// All [watcher]s will be notified anyway.
-  Future<bool?> setIfNotNull<T extends Object>(
+  Future<bool?> setOrNull<T extends Object>(
     ICard<T?> storeCard,
     T? value,
   ) async {
@@ -144,10 +139,9 @@ class CardDb {
   ///
   /// Returns true if the value was successfully saved.
   Future<bool> _setValueToDb<T extends Object>(ICard<T?> card, T value) async {
-    final key = _keyForSP(card);
-
     final resultValue = _getConverter(card)?.toDb(value) ?? value;
 
+    final key = _keyForSP(card);
     // optimize: use a pre-made map?
     switch (card.type) {
       case DataType.bool:
@@ -163,6 +157,7 @@ class CardDb {
     }
   }
 
+  /// Get the converter for the [ICard] card. Returns null if there is no converter.
   IConverter? _getConverter(ICard card) {
     final Map<ICard, IConverter>? converters = _config.converters;
     if (converters != null) {
@@ -220,35 +215,26 @@ class CardDb {
     return _prefs.containsKey(_keyForSP(card));
   }
 
-  Future<T> _convertValueToDb<T extends Object>(
-    ICard<T?> card,
-    Object value,
-  ) async {
-    final IConverter? converter = _config.converters?[card];
-    final Object? convertedValue = converter?.toDb(value);
-
-    final Object result = convertedValue ?? value;
+  T _convertValueToDb<T extends Object>(ICard<T?> card, Object value) {
+    final Object result = _getConverter(card)?.toDb(value) ?? value;
 
     switch (card.type) {
-      case TypeData.bool:
+      case DataType.bool:
         return (result as bool) as T;
-      case TypeData.int:
+      case DataType.int:
         return (result as int) as T;
-      case TypeData.double:
+      case DataType.double:
         return (result as double) as T;
-      case TypeData.string:
+      case DataType.string:
         return (result as String) as T;
-      case TypeData.stringList:
+      case DataType.stringList:
         return ((result as List).cast<String>()) as T;
-      case TypeData.color:
-        final converted = const ColorConverter().toDb(value as Color);
-        return converted as T;
     }
   }
 
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
-  void setMockInitialValues(Map<ICard, Object> values) {
+  void setMockInitialValues(Map<ICard<Object?>, Object> values) {
     assert(checkConfiguration(cards: cards, config: _config));
 
     // ignore: invalid_use_of_visible_for_testing_member
@@ -270,7 +256,7 @@ class CardDb {
 
 /// Get access to all the original methods of the [SharedPreferences] library.
 ///
-/// Sometimes can be useful for debugging or for use outside the system [CardDb].
+/// Sometimes can be useful for debugging/testing or for use outside the system [CardDb].
 mixin AccessToSP on CardDb {
   SharedPreferences get prefs {
     checkInit(CardDb._isInitialized);
