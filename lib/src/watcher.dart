@@ -22,8 +22,8 @@ mixin Watcher on CardDb implements IWatcher {
 
   @override
   @internal
-  void notify<V extends Object>(ICard<V?> key, V? value) {
-    final ws = _watchers[key];
+  void notify<V extends Object>(ICard<V?> card, V? value) {
+    final ws = _watchers[card];
 
     if (ws != null) {
       for (final watcher in ws) {
@@ -33,16 +33,16 @@ mixin Watcher on CardDb implements IWatcher {
   }
 
   /// Attach a [CbWatcher] to your [ICard]. A [watcher] will be called whenever
-  /// the [key] value changes.
+  /// the [card] value changes.
   ///
-  /// Use this method when you want to track changes in the value for [key].
+  /// Use this method when you want to track changes in the value for [card].
   /// As soon as you call [CardDb.set] the value is passed to the listener [watcher].
   /// If your listener can be deleted, pass [detacher], thereby freeing up related resources.
   ///
   /// The first call returns the stored value from the database. If null, returned
-  /// default value [ICard.defaultValue] for the given [key].
+  /// default value [ICard.defaultValue] for the given [card].
   V attach<V extends Object?>(
-    ICard<V> key,
+    ICard<V> card,
     CbWatcher<V> watcher, {
     // The obligativeness of the argument [detacher] is due to the high degree
     //  of forgetfulness of its instruction
@@ -50,18 +50,18 @@ mixin Watcher on CardDb implements IWatcher {
   }) {
     final w = (Object? value) => watcher(value as V);
 
-    _watchers[key] = [...?_watchers[key], w];
+    _watchers[card] = [...?_watchers[card], w];
 
     detacher?.call(() {
-      _watchers[key]?.remove(w);
+      _watchers[card]?.remove(w);
 
       // Remove the key from the [_watchers], if the list is empty
-      if (_watchers[key]?.isEmpty ?? false) {
-        _watchers.remove(key);
+      if (_watchers[card]?.isEmpty ?? false) {
+        _watchers.remove(card);
       }
     });
 
-    return getOrNull(key) ?? key.defaultValue;
+    return getOrNull(card) ?? card.defaultValue;
   }
 
   @visibleForTesting

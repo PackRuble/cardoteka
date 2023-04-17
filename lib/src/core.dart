@@ -118,7 +118,7 @@ class CardDb {
   ///
   /// All [watcher]s will be notified anyway.
   Future<bool?> setOrNull<T extends Object>(
-    ICard<T?> storeCard,
+    ICard<T?> storeCard, //todo: simple card
     T? value,
   ) async {
     checkInit(_isInitialized);
