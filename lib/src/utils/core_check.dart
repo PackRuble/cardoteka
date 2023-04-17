@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-import '../config_db.dart';
+import '../config.dart';
 import '../converter.dart';
 import '../extensions/data_type_ext.dart';
-import '../i_card.dart';
+import '../card.dart';
 
 // TODO:
 // 1. Translate everything into custom errors.
 
 /// Comprehensive verification of input data.
 bool checkConfiguration({
-  required ConfigDB config,
-  required List<ICard> cards,
+  required Config config,
+  required List<Card> cards,
 }) {
   _checkKeys(cards);
   _checkProvidedDataType(cards, config.converters);
@@ -21,14 +21,14 @@ bool checkConfiguration({
   return true;
 }
 
-/// Check if the specified type [DataType] matches the provided type [ICard.defaultValue].
+/// Check if the specified type [DataType] matches the provided type [Card.defaultValue].
 ///
 /// Note:
 /// - can't check when value is nullable type
 /// - in web can't check when value is [double] or [int]
 bool _checkProvidedDataType<T>(
-  List<ICard<T>> cards,
-  Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
+  List<Card<T>> cards,
+  Map<Card<Object?>, Converter<Object?, Object>>? converters,
 ) {
   for (final card in cards) {
     final Object? value = card.defaultValue;
@@ -51,8 +51,8 @@ Expected type: <${card.type.getDartType()}>
   return true;
 }
 
-/// Check [ICard]'s keys for correctness.
-bool _checkKeys<T>(List<ICard<T>> cards) {
+/// Check [Card]'s keys for correctness.
+bool _checkKeys<T>(List<Card<T>> cards) {
   if (cards.isEmpty) return true;
 
   return _checkDuplicatesKeys(cards);
@@ -62,8 +62,8 @@ bool _checkKeys<T>(List<ICard<T>> cards) {
 ///
 /// We cannot check [Null] values (for all platforms).
 bool _checkConverterForComplexObject(
-  List<ICard<Object?>> cards,
-  Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
+  List<Card<Object?>> cards,
+  Map<Card<Object?>, Converter<Object?, Object>>? converters,
 ) {
   for (final card in cards) {
     if (card.defaultValue == null) continue;
@@ -92,13 +92,13 @@ $availableConverters}
   return true;
 }
 
-/// Checking for matching [ICard] and [CardConfig.converters].
+/// Checking for matching [Card] and [CardConfig.converters].
 ///
 /// Note: We cannot guarantee verification of the [double] and [int] types in the web.
 /// Also, we cannot check [Null] values (for all platforms).
 bool _checkMatchingConverters(
-  List<ICard<Object?>> cards,
-  Map<ICard<Object?>, IConverter<Object?, Object>>? converters,
+  List<Card<Object?>> cards,
+  Map<Card<Object?>, Converter<Object?, Object>>? converters,
 ) {
   if (converters?.isEmpty ?? true) return true;
 
@@ -111,7 +111,7 @@ bool _checkMatchingConverters(
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
 
-    if (card.type.getDartType() != converter.toDb(value).runtimeType) {
+    if (card.type.getDartType() != converter.to(value).runtimeType) {
       debugPrint('''
 The $card does not match the $converter.
 
@@ -124,8 +124,8 @@ Check if the converter types for the card match.
   return true;
 }
 
-/// Check for duplicates [ICard.key].
-bool _checkDuplicatesKeys(List<ICard> cards) {
+/// Check for duplicates [Card.key].
+bool _checkDuplicatesKeys(List<Card> cards) {
   List<String>? duplicateKeys;
 
   final List<String> keys = cards.map((e) => e.key).toList();
@@ -148,7 +148,7 @@ bool _checkDuplicatesKeys(List<ICard> cards) {
 /// Returns true if the type is valid (one of [DataType]).
 ///
 /// Note: in the web double can be equal to int.
-bool _isSimpleData(ICard<Object?> card) {
+bool _isSimpleData(Card<Object?> card) {
   final Object? value = card.defaultValue;
 
   // we cannot determine the type for sure if the value is null.

@@ -1,6 +1,17 @@
 
 [//]: # (todo: The documentation needs a serious update!)
 
+<!-- TOC -->
+  * [How to started?](#how-to-started)
+  * [How to use with Riverpod?](#how-to-use-with-riverpod)
+  * [How to implement key storage?](#how-to-implement-key-storage)
+      * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
+  * [TODO](#todo)
+  * [TODO implement](#todo-implement)
+  * [Additional information](#additional-information)
+  * [The structure of the library](#the-structure-of-the-library)
+<!-- TOC -->
+
 ## How to started?
 
 1. Identify the DB object with the necessary mixins (optional)
@@ -206,6 +217,8 @@ class KeyStore2<T> implements RKey<T> {
 
 This project is under development and is actively 'undergoing combat' tests in applications
 
+## The structure of the library
+
 ```mermaid
 classDiagram
     class Card~V~ {
@@ -213,6 +226,15 @@ classDiagram
         +DateType type*
         +~V~ defaultValue*
         +String key*
+    }
+    
+    class DataType {
+        <<Enumeration>>
+        bool
+        int
+        double
+        string
+        stringList
     }
 
     class Watcher {
@@ -244,7 +266,7 @@ classDiagram
  
     Converter <|.. ColorConverter
     
-    class Cartoteka {
+    class Cardoteka {
         -ConfigDB _config
         +List~Card~ cards
         +Watcher watcher
@@ -267,8 +289,8 @@ classDiagram
         +Map&lt;Card, Converter>? converters
     }
     
-    Cartoteka --* ConfigDB
-    Cartoteka --* Watcher
+    Cardoteka --* ConfigDB
+    Cardoteka --* Watcher
 
     class AccessToSP {
         <<Mixin>>

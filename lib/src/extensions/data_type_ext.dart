@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../i_card.dart';
+import '../card.dart';
 
 extension DataTypeExt on DataType {
   /// Get dart type.

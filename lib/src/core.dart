@@ -3,34 +3,34 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'config_db.dart';
+import 'card.dart';
+import 'config.dart';
 import 'converter.dart';
-import 'i_card.dart';
-import 'i_watcher.dart';
 import 'utils/core_check.dart';
+import 'watcher.dart';
 
 /// A handy wrapper for typed use [SharedPreferences].
 ///
 /// Todo: example for use
-class CardDb {
-  const CardDb({
+class Cardoteka {
+  const Cardoteka({
     required this.cards,
-    required ConfigDB config,
+    required Config config,
   }) : _config = config;
 
-  /// List of keys [ICard] for accessing the database [SharedPreferences].
-  final List<ICard> cards;
+  /// List of keys [Card] for accessing the database [SharedPreferences].
+  final List<Card> cards;
 
   /// Configuration file.
-  final ConfigDB _config;
+  final Config _config;
 
   static late SharedPreferences _prefs;
 
-  /// Specify if listeners should be notified of new values in the database.
+  /// Specify if listeners should be notified of new values in the persistence storage.
   ///
-  /// Use a mixin based on the [IWatcher] interface.
+  /// Use a mixin based on the [Watcher] interface.
   @internal
-  IWatcher? get watcher => null;
+  Watcher? get watcher => null;
 
   /// Indicates whether the database is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
@@ -40,7 +40,7 @@ class CardDb {
 
   static bool _isInitialized = false;
 
-  /// Initialization [CardDb]. It is necessary to wait for completion.
+  /// Initialization [Cardoteka]. It is necessary to wait for completion.
   Future<bool> init() async {
     if (!_isInitialized) {
       assert(checkConfiguration(cards: cards, config: _config));
@@ -56,31 +56,31 @@ class CardDb {
   // String _getKeyFromDb(String key) => key.split(_separatorKey)[1];
 
   /// Get the key to use it in the [SharedPreferences].
-  String _keyForSP(ICard card) => '${_config.name}.${card.key}';
+  String _keyForSP(Card card) => '${_config.name}.${card.key}';
 
-  /// Get value from [SharedPreferences] using key type [ICard].
+  /// Get value from [SharedPreferences] using key type [Card].
   ///
   /// The default behavior assumes that if [SharedPreferences] does not have
   /// a record with the provided key, then `defaultValue` will be returned.
   ///
   /// The returned object is always non-nullable.
-  T get<T extends Object>(ICard<T> storeCard) {
+  T get<T extends Object>(Card<T> card) {
     checkInit(_isInitialized);
 
-    return _getValueFromDb<T>(storeCard) ?? storeCard.defaultValue;
+    return _getValueFromDb<T>(card) ?? card.defaultValue;
   }
 
   /// The return null will mean there is no value in the persistent storage.
   ///
-  /// [ICard.defaultValue] is not used in this case.
-  T? getOrNull<T extends Object?>(ICard<T?> storeCard) {
+  /// [Card.defaultValue] is not used in this case.
+  T? getOrNull<T extends Object?>(Card<T?> card) {
     checkInit(_isInitialized);
 
-    return _getValueFromDb<T>(storeCard);
+    return _getValueFromDb<T>(card);
   }
 
   /// Internal method to retrieve data from [SharedPreferences].
-  T? _getValueFromDb<T>(ICard<T?> card) {
+  T? _getValueFromDb<T>(Card<T?> card) {
     final key = _keyForSP(card);
 
     final Object? value;
@@ -95,51 +95,48 @@ class CardDb {
       // value was not in the storage
       return value as T?;
     } else {
-      return (_getConverter(card)?.fromDb(value) ?? value) as T?;
+      return (_getConverter(card)?.from(value) ?? value) as T?;
     }
   }
 
-  /// Save the new value in [SharedPreferences] using a key of type [ICard].
-  /// NOTE: Always specify the generic type and do so according to [ICard.type]
+  /// Save the new value in [SharedPreferences] using a key of type [Card].
+  /// NOTE: Always specify the generic type and do so according to [Card.type]
   ///
   /// The [value] cannot be `null`. Use [setOrNull] when you want to simulate null.
   ///
   /// All [watcher]s will be notified.
-  Future<bool> set<T extends Object>(ICard<T?> storeCard, T value) async {
+  Future<bool> set<T extends Object>(Card<T?> card, T value) async {
     checkInit(_isInitialized);
 
-    watcher?.notify<T>(storeCard, value);
+    watcher?.notify<T>(card, value);
 
-    return _setValueToDb<T>(storeCard, value);
+    return _setValueToDb<T>(card, value);
   }
 
-  /// Save the new value in [SharedPreferences] using [storeCard] if ([value] != null).
+  /// Save the new value in [SharedPreferences] using [card] if ([value] != null).
   /// Otherwise the value will be deleted from the database to simulate null.
   ///
   /// All [watcher]s will be notified anyway.
-  Future<bool?> setOrNull<T extends Object>(
-    ICard<T?> storeCard, //todo: simple card
-    T? value,
-  ) async {
+  Future<bool?> setOrNull<T extends Object>(Card<T?> card, T? value) async {
     checkInit(_isInitialized);
 
-    watcher?.notify<T>(storeCard, value);
+    watcher?.notify<T>(card, value);
 
     if (value == null
         // && value is! T
         ) {
-      await remove(storeCard);
+      await remove(card);
       return null;
     }
 
-    return _setValueToDb<T>(storeCard, value);
+    return _setValueToDb<T>(card, value);
   }
 
   /// Internal method to save data in [SharedPreferences].
   ///
   /// Returns true if the value was successfully saved.
-  Future<bool> _setValueToDb<T extends Object>(ICard<T?> card, T value) async {
-    final resultValue = _getConverter(card)?.toDb(value) ?? value;
+  Future<bool> _setValueToDb<T extends Object>(Card<T?> card, T value) async {
+    final resultValue = _getConverter(card)?.to(value) ?? value;
 
     final key = _keyForSP(card);
     // optimize: use a pre-made map?
@@ -157,9 +154,9 @@ class CardDb {
     }
   }
 
-  /// Get the converter for the [ICard] card. Returns null if there is no converter.
-  IConverter? _getConverter(ICard card) {
-    final Map<ICard, IConverter>? converters = _config.converters;
+  /// Get the converter for the [Card] card. Returns null if there is no converter.
+  Converter? _getConverter(Card card) {
+    final Map<Card, Converter>? converters = _config.converters;
     if (converters != null) {
       if (converters.containsKey(card)) {
         return converters[card]!;
@@ -172,7 +169,7 @@ class CardDb {
   /// Removes an entry by using [card] from persistent storage.
   ///
   /// If successful, it will return true.
-  Future<bool> remove(ICard card) async {
+  Future<bool> remove(Card card) async {
     checkInit(_isInitialized);
 
     return _prefs.remove(_keyForSP(card));
@@ -196,11 +193,11 @@ class CardDb {
   /// Acts according to the [SharedPreferences.getKeys] method of the same name.
   ///
   /// Returns all [cards] that contains in the persistent storage.
-  Set<ICard> getCards() {
+  Set<Card> getCards() {
     checkInit(_isInitialized);
 
     final Set<String> allStoredKey = _prefs.getKeys();
-    final resultKeys = <ICard>{
+    final resultKeys = <Card>{
       for (final card in cards)
         if (allStoredKey.contains(_keyForSP(card))) card
     };
@@ -209,14 +206,14 @@ class CardDb {
   }
 
   /// Returns true if persistent storage the contains the given [card].
-  Future<bool> containsCard(ICard card) async {
+  Future<bool> containsCard(Card card) async {
     checkInit(_isInitialized);
 
     return _prefs.containsKey(_keyForSP(card));
   }
 
-  T _convertValueToDb<T extends Object>(ICard<T?> card, Object value) {
-    final Object result = _getConverter(card)?.toDb(value) ?? value;
+  T _convertValueToDb<T extends Object>(Card<T?> card, Object value) {
+    final Object result = _getConverter(card)?.to(value) ?? value;
 
     switch (card.type) {
       case DataType.bool:
@@ -234,12 +231,12 @@ class CardDb {
 
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
-  void setMockInitialValues(Map<ICard<Object?>, Object> values) {
+  void setMockInitialValues(Map<Card<Object?>, Object> values) {
     assert(checkConfiguration(cards: cards, config: _config));
 
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
-      for (final MapEntry<ICard<Object?>, Object> entry in values.entries)
+      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
         _keyForSP(entry.key): _convertValueToDb(entry.key, entry.value)
     });
   }
@@ -247,37 +244,37 @@ class CardDb {
   /// Acts according to the [AccessToSP.getEntries] method of the same name.
   ///
   /// Returns all stored entities from the persistent storage.
-  Map<ICard, Object> getStoredEntries() {
+  Map<Card, Object> getStoredEntries() {
     checkInit(_isInitialized);
 
-    return {for (final ICard card in getCards()) card: _getValueFromDb(card)!};
+    return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
   }
 }
 
 /// Get access to all the original methods of the [SharedPreferences] library.
 ///
-/// Sometimes can be useful for debugging/testing or for use outside the system [CardDb].
-mixin AccessToSP on CardDb {
+/// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
+mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs {
-    checkInit(CardDb._isInitialized);
+    checkInit(Cardoteka._isInitialized);
 
-    return CardDb._prefs;
+    return Cardoteka._prefs;
   }
 
   /// The original [SharedPreferences.setPrefix] method.
-  static void setPrefix(String prefix) => SharedPreferences.setPrefix(prefix);
+  void setPrefix(String prefix) => SharedPreferences.setPrefix(prefix);
 
   /// The original [SharedPreferences.resetStatic] method.
   @visibleForTesting
   // ignore: invalid_use_of_visible_for_testing_member
-  static void resetStatic() => SharedPreferences.resetStatic();
+  void resetStatic() => SharedPreferences.resetStatic();
 
   /// The original [SharedPreferences.getInstance] method.
   ///
   /// Useful in tests after call [SharedPreferences.setMockInitialValues].
   @visibleForTesting
-  static Future<void> reInit() async {
-    CardDb._prefs = await SharedPreferences.getInstance();
+  Future<void> reInit() async {
+    Cardoteka._prefs = await SharedPreferences.getInstance();
   }
 
   /// Returns all entries (key: value) in the persistent storage.

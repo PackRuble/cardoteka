@@ -1,9 +1,8 @@
-library reactive_db;
+library reactive_db; //todo: rename
 
-export 'src/config_db.dart';
+export 'src/card.dart';
+export 'src/config.dart';
 export 'src/converter.dart';
 export 'src/core.dart';
-export 'src/custom_converters.dart';
-export 'src/i_card.dart';
 export 'src/mixin/crud_simulation.dart';
-export 'src/watcher.dart';
+export 'src/mixin/watcher_impl.dart';

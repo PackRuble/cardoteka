@@ -1,6 +1,6 @@
-name: reactive_db # card_db? kartoteka_db? Cardoteka?
-description: A reactive db with handy use - wrapper of shared preferences.
-version: 0.1.2
+name: reactive_db # todo: rename cardoteka
+description: A reactive db with handy use - wrapper of shared preferences. # todo
+version: 0.2.0
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
