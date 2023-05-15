@@ -21,7 +21,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   Map<Card, List<CbWatcher>> debugGetWatchers() => _watchers;
 
   // todo: impl
-  removeWatcher() {}
+  _removeWatcher() {}
 
   @override
   @internal

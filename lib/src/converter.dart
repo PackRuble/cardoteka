@@ -21,3 +21,18 @@ class ColorConverter implements Converter<Color, String> {
   @override
   String to(Color color) => color.value.toString();
 }
+
+class _CardConverter {
+  const _CardConverter._();
+
+  // Todo: what is the best way to present converters?
+  // - as a separate class
+  // - as class with static fields
+  // - as class with static getters
+
+  static ColorConverter get colorToString => const ColorConverter();
+
+  // Top-level and static variables with initializers are already
+  // evaluated lazily as if they are marked late.
+  static late ColorConverter colorAsString2 = const ColorConverter();
+}

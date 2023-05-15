@@ -12,9 +12,6 @@ environment:
   sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
-#  flutter:
-#    sdk: flutter # todo: убрать зависимость
-
   shared_preferences: ^2.1.1
   meta: ^1.9.1
 
