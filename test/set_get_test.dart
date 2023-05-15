@@ -5,7 +5,7 @@ import 'package:reactive_db/reactive_db.dart';
 
 import 'source/forest_key_store.dart';
 
-class ForestDb extends CardDb {
+class ForestDb extends Cardoteka {
   const ForestDb({required super.cards, required super.config});
 }
 

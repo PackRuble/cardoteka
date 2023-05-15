@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:reactive_db/reactive_db.dart';
 
-const forestCardConfig = ConfigDB(
+const forestCardConfig = Config(
   name: 'ForestDb',
   converters: {
     ForestCard.currentColorSpruce: ColorConverter(),
@@ -11,7 +11,7 @@ const forestCardConfig = ConfigDB(
 );
 
 /// WCK - with custom key.
-enum ForestCard<T> implements ICard<T> {
+enum ForestCard<T> implements Card<T> {
   /// Are there such trees in the forest?
   keepAcacia<bool>(DataType.bool, true),
   keepAcaciaWithNull<bool?>(DataType.bool, true),

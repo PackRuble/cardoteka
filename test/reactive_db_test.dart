@@ -4,7 +4,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Storage of [Enum] type with possibility of using custom key.
-enum FruitCard<T> implements ICard<T> {
+enum FruitCard<T> implements Card<T> {
   banana<int>(DataType.int, 4),
   bananaNull<int?>(DataType.int, 4),
   counter1<int>(DataType.int, 0),
@@ -26,14 +26,14 @@ enum FruitCard<T> implements ICard<T> {
   String get key => customKey ?? EnumName(this).name;
 }
 
-class DbUser extends CardDb with Watcher {
+class DbUser extends Cardoteka with WatcherImpl {
   DbUser({required super.cards, required super.config});
 }
 
 final dbProvider = Provider<DbUser>(
   (ref) => DbUser(
     cards: FruitCard.values,
-    config: const ConfigDB(name: 'FruitCard'),
+    config: const Config(name: 'FruitCard'),
   ),
 );
 
@@ -68,7 +68,7 @@ void main() {
   test('Watcher', () async {
     final db = DbUser(
       cards: FruitCard.values,
-      config: const ConfigDB(name: 'FruitCard'),
+      config: const Config(name: 'FruitCard'),
     );
 
     await db.init();
