@@ -1,20 +1,33 @@
-name: reactive_db # todo: rename cardoteka
-description: A reactive db with handy use - wrapper of shared preferences. # todo
-version: 0.2.0
+name: cardoteka
+description: The best type-safe wrapper over SharedPreferences.
+  For what?
+  ▶ store strongly typed key-value
+  ▶ get access to get/modify only by typed key
+  ▶ be able to work with null values
+  ▶ have a wiretap
+version: 0.2.1
+# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
-  flutter:
-    sdk: flutter
+#  flutter:
+#    sdk: flutter # todo: убрать зависимость
 
-  shared_preferences: ^2.1.0
-  meta: ^1.8.0 # change after bump flutter_test
+  shared_preferences: ^2.1.1
+  meta: ^1.9.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  riverpod: ^2.3.4
-  lint: ^2.0.1
+  riverpod: ^2.3.6
+  lint: ^2.1.2
+
+screenshots:
+  - description: 'Well met! I am pleased to present a type-safe wrap over SP'
+    path: res/cardoteka_banner.png
+
+funding:
+  - https://t.me/+AkGV73kZi_Q1YTMy

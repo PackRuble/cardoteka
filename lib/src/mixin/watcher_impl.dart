@@ -20,6 +20,9 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   @visibleForTesting
   Map<Card, List<CbWatcher>> debugGetWatchers() => _watchers;
 
+  // todo: impl
+  removeWatcher() {}
+
   @override
   @internal
   void notify<V extends Object>(Card<V?> card, V? value) {

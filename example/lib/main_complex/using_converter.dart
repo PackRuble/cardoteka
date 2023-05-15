@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reactive_db/reactive_db.dart';
 
 import 'db_provider.dart';
 
@@ -14,6 +13,7 @@ final myCarProvider = Provider<Car>((ref) {
   return db.attach<Car>(
     KeyStore1.myCar,
     (value) => ref.state = value,
+    detacher: null,
   );
 }, name: 'myCarProvider');
 

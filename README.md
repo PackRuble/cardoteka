@@ -1,15 +1,19 @@
+<img src="res/cardoteka_banner.png" alt="The best?"/>
 
-[//]: # (todo: The documentation needs a serious update!)
+[![telegram_badge]][telegram_link]
+[![pub_badge]][pub_link]
+
+In progress...
 
 <!-- TOC -->
-  * [How to started?](#how-to-started)
-  * [How to use with Riverpod?](#how-to-use-with-riverpod)
-  * [How to implement key storage?](#how-to-implement-key-storage)
-      * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
-  * [TODO](#todo)
-  * [TODO implement](#todo-implement)
-  * [Additional information](#additional-information)
-  * [The structure of the library](#the-structure-of-the-library)
+* [How to started?](#how-to-started)
+* [How to use with Riverpod?](#how-to-use-with-riverpod)
+* [How to implement key storage?](#how-to-implement-key-storage)
+    * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
+* [TODO](#todo)
+* [TODO implement](#todo-implement)
+* [Additional information](#additional-information)
+* [The structure of the library](#the-structure-of-the-library)
 <!-- TOC -->
 
 ## How to started?
@@ -39,7 +43,7 @@
      String get key => name;
    }
    ```
-   
+
 3. Initialize the database:
    ```dart
    final DbUser db = DbUser();
@@ -141,7 +145,7 @@ This method assumes that the names of the `Enum` instances (e.g. `carrot`) will 
     [+] final String key;
     }
     ```
-   
+
 2. Use custom keys as needed:
     ```dart
    enum KeyStore<T> implements RKey<T> {
@@ -161,7 +165,7 @@ This method assumes that the names of the `Enum` instances (e.g. `carrot`) will 
    [+] String get key => _key ?? name;
    }
    ```
-   
+
 3. Add a key migration map and use the `@Deprecated('message')` annotation:
    ```dart
    ...
@@ -317,3 +321,9 @@ classDiagram
 
     }
 ```
+
+[telegram_badge]: https://img.shields.io/badge/Telegram%20channel-❤️-FEBE8C?style=plastic&logo=telegram
+[telegram_link]: https://t.me/+AkGV73kZi_Q1YTMy
+
+[pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic
+[pub_link]: https://pub.dev/packages/cardoteka

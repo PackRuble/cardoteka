@@ -1,29 +1,32 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' hide Card;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reactive_db/reactive_db.dart';
 
-final dbProvider = Provider<DbUser>((ref) => DbUser());
+final dbProvider = Provider<DbUser>((ref) => DbUser(
+      cards: KeyStore1.values,
+      config: KeyStore1.config,
+    ));
 
-class DbUser extends CardDb with Watcher, CRUD {
-  DbUser() : super(cards: KeyStore1.values);
+class DbUser extends Cardoteka with WatcherImpl, CRUD {
+  DbUser({required super.cards, required super.config});
 }
 
 /// Storage of [Enum] type with possibility of using custom key.
-enum KeyStore1<T> implements ICard<T> {
-  banana<int>(TypeData.int, 0),
-  counter1<int>(TypeData.int, 0),
-  counter2<int>(TypeData.int, 0),
-  counterCustom<int>(TypeData.int, 2, 'custom_counter_key'),
-  skyColor<Color>(TypeData.color, Colors.blue),
-  myCar<Car>(TypeData.string, Car.notCar()),
+enum KeyStore1<T> implements Card<T> {
+  banana<int>(DataType.int, 0),
+  counter1<int>(DataType.int, 0),
+  counter2<int>(DataType.int, 0),
+  counterCustom<int>(DataType.int, 2, 'custom_counter_key'),
+  skyColor<Color>(DataType.string, Colors.blue),
+  myCar<Car>(DataType.string, Car.notCar()),
   ;
 
   const KeyStore1(this.type, this.defaultValue, [this.customKey]);
 
   @override
-  final TypeData type;
+  final DataType type;
 
   @override
   final T defaultValue;
@@ -33,22 +36,24 @@ enum KeyStore1<T> implements ICard<T> {
   @override
   String get key => customKey ?? EnumName(this).name;
 
-  @override
-  CardConfig get config => CardConfig(
+  static Config get config => const Config(
         name: 'KeyStore1',
-        converters: {KeyStore1.myCar: const CarConverter()},
+        converters: {
+          myCar: CarConverter(),
+          skyColor: ColorConverter(),
+        },
       );
 }
 
-class CarConverter implements IConverter<Car, String> {
+class CarConverter implements Converter<Car, String> {
   const CarConverter();
 
   @override
-  Car fromDb(String value) =>
+  Car from(String value) =>
       Car.fromJson(jsonDecode(value) as Map<String, dynamic>);
 
   @override
-  String toDb(Car model) => jsonEncode(model.toJson());
+  String to(Car model) => jsonEncode(model.toJson());
 }
 
 class Car {

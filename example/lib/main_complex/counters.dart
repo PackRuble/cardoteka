@@ -15,7 +15,7 @@ class CountersWidgetController {
     return ref.watch(dbProvider).attach<int>(
           KeyStore1.counter1,
           (value) => ref.state = value,
-          ref.onDispose,
+          detacher: ref.onDispose,
         );
   }, name: 'counter1Provider');
 
@@ -23,7 +23,7 @@ class CountersWidgetController {
     return ref.watch(dbProvider).attach<int>(
           KeyStore1.counter2,
           (value) => ref.state = value,
-          ref.onDispose,
+          detacher: ref.onDispose,
         );
   }, name: 'counter2Provider');
 

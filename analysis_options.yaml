@@ -1,8 +1,8 @@
 include: package:lint/package.yaml
-
-analyzer:
-  exclude:
-    - 'example/**'
+#
+#analyzer:
+#  exclude:
+#    - 'example/**'
 
 linter:
   rules:

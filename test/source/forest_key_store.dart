@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:reactive_db/reactive_db.dart';
+import 'package:cardoteka/cardoteka.dart';
 
 const forestCardConfig = Config(
   name: 'ForestDb',

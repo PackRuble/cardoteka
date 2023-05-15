@@ -1,22 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:reactive_db/reactive_db.dart';
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' hide Card;
 
-class DbUser extends CardDb with Watcher {
-  DbUser({required super.cards});
+class DbUser extends Cardoteka with WatcherImpl {
+  DbUser({required super.cards, required super.config});
 }
 
 /// Storage of [Enum] type with possibility of using custom key.
-enum KeyStore<T> implements ICard<T> {
-  banana<int>(TypeData.int, 5),
-  melon<int?>(TypeData.int, 44),
-  cucumber<int>(TypeData.int, -3),
-  watermelon<int>(TypeData.int, 2),
+enum KeyStore<T> implements Card<T> {
+  banana<int>(DataType.int, 5),
+  melon<int?>(DataType.int, 44),
+  cucumber<int>(DataType.int, -3),
+  watermelon<int>(DataType.int, 2),
   ;
 
   const KeyStore(this.type, this.defaultValue);
 
   @override
-  final TypeData type;
+  final DataType type;
 
   @override
   final T defaultValue;
@@ -24,12 +24,11 @@ enum KeyStore<T> implements ICard<T> {
   @override
   String get key => name;
 
-  @override
-  CardConfig get config => CardConfig(name: 'KeyStore1');
+  static Config get config => const Config(name: 'KeyStore');
 }
 
 Future<void> main() async {
-  final DbUser db = DbUser(cards: KeyStore.values);
+  final DbUser db = DbUser(cards: KeyStore.values, config: KeyStore.config);
   await db.init();
 
   // If there is no value, it will return the default value.
@@ -54,6 +53,7 @@ Future<void> main() async {
   db.attach(
     KeyStore.banana,
     (value) => print('$value - we know the number of bananas'),
+    detacher: (_) {},
   );
 
   runApp(const MaterialApp());

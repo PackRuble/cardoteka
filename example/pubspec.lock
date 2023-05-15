@@ -17,6 +17,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  cardoteka:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "0.2.1"
   characters:
     dependency: transitive
     description:
@@ -74,10 +81,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_riverpod
-      sha256: "812dfbb87af51e73e68ea038bcfd1c732078d6838d3388d03283db7dec0d1e5f"
+      sha256: b83ac5827baadefd331ea1d85110f34645827ea234ccabf53a655f41901a9bf4
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.4"
+    version: "2.3.6"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -100,10 +107,10 @@ packages:
     dependency: "direct dev"
     description:
       name: lint
-      sha256: "3e9343b1cededcfb1e8b40d0dbd3592b7a1c6c0121545663a991433390c2bc97"
+      sha256: f4bd4dbaa39f4ae8836f2d1275f2f32bc68b3a8cce0a0735dd1f7a601f06682a
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.2"
   matcher:
     dependency: transitive
     description:
@@ -184,29 +191,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.4"
-  reactive_db:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.2.0"
   riverpod:
     dependency: transitive
     description:
       name: riverpod
-      sha256: "77ab3bcd084bb19fa8717a526217787c725d7f5be938404c7839cd760fdf6ae5"
+      sha256: "80e48bebc83010d5e67a11c9514af6b44bbac1ec77b4333c8ea65dbc79e2d8ef"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.4"
+    version: "2.3.6"
   shared_preferences:
     dependency: transitive
     description:
       name: shared_preferences
-      sha256: "858aaa72d8f61637d64e776aca82e1c67e6d9ee07979123c5d17115031c1b13b"
+      sha256: "16d3fb6b3692ad244a695c0183fca18cf81fd4b821664394a781de42386bf022"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   shared_preferences_android:
     dependency: transitive
     description:
@@ -341,5 +341,5 @@ packages:
     source: hosted
     version: "0.2.0+2"
 sdks:
-  dart: ">=3.0.0-0 <4.0.0"
+  dart: ">=3.0.0 <4.0.0"
   flutter: ">=3.0.0"

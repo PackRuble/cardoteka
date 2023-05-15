@@ -11,14 +11,14 @@ final bananaProvider = Provider.autoDispose<int>((ref) {
   return db.attach<int>(
     KeyStore1.banana,
     (value) => ref.state = value,
-    ref.onDispose,
+    detacher: ref.onDispose,
   );
 }, name: 'bananaProvider');
 
 class BananaCounterWidget extends ConsumerWidget {
   const BananaCounterWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +50,7 @@ class BananaControllerUI {
     return ref.watch(instance).db.attach<int>(
           KeyStore1.banana,
           (value) => ref.state = value,
-          ref.onDispose,
+          detacher: ref.onDispose,
         );
   });
 

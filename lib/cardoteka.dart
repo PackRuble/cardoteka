@@ -1,4 +1,4 @@
-library reactive_db; //todo: rename
+library cardoteka;
 
 export 'src/card.dart';
 export 'src/config.dart';

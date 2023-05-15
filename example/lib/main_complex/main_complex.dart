@@ -38,7 +38,7 @@ class Home extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Testing RDatabase'),
       ),
-      body: Stack(children: const [
+      body: const Stack(children: [
         HomePage(),
         Align(
           alignment: Alignment.centerRight,
@@ -73,8 +73,8 @@ class HelperButtonsWidget extends ConsumerWidget {
             child: const Text('Reload Db')),
         TextButton(
             onPressed: () {
-              final data = db.getSavedData();
-              print(data);
+              // final data = db.getSavedData();
+              // print(data);
             },
             child: const Text('Saved in prefs')),
       ],

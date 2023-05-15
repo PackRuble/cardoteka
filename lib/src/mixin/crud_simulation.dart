@@ -1,5 +1,5 @@
-import '../core.dart';
 import '../card.dart';
+import '../core.dart';
 
 /// Work with the database using familiar CRUD operations.
 mixin CRUD on Cardoteka {
