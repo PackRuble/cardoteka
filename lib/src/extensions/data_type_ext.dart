@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../card.dart';
 
