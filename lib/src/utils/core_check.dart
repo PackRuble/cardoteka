@@ -1,22 +1,19 @@
 import 'package:flutter/foundation.dart';
 
+import '../card.dart';
 import '../config.dart';
 import '../converter.dart';
 import '../extensions/data_type_ext.dart';
-import '../card.dart';
 
 // TODO:
 // 1. Translate everything into custom errors.
 
 /// Comprehensive verification of input data.
-bool checkConfiguration({
-  required Config config,
-  required List<Card> cards,
-}) {
-  _checkKeys(cards);
-  _checkProvidedDataType(cards, config.converters);
-  _checkConverterForComplexObject(cards, config.converters);
-  _checkMatchingConverters(cards, config.converters);
+bool checkConfiguration(Config config) {
+  _checkKeys(config.cards);
+  _checkProvidedDataType(config.cards, config.converters);
+  _checkConverterForComplexObject(config.cards, config.converters);
+  _checkMatchingConverters(config.cards, config.converters);
 
   return true;
 }
@@ -79,13 +76,12 @@ bool _checkConverterForComplexObject(
         availableConverters.writeln('$key: $value');
       });
 
-      debugPrint('''
+      throw AssertionError('''
 <$card> is a complex object. Check for a converter.
 The following converters are found:
 {
 $availableConverters}
 ''');
-      throw AssertionError();
     }
   }
 
@@ -111,13 +107,16 @@ bool _checkMatchingConverters(
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
 
-    if (card.type.getDartType() != converter.to(value).runtimeType) {
-      debugPrint('''
-The $card does not match the $converter.
+    final excepted = card.type.getDartType();
+    final afterConverted = converter.to(value).runtimeType;
 
+    if (excepted != afterConverted) {
+      throw AssertionError('''
+The $card does not match the $converter.
+  Type expected: <$excepted>
+  Type after conversion: <$afterConverted>
 Check if the converter types for the card match.
 ''');
-      throw AssertionError();
     }
   }
 

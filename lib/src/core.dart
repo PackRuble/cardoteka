@@ -13,9 +13,14 @@ import 'watcher.dart';
 ///
 /// Todo: example for use
 class Cardoteka {
-  const Cardoteka({
+  Cardoteka({
     required Config config,
-  }) : _config = config;
+  })  :
+        // this behavior is not yet available for const classes
+        // https://github.com/dart-lang/language/issues/2581
+        //
+        assert(checkConfiguration(config)),
+        _config = config;
 
   /// List of keys [Card] for accessing the database [SharedPreferences].
   List<Card> get cards => _config.cards;
@@ -40,15 +45,11 @@ class Cardoteka {
   static bool _isInitialized = false;
 
   /// Initialization [Cardoteka]. It is necessary to wait for completion.
-  Future<bool> init() async {
+  static Future<void> init() async {
     if (!_isInitialized) {
-      assert(checkConfiguration(cards: cards, config: _config));
-
       _prefs = await SharedPreferences.getInstance();
       _isInitialized = true;
     }
-
-    return true;
   }
 
   // /// Get the key after [SharedPreferences].
@@ -121,9 +122,7 @@ class Cardoteka {
 
     watcher?.notify<T>(card, value);
 
-    if (value == null
-        // && value is! T
-        ) {
+    if (value == null /* && value is! T */) {
       await remove(card);
       return null;
     }
@@ -231,7 +230,7 @@ class Cardoteka {
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
   void setMockInitialValues(Map<Card<Object?>, Object> values) {
-    assert(checkConfiguration(cards: cards, config: _config));
+    assert(checkConfiguration(_config));
 
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
@@ -272,9 +271,8 @@ mixin AccessToSP on Cardoteka {
   ///
   /// Useful in tests after call [SharedPreferences.setMockInitialValues].
   @visibleForTesting
-  Future<void> reInit() async {
-    Cardoteka._prefs = await SharedPreferences.getInstance();
-  }
+  Future<void> reInit() async =>
+      Cardoteka._prefs = await SharedPreferences.getInstance();
 
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
