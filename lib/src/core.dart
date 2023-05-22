@@ -14,12 +14,11 @@ import 'watcher.dart';
 /// Todo: example for use
 class Cardoteka {
   const Cardoteka({
-    required this.cards,
     required Config config,
   }) : _config = config;
 
   /// List of keys [Card] for accessing the database [SharedPreferences].
-  final List<Card> cards;
+  List<Card> get cards => _config.cards;
 
   /// Configuration file.
   final Config _config;

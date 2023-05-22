@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+
 import 'card.dart';
 import 'converter.dart';
 
@@ -7,6 +8,7 @@ import 'converter.dart';
 class Config {
   const Config({
     required this.name,
+    required this.cards,
     this.converters,
   });
 
@@ -16,6 +18,9 @@ class Config {
   /// The name is used as a prefix for keys.
   final String name;
 
+  /// List of all key-cards to access [SharedPreferences] in [Cardoteka].
+  final List<Card> cards;
+
   /// Map of converters for complex objects (those whose types are not part of
   /// the basic set to save).
   ///
@@ -23,4 +28,8 @@ class Config {
   final Map<Card<Object?>, Converter<Object?, Object>>? converters;
 
   // Future feature: final migrator;
+
+  @override
+  String toString() =>
+      '$Config(name: $name, \ncards: $cards, \nconverters: $converters)';
 }

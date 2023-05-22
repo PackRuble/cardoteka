@@ -8,7 +8,7 @@ abstract class Converter<V extends Object?, T extends Object> {
   T to(V object);
 
   @override
-  String toString() => 'from: $V, to: $T';
+  String toString() => '$runtimeType(from: $V, to: $T)';
 }
 
 /// The converter allows you to save the [Color] class to the database as [String].
