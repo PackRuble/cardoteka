@@ -35,6 +35,7 @@ class Cardoteka {
   /// Use a mixin based on the [Watcher] interface.
   @internal
   Watcher? get watcher => null;
+  // todo: наш нотифаер не уведомляется, если значение будет удалено
 
   /// Indicates whether the database is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
@@ -65,7 +66,7 @@ class Cardoteka {
   ///
   /// The returned object is always non-nullable.
   T get<T extends Object>(Card<T> card) {
-    checkInit(_isInitialized);
+    _checkInit();
 
     return _getValueFromDb<T>(card) ?? card.defaultValue;
   }
@@ -74,7 +75,7 @@ class Cardoteka {
   ///
   /// [Card.defaultValue] is not used in this case.
   T? getOrNull<T extends Object?>(Card<T?> card) {
-    checkInit(_isInitialized);
+    _checkInit();
 
     return _getValueFromDb<T>(card);
   }
@@ -106,7 +107,7 @@ class Cardoteka {
   ///
   /// All [watcher]s will be notified.
   Future<bool> set<T extends Object>(Card<T?> card, T value) async {
-    checkInit(_isInitialized);
+    _checkInit();
 
     watcher?.notify<T>(card, value);
 
@@ -118,7 +119,7 @@ class Cardoteka {
   ///
   /// All [watcher]s will be notified anyway.
   Future<bool?> setOrNull<T extends Object>(Card<T?> card, T? value) async {
-    checkInit(_isInitialized);
+    _checkInit();
 
     watcher?.notify<T>(card, value);
 
@@ -168,7 +169,7 @@ class Cardoteka {
   ///
   /// If successful, it will return true.
   Future<bool> remove(Card card) async {
-    checkInit(_isInitialized);
+    _checkInit();
 
     return _prefs.remove(_keyForSP(card));
   }
@@ -192,7 +193,7 @@ class Cardoteka {
   ///
   /// Returns all [cards] that contains in the persistent storage.
   Set<Card> getCards() {
-    checkInit(_isInitialized);
+    _checkInit();
 
     final Set<String> allStoredKey = _prefs.getKeys();
     final resultKeys = <Card>{
@@ -205,7 +206,7 @@ class Cardoteka {
 
   /// Returns true if persistent storage the contains the given [card].
   Future<bool> containsCard(Card card) async {
-    checkInit(_isInitialized);
+    _checkInit();
 
     return _prefs.containsKey(_keyForSP(card));
   }
@@ -243,10 +244,12 @@ class Cardoteka {
   ///
   /// Returns all stored entities from the persistent storage.
   Map<Card, Object> getStoredEntries() {
-    checkInit(_isInitialized);
+    _checkInit();
 
     return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
   }
+
+  void _checkInit() => checkInit(_isInitialized, _config.name);
 }
 
 /// Get access to all the original methods of the [SharedPreferences] library.
@@ -254,7 +257,7 @@ class Cardoteka {
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs {
-    checkInit(Cardoteka._isInitialized);
+    _checkInit();
 
     return Cardoteka._prefs;
   }

@@ -157,9 +157,10 @@ bool _isSimpleData(Card<Object?> card) {
 }
 
 // ignore: avoid_positional_boolean_parameters
-void checkInit(bool isInitialized) {
+void checkInit(bool isInitialized, String nameStorage) {
   assert(
     isInitialized,
-    'The database was not initialized! Need to call [CardDb.init]',
+    'The storage `$nameStorage` was not initialized! '
+    'Need to call `await Cardoteka.init()`',
   );
 }
