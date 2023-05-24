@@ -14,7 +14,7 @@ import 'watcher.dart';
 /// Todo: example for use
 abstract class Cardoteka {
   Cardoteka({
-    required Config config,
+    required CardConfig config,
   })  :
         // this behavior is not yet available for const classes
         // https://github.com/dart-lang/language/issues/2581
@@ -22,11 +22,11 @@ abstract class Cardoteka {
         assert(checkConfiguration(config)),
         _config = config;
 
-  /// List of keys [Card] for accessing the database [SharedPreferences].
+  /// List of keys [Card] for accessing the storage [SharedPreferences].
   List<Card> get cards => _config.cards;
 
-  /// Configuration file.
-  final Config _config;
+  /// Configuration file containing important information about the [Card]s.
+  final CardConfig _config;
 
   static late SharedPreferences _prefs;
 

@@ -9,7 +9,7 @@ import '../extensions/data_type_ext.dart';
 // 1. Translate everything into custom errors.
 
 /// Comprehensive verification of input data.
-bool checkConfiguration(Config config) {
+bool checkConfiguration(CardConfig config) {
   _checkKeys(config.cards);
   _checkProvidedDataType(config.cards, config.converters);
   _checkConverterForComplexObject(config.cards, config.converters);
