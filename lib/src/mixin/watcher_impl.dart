@@ -17,12 +17,6 @@ mixin WatcherImpl on Cardoteka implements Watcher {
 
   final _watchers = <Card, List<CbWatcher>>{};
 
-  @visibleForTesting
-  Map<Card, List<CbWatcher>> debugGetWatchers() => _watchers;
-
-  // todo: impl
-  _removeWatcher() {}
-
   @override
   @internal
   void notify<V extends Object>(Card<V?> card, V? value) {
@@ -66,13 +60,19 @@ mixin WatcherImpl on Cardoteka implements Watcher {
 
     return getOrNull(card) ?? card.defaultValue;
   }
+}
+
+@visibleForTesting
+mixin WatcherImplDebug on WatcherImpl {
+  @visibleForTesting
+  Map<Card<Object?>, List<CbWatcher>> get watchersDebug => _watchers;
 
   @visibleForTesting
   void printAllWatchers() {
     final buffer = StringBuffer();
 
     for (final entry in _watchers.entries) {
-      buffer.writeln('Key: ${entry.key}, List of listeners: ${entry.value}');
+      buffer.writeln('Key: ${entry.key}, Listeners: ${entry.value}');
     }
 
     if (buffer.isEmpty) buffer.writeln('There are no listeners.');
