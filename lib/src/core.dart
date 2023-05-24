@@ -35,7 +35,6 @@ abstract class Cardoteka {
   /// Use a mixin based on the [Watcher] interface.
   @internal
   Watcher? get watcher => null;
-  // todo: наш нотифаер не уведомляется, если значение будет удалено
 
   /// Indicates whether the database is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
@@ -171,6 +170,7 @@ abstract class Cardoteka {
   Future<bool> remove(Card card) async {
     _checkInit();
 
+    watcher?.notify(card, card.defaultValue);
     return _prefs.remove(_keyForSP(card));
   }
 
@@ -183,6 +183,7 @@ abstract class Cardoteka {
   ///
   Future<bool> removeAll() async {
     for (final card in cards) {
+      watcher?.notify(card, card.defaultValue);
       await remove(card);
     }
 
