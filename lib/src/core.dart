@@ -12,7 +12,7 @@ import 'watcher.dart';
 /// A handy wrapper for typed use [SharedPreferences].
 ///
 /// Todo: example for use
-class Cardoteka {
+abstract class Cardoteka {
   Cardoteka({
     required Config config,
   })  :
