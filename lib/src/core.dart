@@ -264,7 +264,8 @@ mixin AccessToSP on Cardoteka {
   }
 
   /// The original [SharedPreferences.setPrefix] method.
-  void setPrefix(String prefix) => SharedPreferences.setPrefix(prefix);
+  void setPrefix(String prefix, {Set<String>? allowList}) =>
+      SharedPreferences.setPrefix(prefix, allowList: allowList);
 
   /// The original [SharedPreferences.resetStatic] method.
   @visibleForTesting
