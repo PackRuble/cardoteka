@@ -11,9 +11,9 @@ import '../extensions/data_type_ext.dart';
 /// Comprehensive verification of input data.
 bool checkConfiguration(CardConfig config) {
   _checkKeys(config.cards);
-  _checkProvidedDataType(config.cards, config.converters);
   _checkConverterForComplexObject(config.cards, config.converters);
   _checkMatchingConverters(config.cards, config.converters);
+  _checkProvidedDataType(config.cards, config.converters);
 
   return true;
 }
@@ -157,10 +157,10 @@ bool _isSimpleData(Card<Object?> card) {
 }
 
 // ignore: avoid_positional_boolean_parameters
-void checkInit(bool isInitialized, String nameStorage) {
+void checkInit(bool isInitialized, String nameStorage, String nameInstance) {
   assert(
     isInitialized,
     'The storage `$nameStorage` was not initialized! '
-    'Need to call `await Cardoteka.init()`',
+    'Need to call `await $nameInstance.init()`',
   );
 }

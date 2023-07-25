@@ -250,7 +250,8 @@ abstract class Cardoteka {
     return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
   }
 
-  void _checkInit() => checkInit(_isInitialized, _config.name);
+  void _checkInit() =>
+      checkInit(_isInitialized, _config.name, runtimeType.toString());
 }
 
 /// Get access to all the original methods of the [SharedPreferences] library.
