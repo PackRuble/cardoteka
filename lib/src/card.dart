@@ -38,4 +38,9 @@ abstract class Card<V extends dc.Object?> {
 
   /// The key to access the value [defaultValue] in the [Cardoteka].
   dc.String get key;
+
+  @dc.override
+  dc.String toString() => '$runtimeType(key: $key, '
+      'defaultValue: $defaultValue, '
+      'type: $type)';
 }
