@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'card.dart';
 import 'config.dart';
 import 'converter.dart';
-import 'utils/core_check.dart';
+import 'utils/core_check.dart' show checkConfiguration, checkInit;
 import 'watcher.dart';
 
 /// A handy wrapper for typed use [SharedPreferences].

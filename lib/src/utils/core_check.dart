@@ -1,31 +1,48 @@
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import '../card.dart';
 import '../config.dart';
 import '../converter.dart';
 import '../extensions/data_type_ext.dart';
 
-// TODO:
-// 1. Translate everything into custom errors.
+/// This implementation allows \n characters to be used.
+class AssertionErrorImpl extends AssertionError {
+  AssertionErrorImpl(super.message);
+
+  @override
+  String toString() => 'Assertion failed: $message';
+}
+
+/// TODO:
+/// 1. Translate everything into custom errors.
+/// 2. Do separate class Assertion error (test-friendly)
+
+typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
 
 /// Comprehensive verification of input data.
+///
+/// Used only in development mode in `assert`. May throw an error [AssertionErrorImpl].
+@internal
 bool checkConfiguration(CardConfig config) {
-  _checkKeys(config.cards);
-  _checkConverterForComplexObject(config.cards, config.converters);
-  _checkMatchingConverters(config.cards, config.converters);
-  _checkProvidedDataType(config.cards, config.converters);
+  checkKeys(config.cards);
+  checkConverterForComplexObject(config.cards, config.converters);
+  checkMatchingConverters(config.converters);
+  checkProvidedDataType(config.cards, config.converters);
 
   return true;
 }
 
 /// Check if the specified type [DataType] matches the provided type [Card.defaultValue].
+/// We do this based on the type of default value provided. If there is
+/// a converter for the given card, we skip the check.
 ///
 /// Note:
 /// - can't check when value is nullable type
 /// - in web can't check when value is [double] or [int]
-bool _checkProvidedDataType<T>(
+@internal
+bool checkProvidedDataType<T>(
   List<Card<T>> cards,
-  Map<Card<Object?>, Converter<Object?, Object>>? converters,
+  CardToConverters? converters,
 ) {
   for (final card in cards) {
     final Object? value = card.defaultValue;
@@ -37,11 +54,11 @@ bool _checkProvidedDataType<T>(
     if (converters?.containsKey(card) ?? false) continue;
 
     if (!card.type.isCorrectType(value)) {
-      debugPrint('''
-The provided type <${card.type}> does not match the type of the $card.defaultValue: <${card.defaultValue.runtimeType}>.
-Expected type: <${card.type.getDartType()}>
+      throw AssertionErrorImpl('''
+The provided type [${card.type}] does not match the type of the [$card.defaultValue]:
+  Expected type: ${card.type.getDartType()}
+  Actual type: ${card.defaultValue.runtimeType}
 ''');
-      throw AssertionError();
     }
   }
 
@@ -49,39 +66,44 @@ Expected type: <${card.type.getDartType()}>
 }
 
 /// Check [Card]'s keys for correctness.
-bool _checkKeys<T>(List<Card<T>> cards) {
+@internal
+bool checkKeys<T>(List<Card<T>> cards) {
   if (cards.isEmpty) return true;
 
-  return _checkDuplicatesKeys(cards);
+  checkDuplicateKeys(cards);
+  return true;
 }
 
 /// Check for a converter for complex objects.
 ///
 /// We cannot check [Null] values (for all platforms).
-bool _checkConverterForComplexObject(
+@internal
+bool checkConverterForComplexObject(
   List<Card<Object?>> cards,
-  Map<Card<Object?>, Converter<Object?, Object>>? converters,
+  CardToConverters? converters,
 ) {
   for (final card in cards) {
     if (card.defaultValue == null) continue;
 
-    if (_isSimpleData(card)) {
+    if (isSimpleData(card)) {
       continue;
     } else if (converters?.containsKey(card) ?? false) {
       continue;
     } else {
-      final availableConverters = StringBuffer();
-
-      converters?.forEach((key, value) {
-        availableConverters.writeln('$key: $value');
-      });
-
-      throw AssertionError('''
-<$card> is a complex object. Check for a converter.
-The following converters are found:
-{
-$availableConverters}
+      final message = StringBuffer('''
+[$card] has a complex [Card.defaultValue]. Check for a converter.
 ''');
+      if (converters?.isEmpty ?? true) {
+        message.write('No converters were found: $converters');
+      } else {
+        message.writeln('The following converters are found:');
+        message.writeln('{');
+        converters?.forEach((key, value) {
+          message.writeln(' $key: $value,');
+        });
+        message.writeln('}');
+      }
+      throw AssertionErrorImpl(message);
     }
   }
 
@@ -92,9 +114,9 @@ $availableConverters}
 ///
 /// Note: We cannot guarantee verification of the [double] and [int] types in the web.
 /// Also, we cannot check [Null] values (for all platforms).
-bool _checkMatchingConverters(
-  List<Card<Object?>> cards,
-  Map<Card<Object?>, Converter<Object?, Object>>? converters,
+@internal
+bool checkMatchingConverters(
+  CardToConverters? converters,
 ) {
   if (converters?.isEmpty ?? true) return true;
 
@@ -107,14 +129,21 @@ bool _checkMatchingConverters(
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
 
-    final excepted = card.type.getDartType();
-    final afterConverted = converter.to(value).runtimeType;
+    // todo: warning messages to the console if the map is of type int or double + web
 
-    if (excepted != afterConverted) {
-      throw AssertionError('''
-The $card does not match the $converter.
-  Type expected: <$excepted>
-  Type after conversion: <$afterConverted>
+    final excepted = card.type.getDartType();
+    Type? afterConverted;
+    try {
+      afterConverted = converter.to(value).runtimeType;
+
+      if (excepted != afterConverted) {
+        throw '';
+      }
+    } catch (error) {
+      throw AssertionErrorImpl('''
+The [$card] does not match the [$converter]:
+->Type expected: [$excepted]
+->Type after conversion: [${afterConverted ?? error}]
 Check if the converter types for the card match.
 ''');
     }
@@ -123,31 +152,52 @@ Check if the converter types for the card match.
   return true;
 }
 
+/// The type for the [Card.key] field.
+typedef Key = String;
+
 /// Check for duplicates [Card.key].
-bool _checkDuplicatesKeys(List<Card> cards) {
-  List<String>? duplicateKeys;
+@internal
+bool checkDuplicateKeys(List<Card> cards) {
+  final Map<Key, List<Card>> duplicateKeys = getDuplicateKeys(cards);
+  if (duplicateKeys.isNotEmpty) {
+    final bufferDuplicateKeys = StringBuffer();
+    duplicateKeys
+        .forEach((key, list) => bufferDuplicateKeys.writeln(' $key : $list'));
 
-  final List<String> keys = cards.map((e) => e.key).toList();
-
-  if (keys.toSet().length != keys.length) {
-    for (final k in keys.toSet()) {
-      keys.remove(k);
-    }
-
-    duplicateKeys = keys;
-
-    throw AssertionError(
-        'Each <${cards.first.runtimeType}.key> must be unique. Your cards contain the following <key> duplicates: \n'
-        '$duplicateKeys');
+    throw AssertionErrorImpl(
+        'Each [${duplicateKeys.values.first.first}] must be unique key. Your cards contain'
+        ' the following [key] duplicates:\n'
+        '[\n'
+        '$bufferDuplicateKeys'
+        ']');
   }
 
   return true;
 }
 
+/// Returns a duplicates [Card.key].
+@internal
+Map<Key, List<Card>> getDuplicateKeys(List<Card> cards) {
+  final duplicateKeys = <Key, List<Card>>{};
+
+  for (final card in cards) {
+    duplicateKeys.update(
+      card.key,
+      (list) => [...list, card],
+      ifAbsent: () => [card],
+    );
+  }
+
+  duplicateKeys.removeWhere((key, list) => list.length == 1);
+
+  return duplicateKeys;
+}
+
 /// Returns true if the type is valid (one of [DataType]).
 ///
 /// Note: in the web double can be equal to int.
-bool _isSimpleData(Card<Object?> card) {
+@internal
+bool isSimpleData(Card<Object?> card) {
   final Object? value = card.defaultValue;
 
   // we cannot determine the type for sure if the value is null.
