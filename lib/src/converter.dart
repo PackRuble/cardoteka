@@ -61,6 +61,8 @@ class Converters {
   static const Converter<Duration, int> durationAsInt = _DurationConverter();
   static const Converter<DateTime, String> dateTimeAsString =
       _DateTimeConverter();
+  static const Converter<DateTime, int> dateTimeAsInt =
+      _DateTimeAsIntConverter();
   static const Converter<num, double> numAsDouble = _NumConverter();
 }
 
@@ -173,7 +175,12 @@ class _DurationConverter implements Converter<Duration, int> {
 
 /// Converter for class [DateTime].
 ///
+/// [ISO 8601 Date and Time Format](https://www.iso.org/iso-8601-date-and-time-format.html)
+/// as a time stamp. Unlike milliseconds since epoch, the ISO 8601 date is human
+/// readable.
+///
 /// Converts [DateTime] to [String] using [DateTime.toIso8601String].
+///
 class _DateTimeConverter implements Converter<DateTime, String> {
   const _DateTimeConverter();
 
@@ -182,6 +189,19 @@ class _DateTimeConverter implements Converter<DateTime, String> {
 
   @override
   String to(DateTime object) => object.toIso8601String();
+}
+
+/// Converter for class [DateTime].
+///
+/// Converts [DateTime] to [int] using [DateTime.millisecondsSinceEpoch].
+class _DateTimeAsIntConverter implements Converter<DateTime, int> {
+  const _DateTimeAsIntConverter();
+
+  @override
+  DateTime from(int data) => DateTime.fromMillisecondsSinceEpoch(data);
+
+  @override
+  int to(DateTime object) => object.millisecondsSinceEpoch;
 }
 
 /// Converter for class [num].
