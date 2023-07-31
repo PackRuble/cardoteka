@@ -284,3 +284,13 @@ mixin AccessToSP on Cardoteka {
   Map<String, Object> getEntries() =>
       {for (final key in prefs.getKeys()) key: prefs.get(key)!};
 }
+
+/// Contains various utilities, mainly designed for testing.
+@visibleForTesting
+@internal
+mixin CardotekaUtilsForTest on Cardoteka {
+  /// A way to reset the initialization state.
+  @visibleForTesting
+  @internal
+  void deInit() => Cardoteka._isInitialized = false;
+}
