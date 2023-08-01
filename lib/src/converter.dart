@@ -95,8 +95,8 @@ extension EnumConverters on Converters {
   ///
   /// For better control of enum names, simply override [EnumName.name]
   /// and assign a permanent name.
-  static Converter<T, String> enumAsString<T extends Enum>(List<T> enums) =>
-      EnumAsStringConverter(enums);
+  static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
+      EnumAsStringConverter<T>(enums);
 
   /// Convert [Enum] to [int]. Not dependent on [EnumName.name].
   ///
@@ -104,7 +104,7 @@ extension EnumConverters on Converters {
   /// if your enumeration index changes (for example, if you move your
   /// enumeration value), the first item in the enumeration list will be returned.
   static Converter<T, int> enumAsInt<T extends Enum>(List<T> enums) =>
-      EnumAsIntConverter(enums);
+      EnumAsIntConverter<T>(enums);
 }
 
 /// The converter allows you to save the [Color] class to the storage as [int].
@@ -139,7 +139,7 @@ class EnumAsIntConverter<T extends Enum> implements Converter<T, int> {
 class EnumAsStringConverter<T extends Enum> implements Converter<T, String> {
   const EnumAsStringConverter(this._enums);
 
-  final List<T> _enums;
+  final Iterable<T> _enums;
 
   @override
   T from(String name) => _enums.byNameOr(name, orElse: () => _enums.first);
