@@ -64,6 +64,7 @@ class Converters {
   static const Converter<DateTime, int> dateTimeAsInt =
       _DateTimeAsIntConverter();
   static const Converter<num, double> numAsDouble = _NumConverter();
+  static const Converter<num, String> numAsString = _NumAsStringConverter();
 }
 
 /// Provides converters to convert [Enum].
@@ -215,6 +216,19 @@ class _NumConverter implements Converter<num, double> {
 
   @override
   double to(num object) => object.toDouble();
+}
+
+/// Converter for class [num].
+///
+/// Converts [num] to [String] using [num.toString].
+class _NumAsStringConverter implements Converter<num, String> {
+  const _NumAsStringConverter();
+
+  @override
+  num from(String data) => num.parse(data);
+
+  @override
+  String to(num object) => object.toString();
 }
 
 /// Converter for class [Iterable].
