@@ -26,6 +26,8 @@ abstract class Cardoteka {
   List<Card> get cards => _config.cards;
 
   /// Configuration file containing important information about the [Card]s.
+  // todo: it is necessary to bring the name to a string without spaces in snake_case
+  //  though it probably doesn't have to be?
   final CardConfig _config;
 
   static late SharedPreferences _prefs;

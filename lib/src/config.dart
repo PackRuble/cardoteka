@@ -27,7 +27,7 @@ class CardConfig {
   /// For each card [Card], add the necessary [Converter].
   final Map<Card<Object?>, Converter<Object?, Object>>? converters;
 
-  // Future feature: final migrator;
+  // todo: Future feature: final migrator;
 
   @override
   String toString() =>
