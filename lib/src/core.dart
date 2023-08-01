@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'card.dart';
 import 'config.dart';
 import 'converter.dart';
-import 'utils/core_check.dart' show checkConfiguration, checkInit;
+import 'utils/core_check.dart' show checkConfiguration;
 import 'watcher.dart';
 
 /// A handy wrapper for typed use [SharedPreferences].
@@ -65,7 +65,7 @@ abstract class Cardoteka {
   ///
   /// The returned object is always non-nullable.
   T get<T extends Object>(Card<T> card) {
-    _checkInit();
+    checkInit();
 
     return _getValueFromDb<T>(card) ?? card.defaultValue;
   }
@@ -74,7 +74,7 @@ abstract class Cardoteka {
   ///
   /// [Card.defaultValue] is not used in this case.
   T? getOrNull<T extends Object?>(Card<T?> card) {
-    _checkInit();
+    checkInit();
 
     return _getValueFromDb<T>(card);
   }
@@ -106,7 +106,7 @@ abstract class Cardoteka {
   ///
   /// All [watcher]s will be notified.
   Future<bool> set<T extends Object>(Card<T?> card, T value) async {
-    _checkInit();
+    checkInit();
 
     watcher?.notify<T>(card, value);
 
@@ -118,7 +118,7 @@ abstract class Cardoteka {
   ///
   /// All [watcher]s will be notified anyway.
   Future<bool?> setOrNull<T extends Object>(Card<T?> card, T? value) async {
-    _checkInit();
+    checkInit();
 
     watcher?.notify<T>(card, value);
 
@@ -168,7 +168,7 @@ abstract class Cardoteka {
   ///
   /// If successful, it will return true.
   Future<bool> remove(Card card) async {
-    _checkInit();
+    checkInit();
 
     watcher?.notify(card, card.defaultValue);
     return _prefs.remove(_keyForSP(card));
@@ -182,6 +182,8 @@ abstract class Cardoteka {
   /// Returns true if the operation was successful.
   ///
   Future<bool> removeAll() async {
+    checkInit();
+
     for (final card in cards) {
       watcher?.notify(card, card.defaultValue);
       await remove(card);
@@ -194,7 +196,7 @@ abstract class Cardoteka {
   ///
   /// Returns all [cards] that contains in the persistent storage.
   Set<Card> getCards() {
-    _checkInit();
+    checkInit();
 
     final Set<String> allStoredKey = _prefs.getKeys();
     final resultKeys = <Card>{
@@ -207,7 +209,7 @@ abstract class Cardoteka {
 
   /// Returns true if persistent storage the contains the given [card].
   Future<bool> containsCard(Card card) async {
-    _checkInit();
+    checkInit();
 
     return _prefs.containsKey(_keyForSP(card));
   }
@@ -245,13 +247,20 @@ abstract class Cardoteka {
   ///
   /// Returns all stored entities from the persistent storage.
   Map<Card, Object> getStoredEntries() {
-    _checkInit();
+    checkInit();
 
     return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
   }
 
-  void _checkInit() =>
-      checkInit(_isInitialized, _config.name, runtimeType.toString());
+  @internal
+  @visibleForTesting
+  void checkInit() {
+    assert(
+      isInitialized,
+      'The storage [${_config.name}] was not initialized! '
+      'Need to call `await $runtimeType.init()`',
+    );
+  }
 }
 
 /// Get access to all the original methods of the [SharedPreferences] library.
@@ -259,7 +268,7 @@ abstract class Cardoteka {
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs {
-    _checkInit();
+    checkInit();
 
     return Cardoteka._prefs;
   }

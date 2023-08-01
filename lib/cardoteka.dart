@@ -8,6 +8,6 @@ library cardoteka;
 export 'src/card.dart';
 export 'src/config.dart';
 export 'src/converter.dart';
-export 'src/core.dart';
+export 'src/core.dart' show AccessToSP, Cardoteka;
 export 'src/mixin/crud_simulation.dart';
 export 'src/mixin/watcher_impl.dart';

@@ -205,12 +205,3 @@ bool isSimpleData(Card<Object?> card) {
 
   return card.type.isCorrectType(value);
 }
-
-// ignore: avoid_positional_boolean_parameters
-void checkInit(bool isInitialized, String nameStorage, String nameInstance) {
-  assert(
-    isInitialized,
-    'The storage `$nameStorage` was not initialized! '
-    'Need to call `await $nameInstance.init()`',
-  );
-}
