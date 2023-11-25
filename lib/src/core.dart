@@ -187,7 +187,6 @@ abstract class Cardoteka {
     checkInit();
 
     for (final card in cards) {
-      watcher?.notify(card, card.defaultValue);
       await remove(card);
     }
 
