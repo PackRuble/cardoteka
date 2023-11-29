@@ -122,12 +122,15 @@ abstract class Cardoteka {
   Future<bool?> setOrNull<T extends Object>(Card<T?> card, T? value) async {
     checkInit();
 
-    watcher?.notify<T>(card, value);
+    bool toNotify = true;
 
-    if (value == null /* && value is! T */) {
+    if (value == null) {
+      toNotify = false;
       await remove(card);
       return null;
     }
+
+    if (toNotify) watcher?.notify<T>(card, value);
 
     return _setValueToDb<T>(card, value);
   }
