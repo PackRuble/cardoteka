@@ -39,9 +39,33 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   /// - [Cardoteka.remove] or [Cardoteka.removeAll]
   /// the value is passed to the listener [callback].
   ///
-  /// If your listener can be deleted, pass [detacher], thereby freeing up
-  /// related resources. The necessity of this argument is due to the high degree
-  /// of forgetfulness of its instruction.
+  /// Pass [detacher] to remove the watcher when it becomes irrelevant.
+  /// The meaning of this functionality can be described as follows:
+  /// ```dart
+  /// class MyNotifier extends ValueNotifier {
+  ///   MyNotifier(super._value);
+  ///
+  ///   VoidCallback? _onDetach;
+  ///   void onDispose(void Function() cb) => _onDetach = cb;
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _onDetach?.call();
+  ///     super.dispose();
+  ///   }
+  /// }
+  ///
+  /// // then...
+  ///
+  /// final notifier = MyNotifier(0);
+  ///
+  /// cardoteka.attach(
+  ///   card,
+  ///   (value) => notifier.value = value,
+  ///   detacher: notifier.onDispose, // attention to this line
+  ///   fireImmediately: true,
+  /// );
+  /// ```
   ///
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
@@ -52,7 +76,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   V attach<V extends Object?>(
     Card<V> card,
     ValueCallback<V> callback, {
-    required Detacher? detacher,
+    required Detacher detacher,
     bool fireImmediately = false,
   }) {
     // we create a new callback based on an existing one because
@@ -63,7 +87,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
         _watchers.putIfAbsent(card, () => <ValueCallback>[]);
     callbacksByCard.add(newCallback);
 
-    detacher?.call(() {
+    detacher.call(() {
       callbacksByCard.remove(newCallback);
       if (callbacksByCard.isEmpty) {
         _watchers.remove(card);
