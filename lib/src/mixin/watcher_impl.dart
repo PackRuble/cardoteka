@@ -9,8 +9,9 @@ import '../watcher.dart';
 /// Signature for callbacks that report that a new value has been set in the storage.
 typedef ValueCallback<V extends Object?> = void Function(V value);
 
-/// Signature for callbacks that report that
-typedef Detacher = void Function(void Function());
+/// Signature informs that the onDetach function should be called when
+/// the listener is no longer needed. This will remove the linked resources.
+typedef Detacher = void Function(void Function() onDetach);
 
 /// Provides the ability to listen for new [Card] values when their value
 /// changes in storage.
@@ -82,6 +83,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   ///   fireImmediately: true,
   /// );
   /// ```
+  /// A repeated call to _onDetach is completely safe.
   ///
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
