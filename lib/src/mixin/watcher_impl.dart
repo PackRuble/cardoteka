@@ -46,10 +46,14 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
   ///
+  /// If [fireImmediately] is set to true, the passed callback will be executed
+  /// immediately.
+  ///
   V attach<V extends Object?>(
     Card<V> card,
     ValueCallback<V> callback, {
     required Detacher? detacher,
+    bool fireImmediately = false,
   }) {
     // we create a new callback based on an existing one because
     // type 'void Function(V)' can't be assigned
@@ -67,6 +71,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
     });
 
     final V value = getOrNull(card) ?? card.defaultValue;
+    if (fireImmediately) newCallback.call(value);
     return value;
   }
 }
