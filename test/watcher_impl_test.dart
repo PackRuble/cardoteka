@@ -140,8 +140,8 @@ Future<void> main() async {
             actionForResultInCallback,
             hasLength(counter),
             reason: getReason(
-              'All operations must trigger the callback!'
-              '${cardoteka.getWatchers()}',
+              'All operations must trigger the callback!\n'
+              'watchers: ${cardoteka.getWatchers()}',
               card,
             ),
           );
@@ -229,6 +229,75 @@ Future<void> main() async {
     );
 
     await testWith(
+      '$WatcherImpl.attach -> detacher: one card, many callbacks',
+      setUp: setUpAction,
+      tearDown: tearDownAction,
+      () async {
+        for (final card in cardoteka.cards) {
+          final detachers = <int, void Function()>{};
+          final count = 1 + Random().nextInt(10);
+
+          for (var i = 0; i < count; ++i) {
+            cardoteka.attach(card, (_) {}, detacher: (onDetach) {
+              detachers[i] = onDetach;
+            });
+          }
+
+          for (var i = 0; i < count; ++i) {
+            expect(
+              cardoteka.watchersDebug[card],
+              hasLength(count - i),
+              reason: getReason(
+                'The number of callbacks in [detachers] must match the number of attachments!\n'
+                'detachers: $detachers \n'
+                'watchers: ${cardoteka.getWatchers()}',
+                card,
+              ),
+            );
+
+            detachers[i]?.call();
+          }
+        }
+      },
+    );
+
+    await testWith(
+      '$WatcherImpl.attach -> detacher: many cards, many callbacks',
+      setUp: setUpAction,
+      tearDown: tearDownAction,
+      () async {
+        final detachers = <Card, List<void Function()>>{};
+        for (final card in cardoteka.cards) {
+          final count = 1 + Random().nextInt(10);
+
+          for (var i = 0; i < count; ++i) {
+            cardoteka.attach(card, (_) {}, detacher: (onDetach) {
+              detachers[card] ??= [];
+              detachers[card]!.add(onDetach);
+            });
+          }
+        }
+
+        for (final MapEntry(key:card, value:callbacks) in detachers.entries) {
+          for (final (index, cb) in callbacks.indexed) {
+            expect(
+              cardoteka.watchersDebug[card],
+              hasLength(callbacks.length - index),
+              reason: getReason(
+                'The number of callbacks in [detachers] must match the number of attachments!\n'
+                    'detachers: $detachers \n'
+                    'watchers: ${cardoteka.getWatchers()}',
+                card,
+              ),
+            );
+
+            cb.call();
+          }
+        }
+      },
+    );
+
+    await testWith(
       '$WatcherImpl.attach -> fireImmediately',
       setUp: setUpAction,
       tearDown: tearDownAction,
@@ -274,5 +343,4 @@ Future<void> main() async {
 }
 
 // todo:
-//   test('Detacher Functional Check', () async {});
 //   test('More than one listener per card', () async {});
