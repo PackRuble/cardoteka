@@ -6,12 +6,28 @@ import '../watcher.dart';
 
 // ignore_for_file: prefer_function_declarations_over_variables
 
-
+/// Signature for callbacks that report that a new value has been set in the storage.
 typedef ValueCallback<V extends Object?> = void Function(V value);
 
+/// Signature for callbacks that report that
 typedef Detacher = void Function(void Function());
 
-/// Provides methods to be able to listen for changes in the database.
+/// Provides the ability to listen for new [Card] values when their value
+/// changes in storage.
+///
+/// To use, simply mix this class to your [Cardoteka] instance:
+/// ```dart
+/// class MyCardoteka extends Cardoteka with WatcherImpl {...}
+///
+/// // and then...
+///
+/// final cardoteka = MyCardoteka(...);
+/// final actualValue = cardoteka.attach(
+///   card,
+///   (value) {...},
+///   detacher: (onDetach) {...},
+/// );
+/// ```
 mixin WatcherImpl on Cardoteka implements Watcher {
   @override
   Watcher get watcher => this;
@@ -71,7 +87,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   /// [Card.defaultValue] will be returned.
   ///
   /// If [fireImmediately] is set to true, the passed callback will be executed
-  /// immediately.
+  /// immediately with stored value from storage.
   ///
   V attach<V extends Object?>(
     Card<V> card,
@@ -99,6 +115,12 @@ mixin WatcherImpl on Cardoteka implements Watcher {
     return value;
   }
 }
+
+// todo:
+// [Allow mixins in "extends" clauses](https://github.com/dart-lang/language/issues/1942)
+// mixin WatcherImplDebug extends WatcherImpl {}
+// and then...
+// class CardotekaImpl extends Cardoteka with WatcherImplDebug {}
 
 @visibleForTesting
 @internal
