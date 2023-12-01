@@ -101,23 +101,33 @@ mixin WatcherImpl on Cardoteka implements Watcher {
 }
 
 @visibleForTesting
+@internal
 mixin WatcherImplDebug on WatcherImpl {
   @visibleForTesting
+  @internal
   Map<Card, List<ValueCallback>> get watchersDebug => _watchers;
 
   @visibleForTesting
-  void printAllWatchers() {
+  @internal
+  String getWatchers([bool console = false]) {
     final buffer = StringBuffer();
 
-    for (final entry in _watchers.entries) {
-      buffer.writeln('Key: ${entry.key}, Listeners: ${entry.value}');
+    if (watchersDebug.entries.isNotEmpty) {
+      for (final entry in watchersDebug.entries) {
+        buffer.writeln(
+            '-> for [${entry.key}] there are [${entry.value.length}] listeners');
+      }
+    } else {
+      buffer.writeln('There are no listeners.');
     }
 
-    if (buffer.isEmpty) buffer.writeln('There are no listeners.');
-
-    // ignore: avoid_print
-    print('''
+    if (console) {
+      // ignore: avoid_print
+      print('''
 All listeners are represented at the moment:
 $buffer''');
+    }
+
+    return buffer.toString();
   }
 }
