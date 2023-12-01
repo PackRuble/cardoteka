@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
 import 'package:cardoteka/src/extensions/data_type_ext.dart';
+import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'source/forest_key_store.dart';
@@ -54,7 +55,7 @@ Object? getTestValueBasedOnDefaultValue(Card<Object?> card) {
   return switch (card.type) {
     DataType.string => (defaultValue as String) + '_test',
     DataType.int => (defaultValue as int) * 2,
-    DataType.double => (defaultValue as double) + 0.1,
+    DataType.double => (defaultValue as double) + 1.11111,
     DataType.bool => !(defaultValue as bool),
     DataType.stringList => (defaultValue as List<String>) + ['_test'],
   };
@@ -62,7 +63,7 @@ Object? getTestValueBasedOnDefaultValue(Card<Object?> card) {
 
 String getReason(String message, Card card) => '''
 $message
-Broken on cards: $card
+Broken on card: $card
 ''';
 
 class CardotekaTest extends Cardoteka
@@ -155,7 +156,7 @@ Future<void> main() async {
       tearDown: tearDownAction,
       () async {
         for (final card in cardoteka.cards) {
-          final value = cardoteka.attach(card, (_) {}, detacher: null);
+          final value = cardoteka.attach(card, (_) {}, detacher: (_) {});
           expect(
             value,
             card.defaultValue,
@@ -191,7 +192,7 @@ Future<void> main() async {
             ),
           );
 
-          final value = cardoteka.attach(card, (_) {}, detacher: null);
+          final value = cardoteka.attach(card, (_) {}, detacher: (_) {});
           expect(
             value,
             testedValue,
@@ -212,7 +213,7 @@ Future<void> main() async {
         for (final card in cardoteka.cards) {
           final count = 1 + Random().nextInt(10);
           for (var i = 0; i < count; ++i) {
-            cardoteka.attach(card, (_) {}, detacher: null);
+            cardoteka.attach(card, (_) {}, detacher: (_) {});
           }
 
           expect(
@@ -226,10 +227,52 @@ Future<void> main() async {
         }
       },
     );
+
+    await testWith(
+      '$WatcherImpl.attach -> fireImmediately',
+      setUp: setUpAction,
+      tearDown: tearDownAction,
+      () async {
+        for (final card in cardoteka.cards) {
+          bool wasCalled = false;
+          cardoteka.attach(
+            card,
+            (_) => wasCalled = true,
+            detacher: (_) {},
+            fireImmediately: false,
+          );
+
+          expect(
+            wasCalled,
+            isFalse,
+            reason: getReason(
+              'when fireImmediately=false callback should NOT be called immediately!',
+              card,
+            ),
+          );
+
+          wasCalled = false;
+          cardoteka.attach(
+            card,
+            (_) => wasCalled = true,
+            detacher: (_) {},
+            fireImmediately: true,
+          );
+
+          expect(
+            wasCalled,
+            isTrue,
+            reason: getReason(
+              'when fireImmediately=true callback must be called immediately!',
+              card,
+            ),
+          );
+        }
+      },
+    );
   }
 }
 
 // todo:
 //   test('Detacher Functional Check', () async {});
 //   test('More than one listener per card', () async {});
-//   test('FireImmediately', () async {});
