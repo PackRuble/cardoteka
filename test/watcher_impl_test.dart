@@ -2,6 +2,8 @@
 
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
+import 'dart:math';
+
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
 import 'package:cardoteka/src/extensions/data_type_ext.dart';
@@ -87,14 +89,12 @@ Future<void> main() async {
   for (final config in cardsCollections) {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
-      print('setUp');
       cardoteka = CardotekaTest(config: config);
       cardoteka.setMockInitialValues({});
       await Cardoteka.init();
     }
 
     Future<void> tearDownAction() async {
-      print('tearDown');
       cardoteka.deInit();
     }
 
@@ -132,14 +132,15 @@ Future<void> main() async {
             ),
             detacher: (_) => detacher = _,
           );
-          cardoteka.printAllWatchers();
+
           await Future.wait(actionForResultInCallback.map((e) => e.$1.call()));
 
           expect(
             actionForResultInCallback,
             hasLength(counter),
             reason: getReason(
-              'All operations must trigger the callback',
+              'All operations must trigger the callback!'
+              '${cardoteka.getWatchers()}',
               card,
             ),
           );
@@ -180,6 +181,7 @@ Future<void> main() async {
             card,
             getTestValueBasedOnDefaultValue(card),
           );
+          // todo: this is a separate check when testing the cardoteka
           expect(
             isSuccess,
             isTrue,
@@ -201,11 +203,33 @@ Future<void> main() async {
         }
       },
     );
+
+    await testWith(
+      '$WatcherImpl.attach -> Registering several callbacks',
+      setUp: setUpAction,
+      tearDown: tearDownAction,
+      () async {
+        for (final card in cardoteka.cards) {
+          final count = 1 + Random().nextInt(10);
+          for (var i = 0; i < count; ++i) {
+            cardoteka.attach(card, (_) {}, detacher: null);
+          }
+
+          expect(
+            cardoteka.watchersDebug[card],
+            hasLength(count),
+            reason: getReason(
+              'The number of callbacks must be equal to the number of attachments!',
+              card,
+            ),
+          );
+        }
+      },
+    );
   }
 }
 
 // todo:
-//   test('Registering several callbacks', () async {});
 //   test('Detacher Functional Check', () async {});
 //   test('More than one listener per card', () async {});
 //   test('FireImmediately', () async {});
