@@ -9,9 +9,11 @@ import 'converter.dart';
 import 'utils/core_check.dart' show checkConfiguration;
 import 'watcher.dart';
 
+// todo: all T replace V
+
 /// A handy wrapper for typed use [SharedPreferences].
 ///
-/// Todo: example for use
+/// todo: example for use
 abstract class Cardoteka {
   Cardoteka({
     required CardConfig config,
@@ -26,10 +28,9 @@ abstract class Cardoteka {
   List<Card> get cards => _config.cards;
 
   /// Configuration file containing important information about the [Card]s.
-  // todo: it is necessary to bring the name to a string without spaces in snake_case
-  //  though it probably doesn't have to be?
   final CardConfig _config;
 
+  // todo: comments
   static late SharedPreferences _prefs;
 
   /// Specify if listeners should be notified of new values in the persistence storage.
@@ -82,6 +83,7 @@ abstract class Cardoteka {
   }
 
   /// Internal method to retrieve data from [SharedPreferences].
+  /// todo: rename _getValue? or _getValueFromSP?
   T? _getValueFromDb<T>(Card<T?> card) {
     final key = _keyForSP(card);
 
@@ -138,11 +140,10 @@ abstract class Cardoteka {
   /// Internal method to save data in [SharedPreferences].
   ///
   /// Returns true if the value was successfully saved.
+  /// todo: rename _setValue
   Future<bool> _setValueToDb<T extends Object>(Card<T?> card, T value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
-
     final key = _keyForSP(card);
-    // optimize: use a pre-made map?
     switch (card.type) {
       case DataType.bool:
         return _prefs.setBool(key, resultValue as bool);
@@ -159,8 +160,13 @@ abstract class Cardoteka {
 
   /// Get the converter for the [Card] card. Returns null if there is no converter.
   Converter? _getConverter(Card card) {
+    // todo: Even this one!
+    // return _config.converters?[card];
     final Map<Card, Converter>? converters = _config.converters;
+
     if (converters != null) {
+      // todo: I think that line is enough:
+      // return converters[card];
       if (converters.containsKey(card)) {
         return converters[card]!;
       }
@@ -188,6 +194,8 @@ abstract class Cardoteka {
   ///
   Future<bool> removeAll() async {
     checkInit();
+
+    // todo: to get back what "remove" will bring back. And put it together in a separate bool
 
     for (final card in cards) {
       await remove(card);
@@ -218,6 +226,8 @@ abstract class Cardoteka {
     return _prefs.containsKey(_keyForSP(card));
   }
 
+  // todo: rename
+  // todo: move to AccessToSP
   T _convertValueToDb<T extends Object>(Card<T?> card, Object value) {
     final Object result = _getConverter(card)?.to(value) ?? value;
 
@@ -235,10 +245,11 @@ abstract class Cardoteka {
     }
   }
 
+  /// todo: move to AccessToSP
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
   void setMockInitialValues(Map<Card<Object?>, Object> values) {
-    assert(checkConfiguration(_config));
+    assert(checkConfiguration(_config)); // todo: is that really necessary?
 
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
@@ -259,6 +270,7 @@ abstract class Cardoteka {
   @internal
   @visibleForTesting
   void checkInit() {
+    // todo: rename _assertCheckInit
     assert(
       isInitialized,
       'The storage [${_config.name}] was not initialized! '
@@ -277,9 +289,10 @@ mixin AccessToSP on Cardoteka {
     return Cardoteka._prefs;
   }
 
+  /// todo: add [allowList] after upgrading SP
   /// The original [SharedPreferences.setPrefix] method.
-  void setPrefix(String prefix, {Set<String>? allowList}) =>
-      SharedPreferences.setPrefix(prefix, allowList: allowList);
+  void setPrefix(String prefix, /*{Set<String>? allowList}*/) =>
+      SharedPreferences.setPrefix(prefix, /*allowList: allowList*/);
 
   /// The original [SharedPreferences.resetStatic] method.
   @visibleForTesting
