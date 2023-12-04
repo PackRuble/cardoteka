@@ -4,7 +4,7 @@ import 'package:cardoteka/cardoteka.dart';
 
 import 'models.dart';
 
-final allCards = [
+final allCardConfigs = [
   CardConfig(
     name: '$BarStoolParts',
     cards: BarStoolParts.values,
@@ -183,6 +183,7 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
     cardTimeComplexNull: TimeConverter(),
     cardModelComplex: ModelConverter(),
     cardModelComplexNull: ModelConverter(),
+    card2DList: List2DConverterStub(),
   };
 }
 

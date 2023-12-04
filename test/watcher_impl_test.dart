@@ -6,88 +6,19 @@ import 'dart:math';
 
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
-import 'package:cardoteka/src/extensions/data_type_ext.dart';
 import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'source/forest_key_store.dart';
-
-enum FishCard<T extends Object?> implements Card<T> {
-  perch<int>(DataType.int, 2023),
-  perchGhost<int?>(DataType.int, 2024),
-  perchGhostNull<int?>(DataType.int, null),
-  ;
-
-  const FishCard(this.type, this.defaultValue);
-
-  @override
-  final DataType type;
-
-  @override
-  final T defaultValue;
-
-  @override
-  String get key => name;
-}
-
-final cardsCollections = [
-  CardConfig(
-    name: '$FishCard',
-    cards: FishCard.values,
-  ),
-  CardConfig(
-    name: '$ForestCard',
-    cards: ForestCard.values,
-    converters: ForestCard.converters,
-  ),
-];
-
-bool isPrimitiveValue(Card card, {required bool elseNull}) {
-  final Object? defaultValue = card.defaultValue;
-  if (defaultValue == null) return elseNull;
-
-  return card.type.isCorrectType(defaultValue);
-}
-
-Object? getTestValueBasedOnDefaultValue(Card<Object?> card) {
-  final Object? defaultValue = card.defaultValue;
-  if (defaultValue == null) return null;
-  return switch (card.type) {
-    DataType.string => (defaultValue as String) + '_test',
-    DataType.int => (defaultValue as int) * 2,
-    DataType.double => (defaultValue as double) + 1.11111,
-    DataType.bool => !(defaultValue as bool),
-    DataType.stringList => (defaultValue as List<String>) + ['_test'],
-  };
-}
-
-String getReason(String message, Card card) => '''
-$message
-Broken on card: $card
-''';
+import 'source/cards.dart';
+import 'utils/test_tools.dart';
 
 class CardotekaTest extends Cardoteka
     with WatcherImpl, WatcherImplDebug, CardotekaUtilsForTest, AccessToSP {
   CardotekaTest({required super.config});
 }
 
-typedef AsyncCallback = Future<void> Function();
-
-Future<void> testWith(
-  Object description,
-  dynamic Function() body, {
-  dynamic Function()? setUp,
-  dynamic Function()? tearDown,
-}) async {
-  test(description, () async {
-    await setUp?.call();
-    await body.call();
-    await tearDown?.call();
-  });
-}
-
 Future<void> main() async {
-  for (final config in cardsCollections) {
+  for (final config in allCardConfigs) {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);
@@ -105,10 +36,10 @@ Future<void> main() async {
       tearDown: tearDownAction,
       () async {
         for (final card in cardoteka.cards) {
-          if (!isPrimitiveValue(card, elseNull: true)) continue;
+          if (!TekaTool.isPrimitiveValue(card, elseNull: true)) continue;
 
           final Object? defaultValue = card.defaultValue;
-          final Object? newValue = getTestValueBasedOnDefaultValue(card);
+          final Object? newValue = TekaTool.getTestValueBasedOnDefaultValue(card);
           final actionForResultInCallback =
               <(AsyncCallback action, Object? expectedValue)>[
             if (newValue != null)
@@ -125,7 +56,7 @@ Future<void> main() async {
             (cbValue) => expect(
               cbValue,
               actionForResultInCallback[counter++].$2,
-              reason: getReason(
+              reason: tekaReason(
                 'The callback should return a new value as soon as it changes in the store'
                 '$actionForResultInCallback, when count is $counter',
                 card,
@@ -139,7 +70,7 @@ Future<void> main() async {
           expect(
             actionForResultInCallback,
             hasLength(counter),
-            reason: getReason(
+            reason: tekaReason(
               'All operations must trigger the callback!\n'
               'watchers: ${cardoteka.getWatchers()}',
               card,
@@ -160,7 +91,7 @@ Future<void> main() async {
           expect(
             value,
             card.defaultValue,
-            reason: getReason(
+            reason: tekaReason(
               'Should always return to default value!',
               card,
             ),
@@ -175,18 +106,18 @@ Future<void> main() async {
       tearDown: tearDownAction,
       () async {
         for (final card in cardoteka.cards) {
-          if (!isPrimitiveValue(card, elseNull: false)) continue;
+          if (!TekaTool.isPrimitiveValue(card, elseNull: false)) continue;
 
-          final testedValue = getTestValueBasedOnDefaultValue(card);
+          final testedValue = TekaTool.getTestValueBasedOnDefaultValue(card);
           final isSuccess = await cardoteka.setOrNull(
             card,
-            getTestValueBasedOnDefaultValue(card),
+            TekaTool.getTestValueBasedOnDefaultValue(card),
           );
           // todo: this is a separate check when testing the cardoteka
           expect(
             isSuccess,
             isTrue,
-            reason: getReason(
+            reason: tekaReason(
               'The value must be saved in the storage',
               card,
             ),
@@ -196,7 +127,7 @@ Future<void> main() async {
           expect(
             value,
             testedValue,
-            reason: getReason(
+            reason: tekaReason(
               'Should return a value that is contained in the storage!',
               card,
             ),
@@ -219,7 +150,7 @@ Future<void> main() async {
           expect(
             cardoteka.watchersDebug[card],
             hasLength(count),
-            reason: getReason(
+            reason: tekaReason(
               'The number of callbacks must be equal to the number of attachments!',
               card,
             ),
@@ -247,7 +178,7 @@ Future<void> main() async {
             expect(
               cardoteka.watchersDebug[card],
               hasLength(count - i),
-              reason: getReason(
+              reason: tekaReason(
                 'The number of callbacks in [detachers] must match the number of attachments!\n'
                 'detachers: $detachers \n'
                 'watchers: ${cardoteka.getWatchers()}',
@@ -283,7 +214,7 @@ Future<void> main() async {
             expect(
               cardoteka.watchersDebug[card],
               hasLength(callbacks.length - index),
-              reason: getReason(
+              reason: tekaReason(
                 'The number of callbacks in [detachers] must match the number of attachments!\n'
                     'detachers: $detachers \n'
                     'watchers: ${cardoteka.getWatchers()}',
@@ -314,7 +245,7 @@ Future<void> main() async {
           expect(
             wasCalled,
             isFalse,
-            reason: getReason(
+            reason: tekaReason(
               'when fireImmediately=false callback should NOT be called immediately!',
               card,
             ),
@@ -331,7 +262,7 @@ Future<void> main() async {
           expect(
             wasCalled,
             isTrue,
-            reason: getReason(
+            reason: tekaReason(
               'when fireImmediately=true callback must be called immediately!',
               card,
             ),
@@ -341,6 +272,3 @@ Future<void> main() async {
     );
   }
 }
-
-// todo:
-//   test('More than one listener per card', () async {});
