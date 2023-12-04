@@ -73,12 +73,6 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
 
   @override
   String get key => name;
-
-  static CardConfig get config => const CardConfig(
-        name: 'PrimitiveTypeCards',
-        cards: PrimitiveTypeCards.values,
-        converters: {},
-      );
 }
 
 const primitiveCards = [
@@ -111,6 +105,24 @@ const complexCards = [
 ];
 
 void main() {
+  group('checkConfiguration()', () {
+    test('general test of all checks at once', () {
+      final config = CardConfig(
+        name: 'PrimitiveTypeCards',
+        cards: [...PrimitiveTypeCards.values]
+          ..remove(PrimitiveTypeCards.card2DList),
+        converters: const {
+          PrimitiveTypeCards.cardTimeComplexNull: TimeConverter(),
+          PrimitiveTypeCards.cardModelComplex: ModelConverter(),
+          PrimitiveTypeCards.cardModelComplexNull: ModelConverter(),
+        },
+      );
+
+      bool result = checkConfiguration(config);
+      expect(result, isTrue);
+    });
+  });
+
   group('checkProvidedDataType()', () {
     test('Primitive types: all types in $DataType', () {
       bool result = checkProvidedDataType(primitiveCards, null);
@@ -256,7 +268,7 @@ void main() {
               PrimitiveTypeCards.cardModelComplex: TimeConverter(),
             },
           );
-      expect(resultFunc(), throwsAssertionError);
+      expect(resultFunc, throwsAssertionError);
     });
   });
 }
