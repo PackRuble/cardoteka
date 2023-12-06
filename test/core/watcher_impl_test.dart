@@ -9,8 +9,8 @@ import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
 import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'source/cards.dart';
-import 'utils/test_tools.dart';
+import '../source/cards.dart';
+import '../utils/test_tools.dart';
 
 class CardotekaTest extends Cardoteka
     with WatcherImpl, WatcherImplDebug, CardotekaUtilsForTest, AccessToSP {

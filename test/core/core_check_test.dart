@@ -2,107 +2,11 @@
 
 import 'package:cardoteka/src/card.dart';
 import 'package:cardoteka/src/config.dart';
-import 'package:cardoteka/src/converter.dart';
 import 'package:cardoteka/src/utils/core_check.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class Model {
-  const Model();
-}
-
-class ModelConverter implements Converter<Model, String> {
-  const ModelConverter();
-
-  @override
-  Model from(_) => const Model();
-
-  @override
-  String to(_) => '';
-}
-
-class Time {
-  const Time(this.value);
-
-  final DateTime value;
-
-  factory Time.fromJson(Map<String, dynamic> json) =>
-      Time(DateTime.parse(json['value'] as String));
-
-  Map<String, dynamic> toJson() => {'value': value.toIso8601String()};
-}
-
-class TimeConverter implements Converter<Time, int> {
-  const TimeConverter();
-
-  @override
-  Time from(int data) => Time(DateTime.fromMillisecondsSinceEpoch(data));
-
-  @override
-  int to(Time object) => object.value.millisecondsSinceEpoch;
-}
-
-enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
-  cardBool<bool>(DataType.bool, true),
-  cardInt<int>(DataType.int, 0),
-  cardDouble<double>(DataType.double, 0.0),
-  cardString<String>(DataType.string, ''),
-
-  /// The type of list elements can only be [String].
-  cardStringListEmpty<List<String>>(DataType.stringList, []),
-  cardStringList<List<String>>(DataType.stringList, ['']),
-
-  /// Nullable cards
-  cardBoolNull<bool?>(DataType.bool, null),
-  cardBoolMayNull<bool?>(DataType.bool, true),
-  cardStringListNull<List<String>?>(DataType.stringList, null),
-  cardStringListMayNull<List<String>?>(DataType.stringList, ['']),
-
-  /// Complex [defaultValue] in cards
-  card2DList<List<List>>(DataType.string, [[], []]),
-  cardTimeComplexNull<Time?>(DataType.int, null),
-  cardModelComplex<Model>(DataType.string, Model()),
-  cardModelComplexNull<Model?>(DataType.string, null);
-
-  const PrimitiveTypeCards(this.type, this.defaultValue);
-
-  @override
-  final DataType type;
-
-  @override
-  final T defaultValue;
-
-  @override
-  String get key => name;
-}
-
-const primitiveCards = [
-  PrimitiveTypeCards.cardBool,
-  PrimitiveTypeCards.cardInt,
-  PrimitiveTypeCards.cardDouble,
-  PrimitiveTypeCards.cardString,
-  PrimitiveTypeCards.cardStringListEmpty,
-  PrimitiveTypeCards.cardStringList,
-];
-const primitiveNullableCards = [
-  PrimitiveTypeCards.cardBoolNull,
-  PrimitiveTypeCards.cardBoolMayNull,
-  PrimitiveTypeCards.cardStringListNull,
-  PrimitiveTypeCards.cardStringListMayNull,
-];
-
-const cardsWithDefaultValueIsNull = [
-  PrimitiveTypeCards.cardBoolNull,
-  PrimitiveTypeCards.cardStringListNull,
-  PrimitiveTypeCards.cardTimeComplexNull,
-  PrimitiveTypeCards.cardModelComplexNull,
-];
-
-const complexCards = [
-  PrimitiveTypeCards.card2DList,
-  PrimitiveTypeCards.cardTimeComplexNull,
-  PrimitiveTypeCards.cardModelComplex,
-  PrimitiveTypeCards.cardModelComplexNull,
-];
+import '../source/cards.dart';
+import '../source/models.dart';
 
 void main() {
   group('checkConfiguration()', () {
@@ -172,7 +76,7 @@ void main() {
   group('checkConverterForComplexObject()', () {
     test('default value is Null', () {
       bool Function() resultFunc = () => checkConverterForComplexObject(
-            cardsWithDefaultValueIsNull,
+            primitiveCardsWithDefaultValueIsNull,
             const {},
           );
 
@@ -207,7 +111,7 @@ void main() {
 
     test('no converter for complex object', () {
       bool Function() resultFunc = () => checkConverterForComplexObject(
-            [...complexCards],
+            [...primitiveComplexCards],
             null,
           );
 
