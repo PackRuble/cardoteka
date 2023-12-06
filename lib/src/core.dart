@@ -93,7 +93,7 @@ abstract class Cardoteka {
   ///
   /// The returned object is always non-nullable.
   V get<V extends Object>(Card<V> card) {
-    checkInit();
+    _assertCheckInit();
 
     return _getValueFromDb<V>(card) ?? card.defaultValue;
   }
@@ -102,7 +102,7 @@ abstract class Cardoteka {
   ///
   /// [Card.defaultValue] is not used in this case.
   V? getOrNull<V extends Object?>(Card<V?> card) {
-    checkInit();
+    _assertCheckInit();
 
     return _getValueFromDb<V>(card);
   }
@@ -135,7 +135,7 @@ abstract class Cardoteka {
   ///
   /// All [watcher]s will be notified.
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
-    checkInit();
+    _assertCheckInit();
 
     watcher?.notify<V>(card, value);
 
@@ -147,7 +147,7 @@ abstract class Cardoteka {
   ///
   /// All [watcher]s will be notified anyway.
   Future<bool?> setOrNull<V extends Object>(Card<V?> card, V? value) async {
-    checkInit();
+    _assertCheckInit();
 
     bool toNotify = true;
 
@@ -204,7 +204,7 @@ abstract class Cardoteka {
   ///
   /// If successful, it will return true.
   Future<bool> remove(Card card) async {
-    checkInit();
+    _assertCheckInit();
 
     watcher?.notify(card, card.defaultValue);
     return _prefs.remove(_keyForSP(card));
@@ -218,7 +218,7 @@ abstract class Cardoteka {
   /// Returns true if the operation was successful.
   ///
   Future<bool> removeAll() async {
-    checkInit();
+    _assertCheckInit();
 
     // todo: to get back what "remove" will bring back. And put it together in a separate bool
 
@@ -233,7 +233,7 @@ abstract class Cardoteka {
   ///
   /// Returns all [cards] that contains in the persistent storage.
   Set<Card> getCards() {
-    checkInit();
+    _assertCheckInit();
 
     final Set<String> allStoredKey = _prefs.getKeys();
     final resultKeys = <Card>{
@@ -246,7 +246,7 @@ abstract class Cardoteka {
 
   /// Returns true if persistent storage the contains the given [card].
   Future<bool> containsCard(Card card) async {
-    checkInit();
+    _assertCheckInit();
 
     return _prefs.containsKey(_keyForSP(card));
   }
@@ -287,15 +287,12 @@ abstract class Cardoteka {
   ///
   /// Returns all stored entities from the persistent storage.
   Map<Card, Object> getStoredEntries() {
-    checkInit();
+    _assertCheckInit();
 
     return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
   }
 
-  @internal
-  @visibleForTesting
-  void checkInit() {
-    // todo: rename _assertCheckInit
+  void _assertCheckInit() {
     assert(
       isInitialized,
       'The storage [${_config.name}] was not initialized! '
@@ -308,11 +305,7 @@ abstract class Cardoteka {
 ///
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
-  SharedPreferences get prefs {
-    checkInit();
-
-    return Cardoteka._prefs;
-  }
+  SharedPreferences get prefs => Cardoteka._prefs;
 
   /// todo: add [allowList] after upgrading SP
   /// The original [SharedPreferences.setPrefix] method.
@@ -344,4 +337,9 @@ mixin CardotekaUtilsForTest on Cardoteka {
   @visibleForTesting
   @internal
   void deInit() => Cardoteka._isInitialized = false;
+
+  @internal
+  @visibleForTesting
+  /// A way to access [_assertCheckInit] for testing.
+  void Function() get assertCheckInit => _assertCheckInit;
 }

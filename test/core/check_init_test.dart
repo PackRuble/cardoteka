@@ -35,22 +35,22 @@ void main() {
     cardoteka.deInit();
   });
 
-  group('checkInit()', () {
-    test("don't call initialization", () async {
-      void Function() resultFunc = () => cardoteka.checkInit();
+  group('$Cardoteka.assertCheckInit()', () {
+    test("throw when don't call initialization", () async {
+      void Function() resultFunc = () => cardoteka.assertCheckInit();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
 
-    test('call initialization', () async {
+    test('normal when call initialization', () async {
       await Cardoteka.init();
-      void Function() resultFunc = () => cardoteka.checkInit();
+      void Function() resultFunc = () => cardoteka.assertCheckInit();
       expect(resultFunc, returnsNormally);
       expect(cardoteka.isInitialized, true);
     });
   });
 
-  group('try call data-methods without initialization', () {
+  group('throw when try call data-methods without initialization', () {
     test('get', () async {
       void Function() resultFunc = () => cardoteka.get(card);
       expect(resultFunc, throwsAssertionError);
