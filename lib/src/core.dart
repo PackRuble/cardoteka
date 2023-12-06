@@ -202,18 +202,16 @@ abstract class Cardoteka {
   /// Iteratively removes all values associated with the provided [cards]
   /// from persistent storage.
   ///
-  /// Returns true if the operation was successful.
-  ///
+  /// Returns true only if the result was true for each card.
   Future<bool> removeAll() async {
     _assertCheckInit();
 
-    // todo: to get back what "remove" will bring back. And put it together in a separate bool
-
+    bool overallResult = true;
     for (final card in cards) {
-      await remove(card);
+      overallResult &= await remove(card);
     }
 
-    return true;
+    return overallResult;
   }
 
   /// Acts according to the [SharedPreferences.getKeys] method of the same name.
