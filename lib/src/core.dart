@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,7 +24,7 @@ abstract class Cardoteka {
         _config = config;
 
   /// List of keys [Card] for accessing the storage [SharedPreferences].
-  List<Card> get cards => _config.cards;
+  UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
 
   /// Configuration file containing important information about the [Card]s.
   final CardConfig _config;
