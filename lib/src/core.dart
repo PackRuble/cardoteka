@@ -137,7 +137,7 @@ abstract class Cardoteka {
   ///
   /// The [value] cannot be `null`. Use [setOrNull] when you want to simulate null.
   ///
-  /// All [watcher]s will be notified.
+  /// All [watcher]s will be notified anyway.
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     _assertCheckInit();
 
@@ -245,6 +245,14 @@ abstract class Cardoteka {
   /// Works similarly to the [AccessToSP.getEntries] method of the same name.
   Map<Card, Object> getStoredEntries() =>
       {for (final Card card in getCards()) card: _getValueFromSP(card)!};
+
+  /// The original [SharedPreferences.reload] method.
+  ///
+  /// Fetches the latest values from the host platform.
+  ///
+  /// Use this method to observe modifications that were made in native code
+  /// (without using the plugin) while the app is running.
+  Future<void> get reload => _prefs.reload();
 
   void _assertCheckInit() {
     assert(
