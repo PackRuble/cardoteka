@@ -73,15 +73,20 @@ abstract class Cardoteka {
   ///
   /// A subsequent call to [init] will not cause any action and will not throw
   /// an error.
+  ///
+  /// ```dart
+  /// await Cardoteka.init();
+  ///
+  /// // ...and then create instances and use all the features
+  /// final myCardoteka = MyCardoteka(...);
+  /// final result = myCardoteka.get(...);
+  /// ```
   static Future<void> init() async {
     if (!_isInitialized) {
       _prefs = await SharedPreferences.getInstance();
       _isInitialized = true;
     }
   }
-
-  // /// Get the key after [SharedPreferences].
-  // String _getKeyFromDb(String key) => key.split(_separatorKey)[1];
 
   /// Get the key to use it in the [SharedPreferences].
   String _keyForSP(Card card) => '${_config.name}.${card.key}';
@@ -95,7 +100,7 @@ abstract class Cardoteka {
   V get<V extends Object>(Card<V> card) {
     _assertCheckInit();
 
-    return _getValueFromDb<V>(card) ?? card.defaultValue;
+    return _getValueFromSP<V>(card) ?? card.defaultValue;
   }
 
   /// The return null will mean there is no value in the persistent storage.
@@ -104,12 +109,11 @@ abstract class Cardoteka {
   V? getOrNull<V extends Object?>(Card<V?> card) {
     _assertCheckInit();
 
-    return _getValueFromDb<V>(card);
+    return _getValueFromSP<V>(card);
   }
 
   /// Internal method to retrieve data from [SharedPreferences].
-  /// todo: rename _getValue? or _getValueFromSP?
-  V? _getValueFromDb<V>(Card<V?> card) {
+  V? _getValueFromSP<V>(Card<V?> card) {
     final key = _keyForSP(card);
 
     final Object? value;
@@ -139,7 +143,7 @@ abstract class Cardoteka {
 
     watcher?.notify<V>(card, value);
 
-    return _setValueToDb<V>(card, value);
+    return _setValueToSP<V>(card, value);
   }
 
   /// Save the new value in [SharedPreferences] using [card] if ([value] != null).
@@ -159,14 +163,13 @@ abstract class Cardoteka {
 
     if (toNotify) watcher?.notify<V>(card, value);
 
-    return _setValueToDb<V>(card, value);
+    return _setValueToSP<V>(card, value);
   }
 
   /// Internal method to save data in [SharedPreferences].
   ///
   /// Returns true if the value was successfully saved.
-  /// todo: rename _setValue
-  Future<bool> _setValueToDb<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
     final key = _keyForSP(card);
     switch (card.type) {
@@ -236,45 +239,13 @@ abstract class Cardoteka {
     return _prefs.containsKey(_keyForSP(card));
   }
 
-  // todo: rename
-  // todo: move to AccessToSP
-  V _convertValueToDb<V extends Object>(Card<V?> card, Object value) {
-    final Object result = _getConverter(card)?.to(value) ?? value;
-
-    switch (card.type) {
-      case DataType.bool:
-        return (result as bool) as V;
-      case DataType.int:
-        return (result as int) as V;
-      case DataType.double:
-        return (result as double) as V;
-      case DataType.string:
-        return (result as String) as V;
-      case DataType.stringList:
-        return ((result as List).cast<String>()) as V;
-    }
-  }
-
-  /// todo: move to AccessToSP
-  /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
-  @visibleForTesting
-  void setMockInitialValues(Map<Card<Object?>, Object> values) {
-    assert(checkConfiguration(_config)); // todo: is that really necessary?
-
-    // ignore: invalid_use_of_visible_for_testing_member
-    SharedPreferences.setMockInitialValues({
-      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
-        _keyForSP(entry.key): _convertValueToDb(entry.key, entry.value)
-    });
-  }
-
   /// Acts according to the [AccessToSP.getEntries] method of the same name.
   ///
   /// Returns all stored entities from the persistent storage.
   Map<Card, Object> getStoredEntries() {
     _assertCheckInit();
 
-    return {for (final Card card in getCards()) card: _getValueFromDb(card)!};
+    return {for (final Card card in getCards()) card: _getValueFromSP(card)!};
   }
 
   void _assertCheckInit() {
@@ -292,10 +263,15 @@ abstract class Cardoteka {
 mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs => Cardoteka._prefs;
 
-  /// todo: add [allowList] after upgrading SP
   /// The original [SharedPreferences.setPrefix] method.
-  void setPrefix(String prefix, /*{Set<String>? allowList}*/) =>
-      SharedPreferences.setPrefix(prefix, /*allowList: allowList*/);
+  void setPrefix(
+    String prefix,
+    // todo: add [allowList] after upgrading SP
+    /*{Set<String>? allowList}*/
+  ) =>
+      SharedPreferences.setPrefix(
+        prefix, /*allowList: allowList*/
+      );
 
   /// The original [SharedPreferences.resetStatic] method.
   @visibleForTesting
@@ -323,8 +299,35 @@ mixin CardotekaUtilsForTest on Cardoteka {
   @internal
   void deInit() => Cardoteka._isInitialized = false;
 
+  /// A way to access [_assertCheckInit] for testing.
   @internal
   @visibleForTesting
-  /// A way to access [_assertCheckInit] for testing.
   void Function() get assertCheckInit => _assertCheckInit;
+
+  V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
+    final Object result = _getConverter(card)?.to(value) ?? value;
+
+    switch (card.type) {
+      case DataType.bool:
+        return (result as bool) as V;
+      case DataType.int:
+        return (result as int) as V;
+      case DataType.double:
+        return (result as double) as V;
+      case DataType.string:
+        return (result as String) as V;
+      case DataType.stringList:
+        return ((result as List).cast<String>()) as V;
+    }
+  }
+
+  /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
+  @visibleForTesting
+  void setMockInitialValues(Map<Card<Object?>, Object> values) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    SharedPreferences.setMockInitialValues({
+      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
+        _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
+    });
+  }
 }
