@@ -189,10 +189,11 @@ abstract class Cardoteka {
   /// Get the converter for the [Card] card. Returns null if there is no converter.
   Converter? _getConverter(Card card) => _config.converters?[card];
 
-  /// Acts according to the [SharedPreferences.remove] method of the same name.
   /// Removes an entry by using [card] from persistent storage.
   ///
   /// If successful, it will return true.
+  ///
+  /// Works similarly to the [SharedPreferences.remove] method of the same name.
   Future<bool> remove(Card card) async {
     _assertCheckInit();
 
@@ -200,12 +201,12 @@ abstract class Cardoteka {
     return _prefs.remove(_keyForSP(card));
   }
 
-  /// Acts according to the [SharedPreferences.clear] method of the same name.
-  ///
   /// Iteratively removes all values associated with the provided [cards]
   /// from persistent storage.
   ///
   /// Returns true only if the result was true for each card.
+  ///
+  /// Works similarly to the [SharedPreferences.clear] method of the same name.
   Future<bool> removeAll() async {
     _assertCheckInit();
 
@@ -217,9 +218,9 @@ abstract class Cardoteka {
     return overallResult;
   }
 
-  /// Acts according to the [SharedPreferences.getKeys] method of the same name.
-  ///
   /// Returns all [cards] that contains in the persistent storage.
+  ///
+  /// Works similarly to the [SharedPreferences.getKeys] method of the same name.
   Set<Card> getCards() {
     _assertCheckInit();
 
@@ -239,14 +240,11 @@ abstract class Cardoteka {
     return _prefs.containsKey(_keyForSP(card));
   }
 
-  /// Acts according to the [AccessToSP.getEntries] method of the same name.
-  ///
   /// Returns all stored entities from the persistent storage.
-  Map<Card, Object> getStoredEntries() {
-    _assertCheckInit();
-
-    return {for (final Card card in getCards()) card: _getValueFromSP(card)!};
-  }
+  ///
+  /// Works similarly to the [AccessToSP.getEntries] method of the same name.
+  Map<Card, Object> getStoredEntries() =>
+      {for (final Card card in getCards()) card: _getValueFromSP(card)!};
 
   void _assertCheckInit() {
     assert(
@@ -273,18 +271,6 @@ mixin AccessToSP on Cardoteka {
         prefix, /*allowList: allowList*/
       );
 
-  /// The original [SharedPreferences.resetStatic] method.
-  @visibleForTesting
-  // ignore: invalid_use_of_visible_for_testing_member
-  void resetStatic() => SharedPreferences.resetStatic();
-
-  /// The original [SharedPreferences.getInstance] method.
-  ///
-  /// Useful in tests after call [SharedPreferences.setMockInitialValues].
-  @visibleForTesting
-  Future<void> reInit() async =>
-      Cardoteka._prefs = await SharedPreferences.getInstance();
-
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
       {for (final key in prefs.getKeys()) key: prefs.get(key)!};
@@ -304,6 +290,28 @@ mixin CardotekaUtilsForTest on Cardoteka {
   @visibleForTesting
   void Function() get assertCheckInit => _assertCheckInit;
 
+  /// The original [SharedPreferences.resetStatic] method.
+  @visibleForTesting
+  // ignore: invalid_use_of_visible_for_testing_member
+  void Function() get resetStatic => SharedPreferences.resetStatic;
+
+  /// The original [SharedPreferences.getInstance] method.
+  ///
+  /// Useful in tests after call [SharedPreferences.setMockInitialValues].
+  @visibleForTesting
+  Future<void> reInit() async =>
+      Cardoteka._prefs = await SharedPreferences.getInstance();
+
+  /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
+  @visibleForTesting
+  void setMockInitialValues(Map<Card<Object?>, Object> values) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    SharedPreferences.setMockInitialValues({
+      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
+        _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
+    });
+  }
+
   V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
     final Object result = _getConverter(card)?.to(value) ?? value;
 
@@ -319,15 +327,5 @@ mixin CardotekaUtilsForTest on Cardoteka {
       case DataType.stringList:
         return ((result as List).cast<String>()) as V;
     }
-  }
-
-  /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
-  @visibleForTesting
-  void setMockInitialValues(Map<Card<Object?>, Object> values) {
-    // ignore: invalid_use_of_visible_for_testing_member
-    SharedPreferences.setMockInitialValues({
-      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
-        _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
-    });
   }
 }
