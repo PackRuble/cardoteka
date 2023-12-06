@@ -9,8 +9,6 @@ import 'converter.dart';
 import 'utils/core_check.dart' show checkConfiguration;
 import 'watcher.dart';
 
-// todo: all T replace V
-
 /// A handy wrapper for typed use [SharedPreferences].
 ///
 /// todo: example for use
@@ -67,24 +65,24 @@ abstract class Cardoteka {
   /// a record with the provided key, then `defaultValue` will be returned.
   ///
   /// The returned object is always non-nullable.
-  T get<T extends Object>(Card<T> card) {
+  V get<V extends Object>(Card<V> card) {
     checkInit();
 
-    return _getValueFromDb<T>(card) ?? card.defaultValue;
+    return _getValueFromDb<V>(card) ?? card.defaultValue;
   }
 
   /// The return null will mean there is no value in the persistent storage.
   ///
   /// [Card.defaultValue] is not used in this case.
-  T? getOrNull<T extends Object?>(Card<T?> card) {
+  V? getOrNull<V extends Object?>(Card<V?> card) {
     checkInit();
 
-    return _getValueFromDb<T>(card);
+    return _getValueFromDb<V>(card);
   }
 
   /// Internal method to retrieve data from [SharedPreferences].
   /// todo: rename _getValue? or _getValueFromSP?
-  T? _getValueFromDb<T>(Card<T?> card) {
+  V? _getValueFromDb<V>(Card<V?> card) {
     final key = _keyForSP(card);
 
     final Object? value;
@@ -97,9 +95,9 @@ abstract class Cardoteka {
 
     if (value == null) {
       // value was not in the storage
-      return value as T?;
+      return value as V?;
     } else {
-      return (_getConverter(card)?.from(value) ?? value) as T?;
+      return (_getConverter(card)?.from(value) ?? value) as V?;
     }
   }
 
@@ -109,19 +107,19 @@ abstract class Cardoteka {
   /// The [value] cannot be `null`. Use [setOrNull] when you want to simulate null.
   ///
   /// All [watcher]s will be notified.
-  Future<bool> set<T extends Object>(Card<T?> card, T value) async {
+  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     checkInit();
 
-    watcher?.notify<T>(card, value);
+    watcher?.notify<V>(card, value);
 
-    return _setValueToDb<T>(card, value);
+    return _setValueToDb<V>(card, value);
   }
 
   /// Save the new value in [SharedPreferences] using [card] if ([value] != null).
   /// Otherwise the value will be deleted from the database to simulate null.
   ///
   /// All [watcher]s will be notified anyway.
-  Future<bool?> setOrNull<T extends Object>(Card<T?> card, T? value) async {
+  Future<bool?> setOrNull<V extends Object>(Card<V?> card, V? value) async {
     checkInit();
 
     bool toNotify = true;
@@ -132,16 +130,16 @@ abstract class Cardoteka {
       return null;
     }
 
-    if (toNotify) watcher?.notify<T>(card, value);
+    if (toNotify) watcher?.notify<V>(card, value);
 
-    return _setValueToDb<T>(card, value);
+    return _setValueToDb<V>(card, value);
   }
 
   /// Internal method to save data in [SharedPreferences].
   ///
   /// Returns true if the value was successfully saved.
   /// todo: rename _setValue
-  Future<bool> _setValueToDb<T extends Object>(Card<T?> card, T value) async {
+  Future<bool> _setValueToDb<V extends Object>(Card<V?> card, V value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
     final key = _keyForSP(card);
     switch (card.type) {
@@ -228,20 +226,20 @@ abstract class Cardoteka {
 
   // todo: rename
   // todo: move to AccessToSP
-  T _convertValueToDb<T extends Object>(Card<T?> card, Object value) {
+  V _convertValueToDb<V extends Object>(Card<V?> card, Object value) {
     final Object result = _getConverter(card)?.to(value) ?? value;
 
     switch (card.type) {
       case DataType.bool:
-        return (result as bool) as T;
+        return (result as bool) as V;
       case DataType.int:
-        return (result as int) as T;
+        return (result as int) as V;
       case DataType.double:
-        return (result as double) as T;
+        return (result as double) as V;
       case DataType.string:
-        return (result as String) as T;
+        return (result as String) as V;
       case DataType.stringList:
-        return ((result as List).cast<String>()) as T;
+        return ((result as List).cast<String>()) as V;
     }
   }
 
