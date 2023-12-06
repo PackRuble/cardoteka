@@ -184,20 +184,7 @@ abstract class Cardoteka {
   }
 
   /// Get the converter for the [Card] card. Returns null if there is no converter.
-  Converter? _getConverter(Card card) {
-    // todo: Even this one!
-    // return _config.converters?[card];
-    final Map<Card, Converter>? converters = _config.converters;
-
-    if (converters != null) {
-      // todo: I think that line is enough:
-      // return converters[card];
-      if (converters.containsKey(card)) {
-        return converters[card]!;
-      }
-    }
-    return null;
-  }
+  Converter? _getConverter(Card card) => _config.converters?[card];
 
   /// Acts according to the [SharedPreferences.remove] method of the same name.
   /// Removes an entry by using [card] from persistent storage.
