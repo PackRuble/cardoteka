@@ -29,7 +29,28 @@ abstract class Cardoteka {
   /// Configuration file containing important information about the [Card]s.
   final CardConfig _config;
 
-  // todo: comments
+  /// A reference to an instance of [SharedPreferences] from the package
+  /// [shared_preferences](https://pub.dev/packages/shared_preferences)
+  ///
+  /// Initialization of this variable occurs after calling [init] and
+  /// waiting for it.
+  ///
+  /// If you need to access this instance, use the [AccessToSP] mixin.
+  /// The purposes of this action may be different, for example, using dynamic
+  /// keys:
+  /// ```dart
+  /// // use AccessToSP mixin
+  /// class MyCardoteka extends Cardoteka with AccessToSP {...}
+  ///
+  /// // ...
+  /// MyCardoteka cardoteka;
+  /// // ... and after init
+  /// cardoteka.prefs.setInt('dynamic_key', 123);
+  /// cardoteka.prefs.getBool('isDark');
+  /// ```
+  ///
+  /// This can also be useful in cases of gradual migration or quick testing
+  /// of some hypotheses.
   static late SharedPreferences _prefs;
 
   /// Specify if listeners should be notified of new values in the persistence storage.
@@ -47,6 +68,11 @@ abstract class Cardoteka {
   static bool _isInitialized = false;
 
   /// Initialization [Cardoteka]. It is necessary to wait for completion.
+  /// Regardless of the number of Cardoteka instances, initialization must be
+  /// performed once.
+  ///
+  /// A subsequent call to [init] will not cause any action and will not throw
+  /// an error.
   static Future<void> init() async {
     if (!_isInitialized) {
       _prefs = await SharedPreferences.getInstance();
