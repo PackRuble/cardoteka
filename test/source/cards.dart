@@ -4,6 +4,12 @@ import 'package:cardoteka/cardoteka.dart';
 
 import 'models.dart';
 
+mixin AdditionalTestValue<T> {
+  abstract final T testValue;
+}
+
+abstract class CardTest<T> = Card<T> with AdditionalTestValue<T>;
+
 final allCardConfigs = [
   CardConfig(
     name: '$BarStoolParts',
@@ -188,46 +194,82 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
 }
 
 /// WCK - with custom key.
-enum ForestCard<T> implements Card<T> {
+enum ForestCard<T> implements CardTest<T> {
   /// Are there such trees in the forest?
-  keepAcacia<bool>(DataType.bool, true),
-  keepAcaciaWithNull<bool?>(DataType.bool, true),
-  keepAcaciaWCK<bool>(DataType.bool, true, 'keepAcaciaWCK_custom_key'),
+  keepAcacia<bool>(DataType.bool, true, false),
+  keepAcaciaWithNull<bool?>(DataType.bool, true, false),
+  keepAcaciaWithNullDefault<bool?>(DataType.bool, null, true),
+  keepAcaciaWCK<bool>(DataType.bool, true, false, 'keepAcaciaWCK_custom_key'),
 
   /// Age of trees in ForestStore.
-  ageBaobab<int>(DataType.int, 100),
-  ageBaobabWCK<int>(DataType.int, 150, 'ageBaobabWCK_custom_key'),
+  ageBaobab<int>(DataType.int, 100, 98),
+  ageBaobabWCK<int>(DataType.int, 150, 120, 'ageBaobabWCK_custom_key'),
 
   /// Average trunk diameter of birch trees in the forest in centimeters.
-  diameterTrunkBirch<double>(DataType.double, 55.7),
+  diameterTrunkBirch<double>(DataType.double, 55.7, 60.1111),
   diameterTrunkBirchWCK<double>(
-      DataType.double, 64.984, 'diameterTrunkBirchWCK_custom_key'),
+      DataType.double, 64.984, 44.02, 'diameterTrunkBirchWCK_custom_key'),
 
   /// The habitat of the oak tree.
-  habitatOak<String>(DataType.string,
-      'Northern Hemisphere regions with temperate, subtropical and tropical climates.'),
-  habitatOakWCK<String>(DataType.string, 'Northern Hemisphere regions',
-      'habitatOakWCK_custom_key'),
+  habitatOak<String>(
+    DataType.string,
+    'Northern Hemisphere regions with temperate, subtropical and tropical climates.',
+    'tested: unknown location for habitatOak',
+  ),
+  habitatOakWCK<String>(
+    DataType.string,
+    'Northern Hemisphere regions',
+    'tested: unknown location for habitatOakWCK',
+    'habitatOakWCK_custom_key',
+  ),
 
   /// Some other names for the tree are "linden".
-  namesLinden<List<String>>(DataType.stringList, ['linden', 'lime tree']),
+  namesLinden<List<String>>(
+    DataType.stringList,
+    ['linden', 'lime tree'],
+    ['tree'],
+  ),
   namesLindenWCK<List<String>>(
-      DataType.stringList, [], 'namesLindenWCK_custom_key'),
+    DataType.stringList,
+    [],
+    ['tree', 'tree_new', 'tree_meow'],
+    'namesLindenWCK_custom_key',
+  ),
 
   /// The current color of spruce needles.
-  currentColorSpruce<Color>(DataType.int, Color(0xFF00BFFD)),
+  currentColorSpruce<Color>(
+    DataType.int,
+    Color(0xFF00BFFD),
+    Color(0xFF9855FD),
+  ),
   currentColorSpruceWCK<Color>(
-      DataType.int, Color(0xFF37AB00), 'currentColorSpruceWCK_custom_key'),
-  mySleepDuration<Duration>(DataType.int, Duration(hours: 7)),
+    DataType.int,
+    Color(0xFF37AB00),
+    Color(0xFFAB0000),
+    'currentColorSpruceWCK_custom_key',
+  ),
+  lifetimeCedar<Duration>(
+    DataType.int,
+    Duration(days: 500 * 365),
+    Duration(days: 499 * 365),
+  ),
   ;
 
-  const ForestCard(this.type, this.defaultValue, [this._customKey]);
+  const ForestCard(
+    this.type,
+    this.defaultValue,
+    this.testValue, [
+    this._customKey,
+  ]);
 
   @override
   final DataType type;
 
   @override
   final T defaultValue;
+
+  @override
+  final T testValue;
 
   final String? _customKey;
 
@@ -237,6 +279,6 @@ enum ForestCard<T> implements Card<T> {
   static const converters = {
     currentColorSpruce: Converters.colorAsInt,
     currentColorSpruceWCK: Converters.colorAsInt,
-    mySleepDuration: Converters.durationAsInt,
+    lifetimeCedar: Converters.durationAsInt,
   };
 }
