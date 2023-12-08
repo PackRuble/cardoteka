@@ -23,7 +23,7 @@ void main() {
       cardoteka.deInit();
     }
 
-    group('config: $config', () {
+    group('$config', () {
       // ignore: discarded_futures
       testWith(
         '$Cardoteka.set-get-> saving and then retrieving the value',
@@ -169,7 +169,7 @@ void main() {
               expect(
                 testValue,
                 isNull,
-                reason: tekaReason('The stored value must also be null', card),
+                reason: tekaReason('The stored value must also be null!', card),
               );
             } else {
               expect(
@@ -185,6 +185,71 @@ void main() {
               testValue,
               reason: tekaReason(
                 'Should get the value that was saved earlier!',
+                card,
+              ),
+            );
+          }
+        },
+      );
+
+      // ignore: discarded_futures
+      testWith(
+        '$Cardoteka.containsCard--> setOrNull-containsCard-remove-containsCard',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          for (final card in cardoteka.cards) {
+            final testValue = TekaTool.getTestValueBasedOnDefaultValue(
+              card,
+              config.converters,
+            );
+
+            final isSuccess = await cardoteka.setOrNull(
+              card,
+              testValue,
+            );
+            bool isContains = await cardoteka.containsCard(card);
+
+            // means that [testValue] was null.
+            // Therefore, the value is deleted from the store.
+            if (isSuccess == null) {
+              expect(
+                testValue,
+                isNull,
+                reason: tekaReason('The stored value must also be null!', card),
+              );
+              expect(
+                isContains,
+                isFalse,
+                reason: tekaReason('The value should not be in storage!', card),
+              );
+              continue;
+            } else {
+              expect(
+                isSuccess,
+                isTrue,
+                reason: tekaReason('The value must be stored!', card),
+              );
+            }
+
+            expect(
+              isContains,
+              isTrue,
+              reason: tekaReason(
+                'The value must be contained after saving!',
+                card,
+              ),
+            );
+
+            final isSuccessRemove = await cardoteka.remove(card);
+            expect(isSuccessRemove, isTrue);
+
+            isContains = await cardoteka.containsCard(card);
+            expect(
+              isContains,
+              isFalse,
+              reason: tekaReason(
+                'The value has been removed from storage, so should be missing!',
                 card,
               ),
             );
