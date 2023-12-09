@@ -298,13 +298,110 @@ void main() {
         '$Cardoteka.isInitialized',
         setUp: setUpAction,
         tearDown: tearDownAction,
-            () {
+        () {
           final actualInitialize = cardoteka.isInitialized;
 
           expect(
             actualInitialize,
             isTrue,
             reason: 'The storage must be initialized!',
+          );
+        },
+      );
+
+      testWith(
+        '$Cardoteka.remove-> set-{getCards-remove}-getCards.isEmpty '
+        'Added value can be removed',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          final cards = [...config.cards]..shuffle();
+
+          final beenSavedCards = <Card>[];
+          for (final card in cards) {
+            if (TekaTool.isNonPrimitiveDefaultValue(card, ifNull: true)) {
+              continue;
+            }
+
+            final testValue = TekaTool.getTestValueBasedOnDefaultValue(
+              card,
+              config.converters,
+            );
+
+            beenSavedCards.add(card);
+            await cardoteka.set(card, testValue!);
+          }
+
+          final savedCards = cardoteka.getCards().toList();
+          for (final card in beenSavedCards) {
+            final resultRemove = await cardoteka.remove(card);
+            expect(
+              resultRemove,
+              isTrue,
+              reason: 'The result of removing must be true',
+            );
+
+            savedCards.remove(card);
+            final resultGetCards = cardoteka.getCards().toList();
+            expect(
+              resultGetCards,
+              unorderedEquals(savedCards),
+              reason: 'The remaining cards must match those in $savedCards',
+            );
+          }
+
+          final resultGetCards = cardoteka.getCards();
+          expect(
+            resultGetCards,
+            isEmpty,
+            reason: 'After deletion there should be no values in the storage!',
+          );
+        },
+      );
+
+      testWith(
+        '$Cardoteka.removeAll-> set-getCards-removeAll-getCards '
+        'Added values should be removed',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          final cards = [...config.cards]..shuffle();
+
+          final beenSavedCards = <Card>[];
+          for (final card in cards) {
+            if (TekaTool.isNonPrimitiveDefaultValue(card, ifNull: true)) {
+              continue;
+            }
+
+            final testValue = TekaTool.getTestValueBasedOnDefaultValue(
+              card,
+              config.converters,
+            );
+
+            beenSavedCards.add(card);
+            final resultSet = await cardoteka.set(card, testValue!);
+            expect(resultSet, isTrue, reason: tekaReason('set != false', card));
+          }
+
+          var resultGetCards = cardoteka.getCards().toList();
+          expect(
+            resultGetCards,
+            unorderedEquals(beenSavedCards),
+            reason: 'All saved cards should be in $resultGetCards!',
+          );
+
+          final resultRemoveAll = await cardoteka.removeAll();
+          expect(
+            resultRemoveAll,
+            isTrue,
+            reason: 'All saved cards should be removed!',
+          );
+
+          resultGetCards = cardoteka.getCards().toList();
+          expect(
+            resultGetCards,
+            isEmpty,
+            reason: 'After deletion there should be no values in the storage!',
           );
         },
       );
