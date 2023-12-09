@@ -1,5 +1,10 @@
+// ignore_for_file: discarded_futures
+
+import 'dart:collection' show UnmodifiableListView;
+
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
+import 'package:cardoteka/src/watcher.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,8 +28,23 @@ void main() {
       cardoteka.deInit();
     }
 
+    testWith(
+      '$Cardoteka.watcher--> watcher==null',
+      setUp: setUpAction,
+      tearDown: tearDownAction,
+      () {
+        final actualWatcher = cardoteka.watcher;
+
+        expect(
+          actualWatcher,
+          isNull,
+          reason:
+              'Watcher must be null when $CardotekaTest without mix $Watcher',
+        );
+      },
+    );
+
     group('$config', () {
-      // ignore: discarded_futures
       testWith(
         '$Cardoteka.set-get-> saving and then retrieving the value',
         setUp: setUpAction,
@@ -65,7 +85,6 @@ void main() {
         },
       );
 
-      // ignore: discarded_futures
       testWith(
         '$Cardoteka.set-getOrNull-> saving and then retrieving the value or null',
         setUp: setUpAction,
@@ -104,7 +123,6 @@ void main() {
         },
       );
 
-      // ignore: discarded_futures
       testWith(
         '$Cardoteka.setOrNull-get-> saving and then retrieving the value',
         setUp: setUpAction,
@@ -149,7 +167,6 @@ void main() {
         },
       );
 
-      // ignore: discarded_futures
       testWith(
         '$Cardoteka.setOrNull-getOrNull-> saving and then retrieving the value or null',
         setUp: setUpAction,
@@ -192,7 +209,6 @@ void main() {
         },
       );
 
-      // ignore: discarded_futures
       testWith(
         '$Cardoteka.containsCard--> setOrNull-containsCard-remove-containsCard',
         setUp: setUpAction,
@@ -254,6 +270,42 @@ void main() {
               ),
             );
           }
+        },
+      );
+
+      testWith(
+        '$Cardoteka.cards--> Taken from the configuration $CardConfig',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () {
+          final actualCards = cardoteka.cards;
+
+          expect(
+            actualCards,
+            equals(config.cards),
+            reason: 'Lists must contain identical cards!',
+          );
+
+          expect(
+            actualCards,
+            isA<UnmodifiableListView>(),
+            reason: 'The list must be of type $UnmodifiableListView',
+          );
+        },
+      );
+
+      testWith(
+        '$Cardoteka.isInitialized',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+            () {
+          final actualInitialize = cardoteka.isInitialized;
+
+          expect(
+            actualInitialize,
+            isTrue,
+            reason: 'The storage must be initialized!',
+          );
         },
       );
     });
