@@ -37,7 +37,9 @@ Future<void> main() async {
         tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
-            if (!TekaTool.isPrimitiveValue(card, elseNull: true)) continue;
+            if (TekaTool.isNonPrimitiveDefaultValue(card, ifNull: false)) {
+              continue;
+            }
 
             final Object? defaultValue = card.defaultValue;
             final Object? newValue =
@@ -64,7 +66,7 @@ Future<void> main() async {
                   card,
                 ),
               ),
-              detacher: (_) => detacher = _,
+              detacher: (onDetach) => detacher = onDetach,
             );
 
             await Future.wait(
@@ -109,21 +111,14 @@ Future<void> main() async {
         tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
-            if (!TekaTool.isPrimitiveValue(card, elseNull: false)) continue;
+            if (TekaTool.isNonPrimitiveDefaultValue(card, ifNull: false)) {
+              continue;
+            }
 
             final testedValue = TekaTool.getTestValueBasedOnDefaultValue(card);
-            final isSuccess = await cardoteka.setOrNull(
+            await cardoteka.setOrNull(
               card,
               TekaTool.getTestValueBasedOnDefaultValue(card),
-            );
-            // todo: this is a separate check when testing the cardoteka
-            expect(
-              isSuccess,
-              isTrue,
-              reason: tekaReason(
-                'The value must be saved in the storage',
-                card,
-              ),
             );
 
             final value = cardoteka.attach(card, (_) {}, detacher: (_) {});
