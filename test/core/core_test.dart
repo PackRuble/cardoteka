@@ -405,6 +405,47 @@ void main() {
           );
         },
       );
+
+      testWith(
+        '$Cardoteka.getStoredEntries-> set-getStoredEntries-removeAll-getStoredEntries '
+        'The entities received are equal to those that were stored',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          final cards = [...config.cards]..shuffle();
+
+          final beenSavedCards = <Card, Object>{};
+          for (final card in cards) {
+            if (TekaTool.isNonPrimitiveDefaultValue(card, ifNull: true)) {
+              continue;
+            }
+
+            final testValue = TekaTool.getTestValueBasedOnDefaultValue(
+              card,
+              config.converters,
+            );
+
+            beenSavedCards[card] = testValue!;
+            final resultSet = await cardoteka.set(card, testValue);
+            expect(resultSet, isTrue, reason: tekaReason('set != false', card));
+          }
+
+          var resultGetStoredEntries = cardoteka.getStoredEntries();
+          expect(
+            resultGetStoredEntries,
+            equals(beenSavedCards),
+            reason: 'All saved cards should be in $resultGetStoredEntries!',
+          );
+
+          await cardoteka.removeAll();
+          resultGetStoredEntries = cardoteka.getStoredEntries();
+          expect(
+            resultGetStoredEntries,
+            isEmpty,
+            reason: 'After deleting this $resultGetStoredEntries should be empty!',
+          );
+        },
+      );
     });
   }
 }
