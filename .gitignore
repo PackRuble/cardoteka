@@ -6,6 +6,7 @@
 
 # https://dart.dev/guides/libraries/private-files
 .dart_tool/
-/pubspec.lock
-/.flutter-plugins
-/.flutter-plugins-dependencies
+pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+build/

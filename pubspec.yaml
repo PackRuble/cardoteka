@@ -14,16 +14,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.0
-  meta: ^1.9.1
+  shared_preferences: ^2.1.1 # next release contains min dart SDK = 2.18
+
+  # A project that was created and uses flutter 3.0.0 has a flutter_test package that depends on meta 1.7.0
+  # Therefore, when upgrading the version of this package, you need to take this into account.
+  meta: ^1.7.0
 
 dev_dependencies:
 
   flutter_test:
     sdk: flutter
 
-  riverpod: ^2.3.6
-  lint: ^2.1.2
+  # These dependencies can be as up-to-date as the currently installed flutter version allows.
+  riverpod: ^2.4.9
+  lint: ^2.2.0
 
 screenshots:
   - description: 'Well met! I am pleased to present a type-safe wrap over SP'
