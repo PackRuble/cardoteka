@@ -10,10 +10,118 @@ import 'converter.dart';
 import 'utils/core_check.dart' show checkConfiguration;
 import 'watcher.dart';
 
-/// A handy wrapper for typed use [SharedPreferences].
+/// A wrapper over [SharedPreferences] and the core of the whole system [Cardoteka].
+/// Allows the use of typed [Card]'s to access storage.
 ///
-/// todo: example for use
+/// A typical use case looks like this:
+/// ```dart
+/// // one of the data types that we would like to store
+/// enum UserPage { home, search, favorites, settings }
+///
+/// // after that define the cards -> key:type-defaultValue-[staticKey]
+/// enum SettingsCards<T> implements Card<T> {
+///   homePage<UserPage>(DataType.string, UserPage.search),
+///   userColor<Color>(DataType.int, Color.fromARGB(255, 79, 199, 112)),
+///   lastLoginTime<DateTime?>(DataType.int, null, 'last_login_time_key'),
+///   themeDefault<String>(DataType.string, 'mustard'),
+///   themeMode<ThemeMode>(DataType.int, ThemeMode.dark),
+///   startPage<int>(DataType.int, 104),
+///   sessionDuration<Duration>(DataType.int, Duration(days: 1)),
+///   ;
+///
+///   const SettingsCards(this.type, this.defaultValue, [this.customKey]);
+///
+///   @override
+///   final DataType type;
+///
+///   @override
+///   final T defaultValue;
+///
+///   final String? customKey;
+///
+///   @override
+///   String get key => customKey ?? name;
+///
+///   static Map<SettingsCards, Converter> get converters => const {
+///         themeMode: EnumAsIntConverter(UserPage.values),
+///         lastLoginTime: Converters.dateTimeAsInt,
+///         homePage: EnumAsStringConverter(UserPage.values),
+///         sessionDuration: Converters.durationAsInt,
+///       };
+/// }
+///
+/// // then we define the class of our cardoteka
+/// class MyStorage extends Cardoteka {
+///   MyStorage({required super.config});
+/// }
+///
+/// // initialize and use
+/// main() async {
+///   await Cardoteka.init();
+///
+///   final cardoteka = SettingsCardoteka(
+///     config: CardConfig(
+///       name: 'SettingsCardoteka',
+///       cards: SettingsCards.values,
+///       converters: SettingsCards.converters,
+///     ),
+///   );
+///
+///   ThemeMode themeMode = cardoteka.get(SettingsCards.themeMode); // will return default value
+///   await cardoteka.set<ThemeMode>(SettingsCards.themeMode, ThemeMode.light);
+///   themeMode = cardoteka.get(SettingsCards.themeMode); // ThemeMode.light
+///
+///   DateTime? lastLoginTime = cardoteka.getOrNull(SettingsCards.lastLoginTime); // null
+///   await cardoteka.setOrNull<DateTime>(SettingsCards.lastLoginTime, DateTime.now());
+///   lastLoginTime = cardoteka.getOrNull(SettingsCards.lastLoginTime); // will return the saved time
+///
+///   cardoteka.getCards(); // {SettingsCards.themeMode, SettingsCards.lastLoginTime}
+///
+///   await cardoteka.remove(SettingsCards.userColor); // nothing will happen
+///   await cardoteka.remove(SettingsCards.lastLoginTime); // lastLoginTime removed from storage
+///   cardoteka.getStoredEntries(); // {SettingsCards.themeMode: ThemeMode.light}
+///
+///   await cardoteka.removeAll();
+///   cardoteka.getCards(); // {}
+/// }
+/// ```
+///
+/// To make it easier to understand what is happening, there is a “usage plan”:
+///
+/// 1. Define all values in [Card], using [Enum] to do so.
+///   - implement the [Card] interface and define all required fields
+///   - for each card, identify
+///     - name (will be used as key. It shouldn't change after),
+///     - <generic> for type designation for default value
+///     - type to which the value will be converted. Select the appropriate one
+///     from the [DataType] enumeration,
+///     - default value. It will be returned when using [Cardoteka.get],
+///     if there were no saves in the storage for this card previously.
+///   - converters if generic type does not match your [Card.type]
+///
+/// 2. Define a class extending from [Cardoteka]. Either pass the configuration
+/// directly to the super class, or use required parameters.
+/// At this stage you can also add the necessary [mixin]s to extend
+/// the functionality of your cardoteka:
+/// - [WatcherImpl] to implement listening for changes to values in your storage.
+/// Use your implementation if necessary, extending from [Watcher].
+/// - [AccessToSP] to access static fields [SharedPreferences] as well
+/// as the singleton itself [_prefs]. If you needed this, you probably already
+/// know what you're doing.
+/// - [CRUD] to use familiar basic CRUD operations (create, read, update, delete).
+/// This is nothing more than an imitation based on the [Cardoteka.get],
+/// [Cardoteka.set] and [Cardoteka.remove] methods.
+/// - [CardotekaUtilsForTest] for use during tests.
+///
+/// 3. Perform initialization (once) via [Cardoteka.init] and take advantage of
+/// all the features of your cardoteka! Save, read, delete, listen to your saved
+/// data using typed cards.
+///
+/// Don't worry! If you do something wrong, you will receive a detailed
+/// correction message in the console.
 abstract class Cardoteka {
+  /// Use this constructor to pass a configuration [CardConfig] and create
+  /// an instance of the [Cardoteka].
   Cardoteka({
     required CardConfig config,
   })  :
@@ -27,6 +135,12 @@ abstract class Cardoteka {
   UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
 
   /// Configuration file containing important information about the [Card]s.
+  /// - [CardConfig.name] is used to prefix the key in [SharedPreferences] for
+  /// each of the [Cardoteka] instances;
+  /// - [CardConfig.cards] list of all card keys for accessing the storage.
+  /// Access via [cards] if necessary.
+  /// - [CardConfig.converters] are used to convert a complex object to the base
+  /// types defined in the [DataType] enumeration.
   final CardConfig _config;
 
   /// A reference to an instance of [SharedPreferences] from the package
@@ -59,10 +173,10 @@ abstract class Cardoteka {
   @internal
   Watcher? get watcher => null;
 
-  /// Indicates whether the database is initialized. Use the [init] method to
+  /// Indicates whether the storage is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
   ///
-  /// If it returns true, you can start making queries.
+  /// If it returns true, you can start making and work with cardoteka instances.
   bool get isInitialized => _isInitialized;
 
   static bool _isInitialized = false;
@@ -88,24 +202,32 @@ abstract class Cardoteka {
     }
   }
 
-  /// Get the key to use it in the [SharedPreferences].
+  /// Get a [CardConfig.name]-based key from the [_config] and [Card.key] to use
+  /// in the [SharedPreferences] storage.
   String _keyForSP(Card card) => '${_config.name}.${card.key}';
 
-  /// Get value from [SharedPreferences] using key type [Card].
+  /// Get value from [SharedPreferences] storage using [Card]<[Object]>.
   ///
   /// The default behavior assumes that if [SharedPreferences] does not have
-  /// a record with the provided key, then `defaultValue` will be returned.
+  /// a record with the provided card, then `defaultValue` will be returned.
   ///
   /// The returned object is always non-nullable.
+  ///
+  /// If you need to return a null-value when there is no record in storage
+  ///   OR
+  /// your card is of nullable type [Card]<[Object?]>,
+  ///   then use the [getOrNull] method.
   V get<V extends Object>(Card<V> card) {
     _assertCheckInit();
 
     return _getValueFromSP<V>(card) ?? card.defaultValue;
   }
 
-  /// The return null will mean there is no value in the persistent storage.
+  /// Get value from [SharedPreferences] storage using [Card]<[Object?]>.
   ///
-  /// [Card.defaultValue] is not used in this case.
+  /// If the record was not in the storage, then null will be returned. If you
+  /// need to return a default value [Card.defaultValue] when there is no record
+  /// in storage, use the [get] method.
   V? getOrNull<V extends Object?>(Card<V?> card) {
     _assertCheckInit();
 
@@ -132,12 +254,20 @@ abstract class Cardoteka {
     }
   }
 
-  /// Save the new value in [SharedPreferences] using a key of type [Card].
-  /// NOTE: Always specify the generic type and do so according to [Card.type]
+  /// Save the new value in [SharedPreferences] using [Card].
   ///
-  /// The [value] cannot be `null`. Use [setOrNull] when you want to simulate null.
+  /// NOTE: Always specify a generic type and do so according to the type
+  /// of your [Card.defaultValue]. This will help prevent compilation errors
+  /// because without specifying a generic type, a type will be output
+  /// based on the [card] provided and the stored [value].
   ///
-  /// All [watcher]s will be notified anyway.
+  /// What you need to know:
+  /// - type of [card] and [value] must match.
+  /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
+  /// to simulate storing null.
+  /// - [watcher] will be notified anyway (if it is not null).
+  ///
+  /// If successful, it will return true.
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     _assertCheckInit();
 
@@ -146,11 +276,27 @@ abstract class Cardoteka {
     return _setValueToSP<V>(card, value);
   }
 
-  /// Save the new value in [SharedPreferences] using [card] if ([value] != null).
-  /// Otherwise the value will be deleted from the database to simulate null.
+  /// Store the new value in [SharedPreferences] using [Card], which can be
+  /// of nullable type for [Card.defaultValue]. This method allows you to simulate
+  /// saving of nullable values by saving or deleting them from storage. It means:
+  /// - if you set null for a given [card] then the value will be removed
+  /// from storage
+  /// - any other value will be saved as usual.
   ///
-  /// All [watcher]s will be notified anyway.
+  /// NOTE: Always specify a generic type and do so according to the type
+  /// of your [Card.defaultValue]. This will help prevent compilation errors
+  /// because without specifying a generic type, a type will be output
+  /// based on the [card] provided and the stored [value].
+  ///
   Future<bool?> setOrNull<V extends Object>(Card<V?> card, V? value) async {
+  /// What you need to know:
+  /// - type of [card] and [value] must match OR [value]=null.
+  /// - use the regular [set] method if you won't be working with nullable values.
+  /// - [watcher] will be notified anyway (if it is not null).
+  ///
+  /// If successful, it will return true:
+  /// - if [value]==null, then the value was successfully removed
+  /// - in any other case, the value was successfully saved
     _assertCheckInit();
 
     bool toNotify = true;
@@ -190,6 +336,7 @@ abstract class Cardoteka {
   Converter? _getConverter(Card card) => _config.converters?[card];
 
   /// Removes an entry by using [card] from persistent storage.
+  /// The [watcher] will be notified anyway (if it is not null).
   ///
   /// If successful, it will return true.
   ///
@@ -203,6 +350,8 @@ abstract class Cardoteka {
 
   /// Iteratively removes all values associated with the provided [cards]
   /// from persistent storage.
+  ///
+  /// The [watcher] will be notified anyway (if it is not null).
   ///
   /// Returns true only if the result was true for each card.
   ///
@@ -234,6 +383,8 @@ abstract class Cardoteka {
   }
 
   /// Returns true if persistent storage the contains the given [card].
+  ///
+  /// Works similarly to the [SharedPreferences.containsKey] method of the same name.
   Future<bool> containsCard(Card card) async {
     _assertCheckInit();
 
@@ -247,12 +398,7 @@ abstract class Cardoteka {
       {for (final Card card in getCards()) card: _getValueFromSP(card)!};
 
   /// The original [SharedPreferences.reload] method.
-  ///
-  /// Fetches the latest values from the host platform.
-  ///
-  /// Use this method to observe modifications that were made in native code
-  /// (without using the plugin) while the app is running.
-  Future<void> get reload => _prefs.reload();
+  Future<void> Function() get reload => _prefs.reload;
 
   void _assertCheckInit() {
     assert(
@@ -286,7 +432,6 @@ mixin AccessToSP on Cardoteka {
 
 /// Contains various utilities, mainly designed for testing.
 @visibleForTesting
-@internal
 mixin CardotekaUtilsForTest on Cardoteka {
   /// A way to reset the initialization state.
   @visibleForTesting
