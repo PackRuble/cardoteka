@@ -25,6 +25,10 @@ final allCardConfigs = [
     converters: PrimitiveTypeCards.converters,
   ),
   CardConfig(
+    name: '$SettingsCard',
+    cards: SettingsCard.values,
+  ),
+  CardConfig(
     name: '$ForestCard',
     cards: ForestCard.values,
     converters: ForestCard.converters,
@@ -191,6 +195,25 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
     cardModelComplexNull: ModelConverter(),
     card2DList: List2DConverterStub(),
   };
+}
+
+enum SettingsCard implements Card<Object> {
+  homeIndex(DataType.int, 1),
+  relativePathSettings(DataType.string, r'%MYDOCUMENTS%\app_settings\'),
+  aspectLayout(DataType.double, 0.32),
+  listCodes(DataType.stringList, ['error', '403', '2030']),
+  ;
+
+  const SettingsCard(this.type, this.defaultValue);
+
+  @override
+  final DataType type;
+
+  @override
+  final Object defaultValue;
+
+  @override
+  String get key => name;
 }
 
 /// WCK - with custom key.

@@ -39,7 +39,7 @@ class List2DConverterStub
     implements Converter<List<List<Object?>>, String> {
   const List2DConverterStub();
   @override
-  List<List<Object?>> from(_) => [];
+  List<List<Object?>> from(_) => [[], []];
 
   @override
   String to(_) => '123';
