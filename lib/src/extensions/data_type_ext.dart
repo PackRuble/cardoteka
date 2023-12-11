@@ -1,9 +1,13 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:meta/meta.dart';
 
 import '../card.dart';
 
+/// Extended functionality [DataType].
+@internal
 extension DataTypeExt on DataType {
   /// Get dart type.
+  @internal
   Type getDartType() {
     switch (this) {
       case DataType.bool:
@@ -23,6 +27,7 @@ extension DataTypeExt on DataType {
   ///
   /// Note(!): in the web, the [double] and [int] types can coincide. Read more here:
   /// https://dart.dev/guides/language/numbers
+  @internal
   bool isCorrectType<T extends Object>(T value) {
     if (kIsWeb &&
         (value is double || value is int) &&
@@ -42,37 +47,3 @@ extension DataTypeExt on DataType {
     }
   }
 }
-
-// () {
-// bool result;
-//
-// switch (this) {
-//   case DataType.bool:
-//     result = value is bool;
-//     break;
-//   case DataType.int:
-//   // some checks are based on "runtimeType", which may not be accurate on the web.
-//     if (kIsWeb) {
-//       result = value is num;
-//     } else {
-//       result = value is int;
-//     }
-//     break;
-//   case DataType.double:
-//   // some checks are based on "runtimeType", which may not be accurate on the web.
-//     if (kIsWeb) {
-//       result = value is num;
-//     } else {
-//       result = value is double;
-//     }
-//     break;
-//   case DataType.string:
-//     result = value is String;
-//     break;
-//   case DataType.stringList:
-//     result = value is List<String>;
-//     break;
-// }
-//
-// return result;
-// }

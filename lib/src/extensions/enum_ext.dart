@@ -1,5 +1,6 @@
+/// The extension helps to handle states when enum does not exist in the collection.
 extension EnumByNameOr<T extends Enum> on Iterable<T> {
-  /// Finds the enum value in this list with name [name].
+  /// Finds the enum value in this list with [EnumName.name].
   ///
   /// Goes through this collection looking for an enum with [name], as reported by [EnumName.name].
   /// Returns the first value with the given name. Such a value must be found.
@@ -16,6 +17,7 @@ extension EnumByNameOr<T extends Enum> on Iterable<T> {
     throw ArgumentError.value(name, "name", "No enum value with that name");
   }
 
+  /// Similar to the [byNameOr] method, but based on [Enum.index].
   T byIndexOr(int index, {T Function()? orElse}) {
     RangeError.checkNotNegative(index, "index");
     final iterator = this.iterator;

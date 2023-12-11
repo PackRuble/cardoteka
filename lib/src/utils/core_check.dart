@@ -6,6 +6,7 @@ import '../converter.dart';
 import '../extensions/data_type_ext.dart';
 
 /// This implementation allows \n characters to be used.
+@internal
 class AssertionErrorImpl extends AssertionError {
   AssertionErrorImpl(super.message);
 
@@ -17,6 +18,7 @@ class AssertionErrorImpl extends AssertionError {
 /// 1. Translate everything into custom errors.
 /// 2. Do separate class Assertion error (test-friendly)
 
+@internal
 typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
 
 /// Comprehensive verification of input data.
@@ -56,8 +58,8 @@ bool checkProvidedDataType<T>(
     if (!card.type.isCorrectType(value)) {
       throw AssertionErrorImpl('''
 The provided type [${card.type}] does not match the type of the [$card.defaultValue]:
-  Expected type: ${card.type.getDartType()}
-  Actual type: ${card.defaultValue.runtimeType}
+->Expected type: ${card.type.getDartType()}
+->Actual type: ${card.defaultValue.runtimeType}
 ''');
     }
   }
@@ -153,6 +155,7 @@ Check if the converter types for the card match.
 }
 
 /// The type for the [Card.key] field.
+@internal
 typedef Key = String;
 
 /// Check for duplicates [Card.key].

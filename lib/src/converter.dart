@@ -17,7 +17,7 @@ import 'dart:core'
         override;
 import 'dart:ui' show Color;
 
-import 'package:cardoteka/src/extensions/enum.dart';
+import 'package:cardoteka/src/extensions/enum_ext.dart';
 
 /// Use to transform a complex model for work to [Cardoteka].
 abstract class Converter<Element extends Object?, ElementJson extends Object> {
@@ -45,7 +45,7 @@ abstract class CollectionConverter<
   Collect from(CollectJson elements);
 
   @override
-  CollectJson to(Collect object);
+  CollectJson to(Collect objects);
 
   @override
   String toString() =>
@@ -103,7 +103,7 @@ extension EnumConverters on Converters {
   /// Warning! This is a [Enum.index]-dependent converter. This means that
   /// if your enumeration index changes (for example, if you move your
   /// enumeration value), the first item in the enumeration list will be returned.
-  static Converter<T, int> enumAsInt<T extends Enum>(List<T> enums) =>
+  static Converter<T, int> enumAsInt<T extends Enum>(List<T> /*todo Iterable?*/ enums) =>
       EnumAsIntConverter<T>(enums);
 }
 
@@ -241,13 +241,13 @@ abstract class IterableConverter<Element extends Object>
   const IterableConverter();
 
   @override
-  Element objFrom(String data);
+  Element objFrom(String element);
 
   @override
-  String objTo(Element obj);
+  String objTo(Element object);
 
   @override
-  Iterable<Element> from(List<String> data) => data.map((e) => objFrom(e));
+  Iterable<Element> from(List<String> elements) => elements.map((e) => objFrom(e));
 
   @override
   List<String> to(Iterable<Element> objects) =>
@@ -267,7 +267,7 @@ abstract class ListConverter<Element extends Object>
   Element objFrom(String element);
 
   @override
-  String objTo(Element obj);
+  String objTo(Element object);
 
   @override
   List<Element> from(List<String> elements) =>
@@ -290,7 +290,7 @@ abstract class MapConverter<K, V>
   MapEntry<K, V> objFrom(String element);
 
   @override
-  String objTo(MapEntry<K, V> obj);
+  String objTo(MapEntry<K, V> object);
 
   @override
   Map<K, V> from(List<String> elements) {
@@ -308,4 +308,4 @@ abstract class MapConverter<K, V>
 }
 
 /// todo: add converters
-/// - Records after upgrade dart >3.0.0
+/// - Records after upgrade dart >3.0.0 (unreason)

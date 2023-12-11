@@ -131,7 +131,7 @@ abstract class Cardoteka {
         assert(checkConfiguration(config)),
         _config = config;
 
-  /// List of keys [Card] for accessing the storage [SharedPreferences].
+  /// List of [Card]'s for accessing the storage [SharedPreferences].
   UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
 
   /// Configuration file containing important information about the [Card]s.
