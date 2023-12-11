@@ -288,7 +288,6 @@ abstract class Cardoteka {
   /// because without specifying a generic type, a type will be output
   /// based on the [card] provided and the stored [value].
   ///
-  Future<bool?> setOrNull<V extends Object>(Card<V?> card, V? value) async {
   /// What you need to know:
   /// - type of [card] and [value] must match OR [value]=null.
   /// - use the regular [set] method if you won't be working with nullable values.
@@ -297,14 +296,14 @@ abstract class Cardoteka {
   /// If successful, it will return true:
   /// - if [value]==null, then the value was successfully removed
   /// - in any other case, the value was successfully saved
+  Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) async {
     _assertCheckInit();
 
     bool toNotify = true;
 
     if (value == null) {
       toNotify = false;
-      await remove(card);
-      return null;
+      return remove(card);
     }
 
     if (toNotify) watcher?.notify<V>(card, value);

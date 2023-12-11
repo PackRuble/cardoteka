@@ -228,12 +228,7 @@ void main() {
 
             // means that [testValue] was null.
             // Therefore, the value is deleted from the store.
-            if (isSuccess == null) {
-              expect(
-                testValue,
-                isNull,
-                reason: tekaReason('The stored value must also be null!', card),
-              );
+            if (testValue == null) {
               expect(
                 isContains,
                 isFalse,
