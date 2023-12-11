@@ -18,25 +18,53 @@ enum DataType {
   stringList(),
 }
 
-/// Cards for using the [Cardoteka] service.
-/// (!) When creating cards, be sure to use a generic type that matches your value
-/// or the value of the conversion result [Converter.to].
+/// Cards for using the [Cardoteka] implementation.
 ///
-/// [type] -> type of data to be saved;
-/// [key] -> the [Cardoteka] service uses this key to access [SharedPreferences];
-/// [defaultValue] -> default value for this key (for type [V]).
+/// You may not specify a generic when implementing, in which case the type
+/// will be inferred automatically based on the specified [defaultValue].
+/// In general this works fine, however note that
+/// if [defaultValue]=null then the inferred type will be [dynamic].
 ///
+/// The card consists of:
+/// - [type] -> type of data to be saved;
+/// - [key] -> the cardoteka impl uses this key to access [SharedPreferences];
+/// - [defaultValue] -> default value for this key (for type [V]).
 ///
-/// It is assumed to be implemented with [dc.Enum] for key definition.
+/// It is assumed to be implemented with [dc.Enum] for key definition. Here's an
+/// uncomplicated example of simple data:
+/// ```dart
+/// enum SettingsCard implements Card<Object> {
+///   homeIndex(DataType.int, 1),
+///   relativePathSettings(DataType.string, r'%MYDOCUMENTS%\app_settings\'),
+///   aspectLayout(DataType.double, 0.32),
+///   listCodes(DataType.stringList, ['error', '403', '2030']),
+///   ;
+///
+///   const SettingsCard(this.type, this.defaultValue);
+///
+///   @override
+///   final DataType type;
+///
+///   @override
+///   final Object defaultValue;
+///
+///   @override
+///   String get key => name;
+/// }
+/// ```
+/// For each card you can use a generic type and converters as needed.
+///
 /// However, a regular `class` will also work.
 abstract class Card<V extends dc.Object?> {
-  /// Type of data to be saved.
+  /// Type of data to be saved. Select the one that matches either the type
+  /// of your [defaultValue] or the type after using the [Converter.to]
+  /// converter method.
   DataType get type;
 
-  /// The default value for this key [Card].
+  /// The default value for this [Card].
   V get defaultValue;
 
-  /// The key to access the value [defaultValue] in the [Cardoteka].
+  /// The key to access the value in the [SharedPreferences] store.
   dc.String get key;
 
   @dc.override
