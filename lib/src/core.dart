@@ -271,7 +271,7 @@ abstract class Cardoteka {
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     _assertCheckInit();
 
-    watcher?.notify<V>(card, value);
+    watcher?.notify<V?>(card, value);
 
     return _setValueToSP<V>(card, value);
   }
@@ -306,7 +306,7 @@ abstract class Cardoteka {
       return remove(card);
     }
 
-    if (toNotify) watcher?.notify<V>(card, value);
+    if (toNotify) watcher?.notify<V?>(card, value);
 
     return _setValueToSP<V>(card, value);
   }
@@ -343,7 +343,7 @@ abstract class Cardoteka {
   Future<bool> remove(Card card) async {
     _assertCheckInit();
 
-    watcher?.notify(card, card.defaultValue);
+    watcher?.notify(card, null);
     return _prefs.remove(_keyForSP(card));
   }
 

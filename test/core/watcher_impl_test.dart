@@ -66,6 +66,7 @@ Future<void> main() async {
                   card,
                 ),
               ),
+              onRemove: () => actionForResultInCallback[counter++].$2,
               detacher: (onDetach) => detacher = onDetach,
             );
 
@@ -228,21 +229,23 @@ Future<void> main() async {
       );
 
       testWith(
-        '$WatcherImpl.attach -> fireImmediately',
+        '$WatcherImpl.attach -> fireImmediately + onRemove',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
-            bool wasCalled = false;
+            bool callBackCall = false;
+            bool onRemoveCall = false;
             cardoteka.attach(
               card,
-              (_) => wasCalled = true,
+              (_) => callBackCall = true,
+              onRemove: () => onRemoveCall = true,
               detacher: (_) {},
               fireImmediately: false,
             );
 
             expect(
-              wasCalled,
+              callBackCall && onRemoveCall,
               isFalse,
               reason: tekaReason(
                 'when fireImmediately=false callback should NOT be called immediately!',
@@ -250,25 +253,40 @@ Future<void> main() async {
               ),
             );
 
-            wasCalled = false;
+            callBackCall = false;
+            onRemoveCall = false;
             cardoteka.attach(
               card,
-              (_) => wasCalled = true,
+              (_) => callBackCall = true,
+              onRemove: () => onRemoveCall = true,
               detacher: (_) {},
               fireImmediately: true,
             );
 
-            expect(
-              wasCalled,
-              isTrue,
-              reason: tekaReason(
-                'when fireImmediately=true callback must be called immediately!',
-                card,
-              ),
-            );
+            if (card.defaultValue == null) {
+              expect(
+                onRemoveCall,
+                isTrue,
+                reason: tekaReason(
+                  'when fireImmediately=true callback must be called immediately!',
+                  card,
+                ),
+              );
+            } else {
+              expect(
+                callBackCall,
+                isTrue,
+                reason: tekaReason(
+                  'when fireImmediately=true callback must be called immediately!',
+                  card,
+                ),
+              );
+            }
           }
         },
       );
+
+      // todo: cardoteka.remove + onRemove
     });
   }
 }

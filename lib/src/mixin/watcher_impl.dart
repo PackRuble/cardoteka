@@ -31,13 +31,14 @@ typedef Detacher = void Function(void Function() onDetach);
 /// ```
 mixin WatcherImpl on Cardoteka implements Watcher {
   @override
+  @internal
   Watcher get watcher => this;
 
   final _watchers = <Card, List<ValueCallback>>{};
 
   @override
   @internal
-  void notify<V extends Object>(Card<V?> card, V? value) {
+  void notify<V extends Object?>(Card<V> card, V value) {
     final List<ValueCallback<V?>>? callbacksByCard = _watchers[card];
 
     if (callbacksByCard != null) {
@@ -91,16 +92,22 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   /// If [fireImmediately] is set to true, the passed callback will be executed
   /// immediately with stored value from storage.
   ///
+  /// todo: docs for onRemove and info process when fireImmediately=true
+  ///
   V attach<V extends Object?>(
     Card<V> card,
     ValueCallback<V> callback, {
+    void Function()? onRemove,
     required Detacher detacher,
     bool fireImmediately = false,
   }) {
-    // we create a new callback based on an existing one because
-    // type 'void Function(V)' can't be assigned
-    //   to 'void Function(Object?)'
-    final newCallback = (Object? value) => callback(value as V);
+    final newCallback = (Object? value) => value == null
+        ? onRemove?.call()
+        // we create a new callback based on an existing one because
+        // type 'void Function(V)' can't be assigned
+        //   to 'void Function(Object?)'
+        : callback(value as V);
+
     final callbacksByCard =
         _watchers.putIfAbsent(card, () => <ValueCallback>[]);
     callbacksByCard.add(newCallback);
