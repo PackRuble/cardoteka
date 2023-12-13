@@ -48,14 +48,14 @@ mixin WatcherImpl on Cardoteka implements Watcher {
     }
   }
 
-  /// Attach a [ValueCallback] to your [Card]. A [callback] will be called
-  /// whenever the [card] value changes.
+  /// Attach a [ValueCallback] to your [Card]. The [callback] and [onRemove]
+  /// parameters will allow you to track changes to the value in the storage.
   ///
-  /// Use this method when you want to track changes in the value for [card].
-  /// As soon as you call:
-  /// - [Cardoteka.set] or [Cardoteka.setOrNull]
-  /// - [Cardoteka.remove] or [Cardoteka.removeAll]
-  /// the value is passed to the listener [callback].
+  /// The [callback] will be called whenever the [Cardoteka.set] or
+  /// [Cardoteka.setOrNull] methods are called.
+  ///
+  /// The [onRemove] will be called whenever the [Cardoteka.remove] or
+  /// [Cardoteka.removeAll] methods are called.
   ///
   /// Pass [detacher] to remove the watcher when it becomes irrelevant.
   /// The meaning of this functionality can be described as follows:
@@ -89,11 +89,10 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
   ///
-  /// If [fireImmediately] is set to true, the passed callback will be executed
-  /// immediately with stored value from storage.
-  ///
-  /// todo: docs for onRemove and info process when fireImmediately=true
-  ///
+  /// If [fireImmediately] is set to true, the passed [callback] will be executed
+  /// immediately with stored value from storage or defaultValue if the value
+  /// does not exist in storage. If the [Card.defaultValue] for the [Card]
+  /// was null, [onRemove] will be called instead of [callback].
   V attach<V extends Object?>(
     Card<V> card,
     ValueCallback<V> callback, {

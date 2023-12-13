@@ -229,7 +229,7 @@ Future<void> main() async {
       );
 
       testWith(
-        '$WatcherImpl.attach -> fireImmediately + onRemove',
+        '$WatcherImpl.attach -> fireImmediately=false + onRemove',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () async {
@@ -252,9 +252,18 @@ Future<void> main() async {
                 card,
               ),
             );
+          }
+        },
+      );
 
-            callBackCall = false;
-            onRemoveCall = false;
+      testWith(
+        '$WatcherImpl.attach -> fireImmediately=true + onRemove',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          for (final card in cardoteka.cards) {
+            bool callBackCall = false;
+            bool onRemoveCall = false;
             cardoteka.attach(
               card,
               (_) => callBackCall = true,
@@ -286,7 +295,68 @@ Future<void> main() async {
         },
       );
 
-      // todo: cardoteka.remove + onRemove
+      testWith(
+        '$WatcherImpl.attach -> $Cardoteka.setOrNull-remove-$WatcherImpl.onRemove',
+        setUp: setUpAction,
+        tearDown: tearDownAction,
+        () async {
+          for (final card in cardoteka.cards) {
+            bool callbackCall = false;
+            bool onRemoveCall = false;
+            cardoteka.attach(
+              card,
+              (_) => callbackCall = true,
+              onRemove: () => onRemoveCall = true,
+              detacher: (_) {},
+              fireImmediately: false,
+            );
+
+            final testedValue = TekaTool.getTestValueBasedOnDefaultValue(
+                card, config.converters);
+            await cardoteka.setOrNull(card, testedValue);
+            if (testedValue == null) {
+              expect(
+                onRemoveCall,
+                isTrue,
+                reason: tekaReason('onRemove should be called!', card),
+              );
+              expect(
+                callbackCall,
+                isFalse,
+                reason: tekaReason(
+                    "callbackCall should not have been called!", card),
+              );
+            } else {
+              expect(
+                onRemoveCall,
+                isFalse,
+                reason:
+                    tekaReason('onRemove should not have been called!', card),
+              );
+              expect(
+                callbackCall,
+                isTrue,
+                reason: tekaReason("callbackCall should be called!", card),
+              );
+            }
+
+            callbackCall = false;
+            onRemoveCall = false;
+            await cardoteka.remove(card);
+            expect(
+              onRemoveCall,
+              isTrue,
+              reason: tekaReason('onRemove should be called!', card),
+            );
+            expect(
+              callbackCall,
+              isFalse,
+              reason:
+                  tekaReason("callbackCall should not have been called!", card),
+            );
+          }
+        },
+      );
     });
   }
 }
