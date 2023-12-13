@@ -204,7 +204,7 @@ void main() {
             await cardoteka.create(card);
           }
 
-          final savedCards = cardoteka.getCards().toList();
+          final savedCards = cardoteka.getStoredCards().toList();
           for (final card in beenSavedCards) {
             final resultDelete = await cardoteka.delete(card);
             expect(
@@ -214,7 +214,7 @@ void main() {
             );
 
             savedCards.remove(card);
-            final resultGetCards = cardoteka.getCards().toList();
+            final resultGetCards = cardoteka.getStoredCards().toList();
             expect(
               resultGetCards,
               unorderedEquals(savedCards),
@@ -222,7 +222,7 @@ void main() {
             );
           }
 
-          final resultGetCards = cardoteka.getCards();
+          final resultGetCards = cardoteka.getStoredCards();
           expect(
             resultGetCards,
             isEmpty,

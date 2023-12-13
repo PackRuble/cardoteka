@@ -327,7 +327,7 @@ void main() {
             await cardoteka.set(card, testValue!);
           }
 
-          final savedCards = cardoteka.getCards().toList();
+          final savedCards = cardoteka.getStoredCards().toList();
           for (final card in beenSavedCards) {
             final resultRemove = await cardoteka.remove(card);
             expect(
@@ -337,7 +337,7 @@ void main() {
             );
 
             savedCards.remove(card);
-            final resultGetCards = cardoteka.getCards().toList();
+            final resultGetCards = cardoteka.getStoredCards().toList();
             expect(
               resultGetCards,
               unorderedEquals(savedCards),
@@ -345,7 +345,7 @@ void main() {
             );
           }
 
-          final resultGetCards = cardoteka.getCards();
+          final resultGetCards = cardoteka.getStoredCards();
           expect(
             resultGetCards,
             isEmpty,
@@ -378,7 +378,7 @@ void main() {
             expect(resultSet, isTrue, reason: tekaReason('set != false', card));
           }
 
-          var resultGetCards = cardoteka.getCards().toList();
+          var resultGetCards = cardoteka.getStoredCards().toList();
           expect(
             resultGetCards,
             unorderedEquals(beenSavedCards),
@@ -392,7 +392,7 @@ void main() {
             reason: 'All saved cards should be removed!',
           );
 
-          resultGetCards = cardoteka.getCards().toList();
+          resultGetCards = cardoteka.getStoredCards().toList();
           expect(
             resultGetCards,
             isEmpty,

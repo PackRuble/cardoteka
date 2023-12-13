@@ -125,7 +125,7 @@ abstract class Cardoteka {
   Cardoteka({
     required CardConfig config,
   })  :
-        // this behavior is not yet available for const classes
+        // todo: this behavior is not yet available for const classes
         // https://github.com/dart-lang/language/issues/2581
         //
         assert(checkConfiguration(config)),
@@ -369,7 +369,7 @@ abstract class Cardoteka {
   /// Returns all [cards] that contains in the persistent storage.
   ///
   /// Works similarly to the [SharedPreferences.getKeys] method of the same name.
-  Set<Card> getCards() {
+  Set<Card> getStoredCards() {
     _assertCheckInit();
 
     final Set<String> allStoredKey = _prefs.getKeys();
@@ -394,7 +394,7 @@ abstract class Cardoteka {
   ///
   /// Works similarly to the [AccessToSP.getEntries] method of the same name.
   Map<Card, Object> getStoredEntries() =>
-      {for (final Card card in getCards()) card: _getValueFromSP(card)!};
+      {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
 
   /// The original [SharedPreferences.reload] method.
   Future<void> Function() get reload => _prefs.reload;
