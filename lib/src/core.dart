@@ -397,7 +397,10 @@ abstract class Cardoteka {
       {for (final Card card in getCards()) card: _getValueFromSP(card)!};
 
   /// The original [SharedPreferences.reload] method.
-  Future<void> Function() get reload => _prefs.reload;
+  Future<void> reload() async {
+    await _prefs.reload();
+    watcher?.notifyAll();
+  }
 
   void _assertCheckInit() {
     assert(

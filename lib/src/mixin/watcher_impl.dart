@@ -48,6 +48,18 @@ mixin WatcherImpl on Cardoteka implements Watcher {
     }
   }
 
+  @override
+  @internal
+  void notifyAll() {
+    final Iterable<Card> allWatcherCards = _watchers.keys;
+
+    if (allWatcherCards.isNotEmpty) {
+      for (final card in allWatcherCards) {
+        notify(card, getOrNull(card));
+      }
+    }
+  }
+
   /// Attach a [ValueCallback] to your [Card]. The [callback] and [onRemove]
   /// parameters will allow you to track changes to the value in the storage.
   ///
