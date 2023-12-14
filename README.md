@@ -6,17 +6,113 @@
 In progress...
 
 <!-- TOC -->
-* [How to started?](#how-to-started)
-* [How to use with Riverpod?](#how-to-use-with-riverpod)
-* [How to implement key storage?](#how-to-implement-key-storage)
-    * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
-* [TODO](#todo)
-* [TODO implement](#todo-implement)
-* [Additional information](#additional-information)
-* [The structure of the library](#the-structure-of-the-library)
+  * [How to use?](#how-to-use)
+  * [How to use with Riverpod?](#how-to-use-with-riverpod)
+  * [How to implement key storage?](#how-to-implement-key-storage)
+      * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
+  * [TODO](#todo)
+  * [TODO implement](#todo-implement)
+  * [Additional information](#additional-information)
+  * [The structure of the library](#the-structure-of-the-library)
 <!-- TOC -->
 
-## How to started?
+## How to use?
+
+1. Define your cards: specify the type to be stored and the default value. Additionally, specify converters if the value type cannot be represented in the existing `DataType` enumeration:
+
+```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' hide Card;
+
+enum SettingsCards<T extends Object> implements Card<T> {
+   userColor(DataType.int, Color(0x00FF4BFF)),
+   themeMode(DataType.string, ThemeMode.light),
+   isPremium(DataType.bool, false),
+   ;
+
+   const SettingsCards(this.type, this.defaultValue);
+
+   @override
+   final DataType type;
+
+   @override
+   final T defaultValue;
+
+   @override
+   String get key => name;
+
+   static Map<SettingsCards, Converter> get converters => const {
+      themeMode: EnumAsStringConverter(ThemeMode.values),
+      userColor: Converters.colorAsInt,
+   };
+}
+
+```
+
+2. Define storage for cards and mix in functionality as you see fit:
+
+```dart
+class SettingsCardoteka extends Cardoteka with WatcherImpl {
+  SettingsCardoteka({required super.config});
+}
+```
+
+3. Perform initialization (once) via `Cardoteka.init` and take advantage of all the features of your cardoteka: save, read, delete, listen to your saved data using typed cards:
+
+```dart
+main() async {
+  await Cardoteka.init();
+  final cardoteka = SettingsCardoteka(
+    config: CardConfig(
+      name: 'settings',
+      cards: SettingsCards.values,
+      converters: SettingsCards.converters,
+    ),
+  );
+
+  final log = StringBuffer('All notifications for SettingsCards.themeMode:\n');
+  cardoteka.attach(
+    SettingsCards.themeMode,
+    (value) => log.writeln('-> $value'),
+    onRemove: () => log.writeln('-> has been removed from storage'),
+    detacher: (onDetach) {
+      // pass onDetach to whoever is responsible for the lifetime of the object
+    },
+  );
+
+  ThemeMode themeMode = cardoteka.get(SettingsCards.themeMode);
+  print(themeMode); // will return default value -> ThemeMode.light
+
+  await cardoteka.set(SettingsCards.themeMode, ThemeMode.dark); // first log
+  themeMode = cardoteka.get(SettingsCards.themeMode);
+  print(themeMode); // ThemeMode.dark
+
+  // you can use generic type to prevent possible errors when passing arguments
+  // of different types
+  await cardoteka.set<bool>(SettingsCards.isPremium, true);
+  await cardoteka.set<Color>(SettingsCards.userColor, Colors.deepOrange);
+
+  await cardoteka.remove(SettingsCards.themeMode); // second log
+  Map<Card<Object?>, Object> storedEntries = cardoteka.getStoredEntries();
+  print(storedEntries);
+  // {
+  //   SettingsCards.userColor: Color(0xffff5722),
+  //   SettingsCards.isPremium: true
+  // }
+
+  await cardoteka.removeAll(); // third log
+  storedEntries = cardoteka.getStoredEntries();
+  print(storedEntries); // {}
+
+  print(log); // All notifications for SettingsCards.themeMode:
+  // -> ThemeMode.dark
+  // -> has been removed from storage
+  // -> has been removed from storage
+}
+```
+
+**Don't worry!** If you do something wrong, you will receive a detailed
+correction message in the console.
 
 1. Identify the DB object with the necessary mixins (optional)
    ```dart
