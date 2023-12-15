@@ -115,14 +115,14 @@ main() async {
 
 ## Use with...
 
-All the most up-to-date examples can be found in the [example/lib](https://github.com/PackRuble/cardoteka/tree/dev/example) folder of this project. Here are just some simple practices to use with different tools.
+All the most up-to-date examples can be found in the [example/lib](https://github.com/PackRuble/cardoteka/tree/dev/example/lib) folder of this project. Here are just some simple practices to use with different tools.
 
 ### ChangeNotifier
 
-You will need a notifier (by the way, stop expanding on it. Use `with` instead of `extends`) and one helper method for assembling callbacks for later calling them when the notifier is disposed. For now, you can implement this yourself as a mixin:
+You will need a notifier (by the way, stop extending on it. Use `with` instead of `extends`) and one helper method for caching callbacks for later calling them when the notifier is disposed. For now, you can implement this yourself as a mixin:
 
 ```dart
-mixin CardotekaDetacher on ChangeNotifier {
+mixin NotifierDetacher on ChangeNotifier {
   List<VoidCallback>? _onDisposeCallbacks;
 
   void onDispose(void Function() cb) {
@@ -147,7 +147,7 @@ This feature "from the package" will be implemented later. Now you can take part
 Now you can define your notifier with the required number of states and then `attach` a wiretap (you can attach as many wiretaps to the card as you like):
 
 ```dart
-class OrderNotifier with ChangeNotifier, CardotekaDetacher {
+class OrderNotifier with ChangeNotifier, NotifierDetacher {
   final _orders = <String>[];
 
   void addOrder(String value) {
@@ -160,26 +160,27 @@ class OrderNotifier with ChangeNotifier, CardotekaDetacher {
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
 void main() {
-   // to do: initialize
-   CardotekaImpl? cardoteka;
-   Card<String>? lastOrderCard;
+  // ignore_for_file: definitely_unassigned_late_local_variable
+  // to do: initialize
+  late CardotekaImpl cardoteka;
+  late Card<String> lastOrderCard;
 
-   final notifier = OrderNotifier();
-   cardoteka!.attach(
-      lastOrderCard!,
-      notifier.addOrder,
-      detacher: notifier.onDispose,
-   );
+  final notifier = OrderNotifier();
+  cardoteka.attach(
+     lastOrderCard,
+     notifier.addOrder,
+     detacher: notifier.onDispose,
+  );
 
-   cardoteka.set(lastOrderCard, '#341');
-   // 1. a value was saved to storage
-   // 2. console-> New order: #341
+  cardoteka.set(lastOrderCard, '#341');
+  // 1. a value was saved to storage
+  // 2. console-> New order: #341
 }
 ```
 
 ### ValueNotifier
 
-Everything is very similar (and not surprising, heh) to the example with `ChangeNotifier`. However, let's implement this in a concrete class:
+Everything is very similar (and not surprising, heh) to the example with `ChangeNotifier`. But instead of using `NotifierDetacher` let's implement this in a concrete class:
 
 ```dart
 class CurrentTaskNotifier extends ValueNotifier {
@@ -197,19 +198,20 @@ class CurrentTaskNotifier extends ValueNotifier {
 }
 ```
 
-Now all the same ingredients, but let's also add the `fireImmediately` flag to get the actual value in our notifiers at once:
+Now all the same ingredients, but let's also add the `fireImmediately` flag to get the actual value in our notifier at once:
 
 ```dart
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
 void main() {
+  // ignore_for_file: definitely_unassigned_late_local_variable
   // to do: initialize
-  CardotekaImpl? cardoteka;
-  Card<String>? card; // with default value = 'nothing to do now'
+  late CardotekaImpl cardoteka;
+  late Card<String> card; // with default value = 'nothing to do now'
 
   final notifier = CurrentTaskNotifier('');
-  cardoteka!.attach(
-    card!,
+  cardoteka.attach(
+    card,
     (value) {
       notifier.value = value;
       print('New case: $value');
@@ -228,15 +230,15 @@ void main() {
 However, if you don't like throwing empty values (perhaps adhering to the "don't use magic constants" principle), then use this option (fully equivalent):
 
 ```dart
-  final notifier = CurrentTaskNotifier(card.defaultValue);
-  cardoteka.attach(
-    card,
-    (value) {
-      notifier.value = value;
-      print('New case: $value');
-    },
-    detacher: notifier.onDispose,
-  );
+final notifier = CurrentTaskNotifier(card.defaultValue);
+cardoteka.attach(
+  card,
+  (value) {
+    notifier.value = value;
+    print('New case: $value');
+  },
+  detacher: notifier.onDispose,
+);
 ```
 
 ## OLD Readme 

@@ -19,20 +19,22 @@ class CurrentTaskNotifier extends ValueNotifier {
 
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
+
+
 void main() {
+  // ignore_for_file: definitely_unassigned_late_local_variable
   // to do: initialize
-  CardotekaImpl? cardoteka;
-  Card<String>? card; // with default value = 'nothing to do now'
+  late CardotekaImpl cardoteka;
+  late Card<String> card; // with default value = 'nothing to do now'
 
   final notifier = CurrentTaskNotifier('');
-  cardoteka!.attach(
-    card!,
+  cardoteka.attach(
+    card,
     (value) {
       notifier.value = value;
       print('New case: $value');
     },
     detacher: notifier.onDispose, // attention to this line
-    fireImmediately: true, // callback will fire immediately
   );
 
   cardoteka.set(card, 'new case available!');

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide Card;
 /// Example of using [Cardoteka] and [WatcherImpl] mixin with [ChangeNotifier].
 
 /// Perhaps this mixin will be included in the package in one form or another...
-mixin CardotekaDetacher on ChangeNotifier {
+mixin NotifierDetacher on ChangeNotifier {
   List<VoidCallback>? _onDisposeCallbacks;
 
   void onDispose(void Function() cb) {
@@ -22,7 +22,7 @@ mixin CardotekaDetacher on ChangeNotifier {
 }
 
 /// A given notifier can have as many states as you like.
-class OrderNotifier with ChangeNotifier, CardotekaDetacher {
+class OrderNotifier with ChangeNotifier, NotifierDetacher {
   final _orders = <String>[];
 
   void addOrder(String value) {
@@ -35,13 +35,14 @@ class OrderNotifier with ChangeNotifier, CardotekaDetacher {
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
 void main() {
+  // ignore_for_file: definitely_unassigned_late_local_variable
   // to do: initialize
-  CardotekaImpl? cardoteka;
-  Card<String>? lastOrderCard;
+  late CardotekaImpl cardoteka;
+  late Card<String> lastOrderCard;
 
   final notifier = OrderNotifier();
-  cardoteka!.attach(
-    lastOrderCard!,
+  cardoteka.attach(
+    lastOrderCard,
     notifier.addOrder,
     detacher: notifier.onDispose,
   );
