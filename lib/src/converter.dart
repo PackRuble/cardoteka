@@ -19,37 +19,40 @@ import 'dart:ui' show Color;
 
 import 'package:cardoteka/src/extensions/enum_ext.dart';
 
-/// Use to transform a complex model for work to [Cardoteka].
-abstract class Converter<Element extends Object?, ElementJson extends Object> {
+///  Use to convert a element to a element of allowed types.
+abstract class Converter<Element extends Object?, ElementFrom extends Object> {
   const Converter();
 
-  Element from(ElementJson data);
-  ElementJson to(Element object);
+  Element from(ElementFrom element);
+
+  ElementFrom to(Element object);
 
   @override
-  String toString() => '$runtimeType(from: $Element, to: $ElementJson)';
+  String toString() => '$runtimeType(from: $Element, to: $ElementFrom)';
 }
 
-/// Use to transform a internal [Object] for work to [Cardoteka].
+/// Use to convert a collection of elements to a collection of allowed types.
 abstract class CollectionConverter<
-    Collect extends Object,
-    Element extends Object,
-    CollectJson extends Object,
-    ElementJson extends Object> implements Converter<Collect, CollectJson> {
+        Collection extends Object,
+        Element extends Object,
+        CollectionFrom extends Object,
+        ElementFrom extends Object>
+    implements Converter<Collection, CollectionFrom> {
   const CollectionConverter();
 
-  Element objFrom(ElementJson element);
-  ElementJson objTo(Element object);
+  Element objFrom(ElementFrom element);
+
+  ElementFrom objTo(Element object);
 
   @override
-  Collect from(CollectJson elements);
+  Collection from(CollectionFrom elements);
 
   @override
-  CollectJson to(Collect objects);
+  CollectionFrom to(Collection objects);
 
   @override
   String toString() =>
-      '$runtimeType(from: $Collect<$Element>, to: $CollectJson<$ElementJson>)';
+      '$runtimeType(from: $Collection<$Element>, to: $CollectionFrom<$ElementFrom>)';
 }
 
 /// List of all available converters. Provides easy access.
@@ -65,6 +68,14 @@ class Converters {
       _DateTimeAsIntConverter();
   static const Converter<num, double> numAsDouble = _NumConverter();
   static const Converter<num, String> numAsString = _NumAsStringConverter();
+
+  // todo: there is no way to use something like a generic getter
+  // https://github.com/dart-lang/language/issues/1622
+  static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
+      _EnumConverters.enumAsString<T>(enums);
+
+  static Converter<T, int> enumAsInt<T extends Enum>(Iterable<T> enums) =>
+      _EnumConverters.enumAsInt<T>(enums);
 }
 
 /// Provides converters to convert [Enum].
@@ -86,15 +97,15 @@ class Converters {
 ///
 /// If you want to have a const converter, just create your own or
 /// use [EnumAsStringConverter] or [EnumAsIntConverter].
-extension EnumConverters on Converters {
-  /// Convert [Enum] to [String]. Not dependent on [Enum.index]. Preferred method.
+extension _EnumConverters on Converters {
+  /// Convert [Enum] to [String]. Not dependent on [Enum.index].
   ///
   /// Warning! This is a [EnumName.name]-dependent converter. This means that
   /// if your enumeration name changes (for example, if you rename your
   /// enumeration value), the first item in the enumeration list will be returned.
   ///
   /// For better control of enum names, simply override [EnumName.name]
-  /// and assign a permanent name.
+  /// and assign a constant name.
   static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
       EnumAsStringConverter<T>(enums);
 
@@ -103,11 +114,13 @@ extension EnumConverters on Converters {
   /// Warning! This is a [Enum.index]-dependent converter. This means that
   /// if your enumeration index changes (for example, if you move your
   /// enumeration value), the first item in the enumeration list will be returned.
-  static Converter<T, int> enumAsInt<T extends Enum>(List<T> /*todo Iterable?*/ enums) =>
+  static Converter<T, int> enumAsInt<T extends Enum>(Iterable<T> enums) =>
       EnumAsIntConverter<T>(enums);
 }
 
-/// The converter allows you to save the [Color] class to the storage as [int].
+/// Converter for class [Color].
+///
+/// Converts [Color] to [int] using [Color.value].
 class _ColorConverter implements Converter<Color, int> {
   const _ColorConverter();
 
@@ -124,7 +137,7 @@ class _ColorConverter implements Converter<Color, int> {
 class EnumAsIntConverter<T extends Enum> implements Converter<T, int> {
   const EnumAsIntConverter(this._enums);
 
-  final List<T> _enums;
+  final Iterable<T> _enums;
 
   @override
   T from(int index) => _enums.byIndexOr(index, orElse: () => _enums.first);
@@ -233,7 +246,7 @@ class _NumAsStringConverter implements Converter<num, String> {
 
 /// Converter for class [Iterable].
 ///
-/// Converts [Iterable]<[T]> to [List]<[String]> using [Iterable.toList].
+/// Converts [Iterable]<[Element]> to [List]<[String]> using [Iterable.map].
 ///
 abstract class IterableConverter<Element extends Object>
     implements
@@ -247,7 +260,8 @@ abstract class IterableConverter<Element extends Object>
   String objTo(Element object);
 
   @override
-  Iterable<Element> from(List<String> elements) => elements.map((e) => objFrom(e));
+  Iterable<Element> from(List<String> elements) =>
+      elements.map((e) => objFrom(e));
 
   @override
   List<String> to(Iterable<Element> objects) =>
@@ -281,6 +295,7 @@ abstract class ListConverter<Element extends Object>
 ///
 /// Converts [Map]<[K], [V]> to [List]<[String]>.
 ///
+/// Use a suitable delimiter for your data to represent the key-value as a `String`.
 abstract class MapConverter<K, V>
     implements
         CollectionConverter<Map<K, V>, MapEntry<K, V>, List<String>, String> {
@@ -306,6 +321,3 @@ abstract class MapConverter<K, V>
   List<String> to(Map<K, V> objects) =>
       [for (final o in objects.entries) objTo(o)];
 }
-
-/// todo: add converters
-/// - Records after upgrade dart >3.0.0 (unreason)

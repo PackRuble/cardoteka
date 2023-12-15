@@ -17,7 +17,6 @@ export 'src/converter.dart'
         Converters,
         EnumAsIntConverter,
         EnumAsStringConverter,
-        EnumConverters,
         IterableConverter,
         ListConverter,
         MapConverter;
