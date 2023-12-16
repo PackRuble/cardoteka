@@ -269,7 +269,7 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.cards--> Taken from the configuration $CardConfig',
+        '$Cardoteka.cards--> Taken from the configuration $CardotekaConfig',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () {

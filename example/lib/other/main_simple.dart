@@ -24,7 +24,7 @@ enum Cards<T> implements Card<T> {
   @override
   String get key => name;
 
-  static CardConfig get config => const CardConfig(
+  static CardotekaConfig get config => const CardotekaConfig(
         name: 'KeyStore',
         cards: values,
       );

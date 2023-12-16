@@ -31,7 +31,7 @@ class SettingsCardoteka extends Cardoteka with WatcherImpl {
 void main() async {
   await Cardoteka.init();
   final cardoteka = SettingsCardoteka(
-    config: CardConfig(
+    config: CardotekaConfig(
       name: 'settings',
       cards: SettingsCards.values,
       converters: SettingsCards.converters,

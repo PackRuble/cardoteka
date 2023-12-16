@@ -44,7 +44,7 @@ main() async {
   await Cardoteka.init();
 
   final cardoteka = SettingsCardoteka(
-    config: CardConfig(
+    config: CardotekaConfig(
       name: 'SettingsCardoteka',
       cards: SettingsCards.values,
       converters: SettingsCards.converters,

@@ -11,24 +11,24 @@ mixin AdditionalTestValue<T> {
 abstract class CardTest<T> = Card<T> with AdditionalTestValue<T>;
 
 final allCardConfigs = [
-  CardConfig(
+  CardotekaConfig(
     name: '$BarStoolParts',
     cards: BarStoolParts.values,
   ),
-  CardConfig(
+  CardotekaConfig(
     name: '$FishCard',
     cards: FishCard.values,
   ),
-  CardConfig(
+  CardotekaConfig(
     name: '$PrimitiveTypeCards',
     cards: PrimitiveTypeCards.values,
     converters: PrimitiveTypeCards.converters,
   ),
-  CardConfig(
+  CardotekaConfig(
     name: '$SettingsCard',
     cards: SettingsCard.values,
   ),
-  CardConfig(
+  CardotekaConfig(
     name: '$ForestCard',
     cards: ForestCard.values,
     converters: ForestCard.converters,

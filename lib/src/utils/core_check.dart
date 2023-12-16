@@ -25,7 +25,7 @@ typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
 ///
 /// Used only in development mode in `assert`. May throw an error [AssertionErrorImpl].
 @internal
-bool checkConfiguration(CardConfig config) {
+bool checkConfiguration(CardotekaConfig config) {
   checkKeys(config.cards);
   checkConverterForComplexObject(config.cards, config.converters);
   checkMatchingConverters(config.converters);
@@ -112,7 +112,7 @@ bool checkConverterForComplexObject(
   return true;
 }
 
-/// Checking for matching [Card] and [CardConfig.converters].
+/// Checking for matching [Card] and [CardotekaConfig.converters].
 ///
 /// Note: We cannot guarantee verification of the [double] and [int] types in the web.
 /// Also, we cannot check [Null] values (for all platforms).

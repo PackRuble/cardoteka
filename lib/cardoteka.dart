@@ -9,7 +9,7 @@
 library cardoteka;
 
 export 'src/card.dart' show Card, DataType;
-export 'src/config.dart' show CardConfig;
+export 'src/config.dart' show CardotekaConfig;
 export 'src/converter.dart'
     show
         CollectionConverter,

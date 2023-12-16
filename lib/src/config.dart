@@ -5,8 +5,8 @@ import 'converter.dart';
 
 /// Configuration model for the [Cardoteka] impl.
 @immutable
-class CardConfig {
-  const CardConfig({
+class CardotekaConfig {
+  const CardotekaConfig({
     required this.name,
     required this.cards,
     this.converters,
@@ -31,5 +31,5 @@ class CardConfig {
 
   @override
   String toString() =>
-      '$CardConfig(name: $name, \ncards: $cards, \nconverters: $converters)';
+      '$CardotekaConfig(name: $name, \ncards: $cards, \nconverters: $converters)';
 }

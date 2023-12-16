@@ -11,7 +11,7 @@ import '../source/models.dart';
 void main() {
   group('checkConfiguration()', () {
     test('general test of all checks at once', () {
-      final config = CardConfig(
+      final config = CardotekaConfig(
         name: 'PrimitiveTypeCards',
         cards: [...PrimitiveTypeCards.values]
           ..remove(PrimitiveTypeCards.card2DList),

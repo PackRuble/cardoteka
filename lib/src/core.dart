@@ -120,10 +120,10 @@ import 'watcher.dart';
 /// Don't worry! If you do something wrong, you will receive a detailed
 /// correction message in the console.
 abstract class Cardoteka {
-  /// Use this constructor to pass a configuration [CardConfig] and create
+  /// Use this constructor to pass a configuration [CardotekaConfig] and create
   /// an instance of the [Cardoteka].
   Cardoteka({
-    required CardConfig config,
+    required CardotekaConfig config,
   })  :
         // todo: this behavior is not yet available for const classes
         // https://github.com/dart-lang/language/issues/2581
@@ -135,13 +135,13 @@ abstract class Cardoteka {
   UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
 
   /// Configuration file containing important information about the [Card]s.
-  /// - [CardConfig.name] is used to prefix the key in [SharedPreferences] for
+  /// - [CardotekaConfig.name] is used to prefix the key in [SharedPreferences] for
   /// each of the [Cardoteka] instances;
-  /// - [CardConfig.cards] list of all card keys for accessing the storage.
+  /// - [CardotekaConfig.cards] list of all card keys for accessing the storage.
   /// Access via [cards] if necessary.
-  /// - [CardConfig.converters] are used to convert a complex object to the base
+  /// - [CardotekaConfig.converters] are used to convert a complex object to the base
   /// types defined in the [DataType] enumeration.
-  final CardConfig _config;
+  final CardotekaConfig _config;
 
   /// A reference to an instance of [SharedPreferences] from the package
   /// [shared_preferences](https://pub.dev/packages/shared_preferences)
@@ -202,7 +202,7 @@ abstract class Cardoteka {
     }
   }
 
-  /// Get a [CardConfig.name]-based key from the [_config] and [Card.key] to use
+  /// Get a [CardotekaConfig.name]-based key from the [_config] and [Card.key] to use
   /// in the [SharedPreferences] storage.
   String _keyForSP(Card card) => '${_config.name}.${card.key}';
 

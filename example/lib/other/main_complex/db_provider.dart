@@ -36,7 +36,7 @@ enum KeyStore1<T> implements Card<T> {
   @override
   String get key => customKey ?? EnumName(this).name;
 
-  static CardConfig config = CardConfig(
+  static CardotekaConfig config = CardotekaConfig(
     name: 'KeyStore1',
     cards: values,
     converters: {
