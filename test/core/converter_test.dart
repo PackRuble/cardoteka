@@ -154,8 +154,7 @@ void main() {
     });
 
     test('enumAsString', () {
-      final converter =
-          EnumConverters.enumAsString<ThemeMode>(ThemeMode.values);
+      final converter = Converters.enumAsString<ThemeMode>(ThemeMode.values);
 
       ThemeMode mode = ThemeMode.dark;
       String modeRaw = mode.name;
@@ -170,7 +169,7 @@ void main() {
     });
 
     test('enumAsInt', () {
-      final converter = EnumConverters.enumAsInt<ThemeMode>(ThemeMode.values);
+      final converter = Converters.enumAsInt<ThemeMode>(ThemeMode.values);
 
       ThemeMode mode = ThemeMode.dark;
       int modeRaw = mode.index;
