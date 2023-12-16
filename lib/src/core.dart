@@ -125,9 +125,8 @@ abstract class Cardoteka {
   Cardoteka({
     required CardotekaConfig config,
   })  :
-        // todo: this behavior is not yet available for const classes
+        // fixdep(22.05.2023): this behavior is not yet available for const classes
         // https://github.com/dart-lang/language/issues/2581
-        //
         assert(checkConfiguration(config)),
         _config = config;
 

@@ -124,8 +124,9 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   }
 }
 
-// todo:
-// [Allow mixins in "extends" clauses](https://github.com/dart-lang/language/issues/1942)
+// fixdep(1.12.2023): Allow mixins in "extends" clauses
+// https://github.com/dart-lang/language/issues/1942
+//
 // mixin WatcherImplDebug extends WatcherImpl {}
 // and then...
 // class CardotekaImpl extends Cardoteka with WatcherImplDebug {}

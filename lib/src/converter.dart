@@ -69,7 +69,7 @@ class Converters {
   static const Converter<num, double> numAsDouble = _NumConverter();
   static const Converter<num, String> numAsString = _NumAsStringConverter();
 
-  // todo: there is no way to use something like a generic getter
+  // fixdep(15.12.2023): there is no way to use something like a generic getter
   // https://github.com/dart-lang/language/issues/1622
   static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
       _EnumConverters.enumAsString<T>(enums);

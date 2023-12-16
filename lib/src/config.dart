@@ -27,8 +27,6 @@ class CardotekaConfig {
   /// For each [Card], add a [Converter] if necessary.
   final Map<Card<Object?>, Converter<Object?, Object>>? converters;
 
-  // todo: Future feature: final migrator;
-
   @override
   String toString() =>
       '$CardotekaConfig(name: $name, \ncards: $cards, \nconverters: $converters)';
