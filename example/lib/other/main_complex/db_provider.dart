@@ -5,12 +5,11 @@ import 'package:flutter/material.dart' hide Card;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final dbProvider = Provider<DbUser>((ref) => DbUser(
-      cards: KeyStore1.values,
       config: KeyStore1.config,
     ));
 
 class DbUser extends Cardoteka with WatcherImpl, CRUD {
-  DbUser({required super.cards, required super.config});
+  DbUser({required super.config});
 }
 
 /// Storage of [Enum] type with possibility of using custom key.
@@ -21,6 +20,7 @@ enum KeyStore1<T> implements Card<T> {
   counterCustom<int>(DataType.int, 2, 'custom_counter_key'),
   skyColor<Color>(DataType.string, Colors.blue),
   myCar<Car>(DataType.string, Car.notCar()),
+  control<Controllability>(DataType.string, Controllability.easy),
   ;
 
   const KeyStore1(this.type, this.defaultValue, [this.customKey]);
@@ -36,13 +36,16 @@ enum KeyStore1<T> implements Card<T> {
   @override
   String get key => customKey ?? EnumName(this).name;
 
-  static Config get config => const Config(
-        name: 'KeyStore1',
-        converters: {
-          myCar: CarConverter(),
-          skyColor: ColorConverter(),
-        },
-      );
+  static CardConfig config = CardConfig(
+    name: 'KeyStore1',
+    cards: values,
+    converters: {
+      myCar: CarConverter(),
+      skyColor: Converters.colorAsString,
+      control: Converters.enumAsString(Controllability.values),
+      control: Converters.enumAsInt(Controllability.values),
+    },
+  );
 }
 
 class CarConverter implements Converter<Car, String> {
@@ -72,3 +75,5 @@ class Car {
   @override
   String toString() => 'Car($brand, $weight kg)';
 }
+
+enum Controllability { easy, medium, hard }
