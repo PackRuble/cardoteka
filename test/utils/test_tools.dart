@@ -5,9 +5,11 @@
 import 'package:cardoteka/cardoteka.dart' show Card, Converter, DataType;
 import 'package:cardoteka/src/extensions/data_type_ext.dart';
 import 'package:flutter_test/flutter_test.dart' show test;
+import 'package:meta/meta.dart' show isTest;
 
 typedef AsyncCallback = Future<void> Function();
 
+@isTest
 Future<void> testWith(
   Object description,
   dynamic Function() body, {
