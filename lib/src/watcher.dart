@@ -10,6 +10,6 @@ import 'card.dart';
 abstract class Watcher {
   /// Called whenever a new value is provided for the storage. To implement
   /// this method, please refer to the documentation [Cardoteka.watcher].
-  @protected
+  @internal
   void notify<V extends Object?>(Card<V> card, V value);
 }
