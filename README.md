@@ -140,11 +140,9 @@ mixin NotifierDetacher on ChangeNotifier {
 }
 ```
 
-This feature "from the package" will be implemented later. Now you can take part in the discussion (🥺) of the API of this aspect.
+This feature "from the package" will be implemented later. Now you can take part in the [discussion #9](https://github.com/PackRuble/cardoteka/issues/9) (🥺) of the API of this aspect.
 
-[//]: # (todo: link on issue)
-
-Now you can define your notifier with the required number of states and then `attach` a wiretap (you can attach as many wiretaps to the card as you like):
+Now you can define your notifier with the required number of states and then `attach` a callback (you can attach as many callbacks to the card as you like):
 
 ```dart
 class OrderNotifier with ChangeNotifier, NotifierDetacher {
@@ -240,6 +238,42 @@ cardoteka.attach(
   detacher: notifier.onDispose,
 );
 ```
+
+## General overview of the library:
+
+card
+
+| Basic elements of Cardoteka | Purpose                                       |
+|-----------------------------|-----------------------------------------------|
+| `Card`                      | Key to the storage to interact with it        |
+| `CardConfig`                | Configuration file for a Cardoteka instance   |
+| `Converter` & `Converters`  | Transforming objects to interact with storage |
+
+| Mixin for `Cardoteka`    | Purpose                                     |
+|--------------------------|---------------------------------------------|
+| `Watcher`<-`WatcherImpl` | To implement wiretapping based on callbacks |
+| `AccessToSP`             | To access the original `SharedPreferences`  |
+| `CRUD`                   | To simulate crud operations                 |
+
+
+| Converter                   | Representation of an object in storage |
+|-----------------------------|----------------------------------------|
+| `Converters`                |                                        |
+| ->`_ColorConverter`         | `Color` as `int`                       |
+| ->`_UriConverter`           | `Uri` as `String`                      |
+| ->`_DurationConverter`      | `Duration` as `int`                    |
+| ->`_DateTimeConverter`      | `DateTime` as `String`                 |
+| ->`_DateTimeAsIntConverter` | `DateTime` as `int`                    |
+| ->`_NumConverter`           | `num` as `double`                      |
+| ->`_NumAsStringConverter`   | `num` as `String`                      |
+| `Enum`                      |                                        |
+| ->`EnumAsStringConverter`   | `Iterable<Enum>` as `String`           |
+| ->`EnumAsIntConverter`      | `Iterable<Enum>` as `int`              |
+| `CollectionConverter`       |                                        |
+| ->`IterableConverter`       | `Iterable<E>` as `List<String>`        |
+| ->`ListConverter`           | `List<E>` as `List<String>`            |
+| ->`MapConverter`            | `Map<K, V>` as `List<String>`          |
+
 
 ## OLD Readme 
 
