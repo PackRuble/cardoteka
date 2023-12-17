@@ -25,8 +25,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # These dependencies can be as up-to-date as the currently installed flutter version allows.
-  riverpod: ^2.4.9
   lint: ^2.2.0
 
 screenshots:
@@ -35,3 +33,10 @@ screenshots:
 
 funding:
   - https://t.me/+AkGV73kZi_Q1YTMy
+
+topics:
+  - shared-preferences
+  - storage
+  - cardoteka
+  - database
+  - persistence
