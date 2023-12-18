@@ -18,7 +18,7 @@ class CardotekaTest extends Cardoteka
 }
 
 Future<void> main() async {
-  for (final config in allCardConfigs) {
+  for (final config in allCardotekaConfigs) {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);

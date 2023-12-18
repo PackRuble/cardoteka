@@ -12,7 +12,7 @@ class CardotekaCRUD extends Cardoteka with CRUD, CardotekaUtilsForTest {
 }
 
 void main() {
-  for (final config in allCardConfigs) {
+  for (final config in allCardotekaConfigs) {
     late CardotekaCRUD cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaCRUD(config: config);

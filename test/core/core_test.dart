@@ -16,7 +16,7 @@ class CardotekaTest extends Cardoteka with CardotekaUtilsForTest {
 }
 
 void main() {
-  for (final config in allCardConfigs) {
+  for (final config in allCardotekaConfigs) {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);

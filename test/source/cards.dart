@@ -10,7 +10,7 @@ mixin AdditionalTestValue<T> {
 
 abstract class CardTest<T> = Card<T> with AdditionalTestValue<T>;
 
-final allCardConfigs = [
+final allCardotekaConfigs = [
   CardotekaConfig(
     name: '$BarStoolParts',
     cards: BarStoolParts.values,

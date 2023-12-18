@@ -63,7 +63,7 @@ class SettingsCardoteka extends Cardoteka with WatcherImpl {
 main() async {
   await Cardoteka.init();
   final cardoteka = SettingsCardoteka(
-    config: CardConfig(
+    config: CardotekaConfig(
       name: 'settings',
       cards: SettingsCards.values,
       converters: SettingsCards.converters,
@@ -385,7 +385,7 @@ card
 | Basic elements of Cardoteka | Purpose                                       |
 |-----------------------------|-----------------------------------------------|
 | `Card`                      | Key to the storage to interact with it        |
-| `CardConfig`                | Configuration file for a Cardoteka instance   |
+| `CardotekaConfig`           | Configuration file for a Cardoteka instance   |
 | `Converter` & `Converters`  | Transforming objects to interact with storage |
 
 | Mixin for `Cardoteka`    | Purpose                                     |

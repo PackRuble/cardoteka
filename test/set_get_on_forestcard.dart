@@ -12,7 +12,7 @@ Future<void> main() async {
   late CardotekaImplTest cardoteka;
   setUp(() async {
     cardoteka = CardotekaImplTest(
-      config: allCardConfigs.firstWhere((el) => el.name == '$ForestCard'),
+      config: allCardotekaConfigs.firstWhere((el) => el.name == '$ForestCard'),
     );
     cardoteka.setMockInitialValues({});
     await Cardoteka.init();

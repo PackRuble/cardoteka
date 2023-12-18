@@ -20,7 +20,7 @@
 //   String get key => name; // pay attention
 //
 //   @override
-//   CardConfig get config => CardConfig(name: 'KeyStore1');
+//   CardotekaConfig get config => CardotekaConfig(name: 'KeyStore1');
 // }
 //
 // /// Key store with optional custom key.
@@ -52,7 +52,7 @@
 //   String get key => _key ?? name;
 //
 //   @override
-//   CardConfig get config => CardConfig(name: 'KeyStore1');
+//   CardotekaConfig get config => CardotekaConfig(name: 'KeyStore1');
 // }
 //
 // class KeyStore2<T> implements ICard<T> {
@@ -75,5 +75,5 @@
 //   final String key;
 //
 //   @override
-//   CardConfig get config => CardConfig(name: 'KeyStore1');
+//   CardotekaConfig get config => CardotekaConfig(name: 'KeyStore1');
 // }
