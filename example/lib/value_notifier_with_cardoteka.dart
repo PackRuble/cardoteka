@@ -19,11 +19,10 @@ class CurrentTaskNotifier extends ValueNotifier {
 
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
-
-
-void main() {
+Future<void> main() async {
+  await Cardoteka.init();
   // ignore_for_file: definitely_unassigned_late_local_variable
-  // to do: initialize
+  // to☝️do: create an instance of cardoteka and pass configuration with cards
   late CardotekaImpl cardoteka;
   late Card<String> card; // with default value = 'nothing to do now'
 
@@ -37,7 +36,7 @@ void main() {
     detacher: notifier.onDispose, // attention to this line
   );
 
-  cardoteka.set(card, 'new case available!');
+  await cardoteka.set(card, 'new case available!');
   // 1. console-> nothing to do now
   // 2. a value was saved to storage
   // 3. console-> New case: new case available!

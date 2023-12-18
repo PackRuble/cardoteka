@@ -34,9 +34,10 @@ class OrderNotifier with ChangeNotifier, NotifierDetacher {
 
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
-void main() {
+Future<void> main() async {
+  await Cardoteka.init();
   // ignore_for_file: definitely_unassigned_late_local_variable
-  // to do: initialize
+  // to☝️do: create an instance of cardoteka and pass configuration with cards
   late CardotekaImpl cardoteka;
   late Card<String> lastOrderCard;
 
@@ -47,7 +48,7 @@ void main() {
     detacher: notifier.onDispose,
   );
 
-  cardoteka.set(lastOrderCard, '#341');
+  await cardoteka.set(lastOrderCard, '#341');
   // 1. a value was saved to storage
   // 2. console-> New order: #341
 }

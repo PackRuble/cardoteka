@@ -157,9 +157,10 @@ class OrderNotifier with ChangeNotifier, NotifierDetacher {
 
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
-void main() {
+Future<void> main() async {
+  await Cardoteka.init();
   // ignore_for_file: definitely_unassigned_late_local_variable
-  // to do: initialize
+  // to☝️do: create an instance of cardoteka and pass configuration with cards
   late CardotekaImpl cardoteka;
   late Card<String> lastOrderCard;
 
@@ -170,7 +171,7 @@ void main() {
      detacher: notifier.onDispose,
   );
 
-  cardoteka.set(lastOrderCard, '#341');
+  await cardoteka.set(lastOrderCard, '#341');
   // 1. a value was saved to storage
   // 2. console-> New order: #341
 }
@@ -199,11 +200,15 @@ class CurrentTaskNotifier extends ValueNotifier {
 Now all the same ingredients, but let's also add the `fireImmediately` flag to get the actual value in our notifier at once:
 
 ```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' hide Card;
+
 class CardotekaImpl = Cardoteka with WatcherImpl;
 
-void main() {
+Future<void> main() async {
+  await Cardoteka.init();
   // ignore_for_file: definitely_unassigned_late_local_variable
-  // to do: initialize
+  // to☝️do: create an instance of cardoteka and pass configuration with cards
   late CardotekaImpl cardoteka;
   late Card<String> card; // with default value = 'nothing to do now'
 
@@ -218,7 +223,7 @@ void main() {
     fireImmediately: true, // callback will fire immediately
   );
 
-  cardoteka.set(card, 'new case available!');
+  await cardoteka.set(card, 'new case available!');
   // 1. console-> nothing to do now
   // 2. a value was saved to storage
   // 3. console-> New case: new case available!
@@ -293,8 +298,6 @@ Future<void> main() async {
   // 3. print-> RoomDoorState.unknown
 }
 ```
-
-
 
 ## General overview of the library:
 
