@@ -145,6 +145,9 @@ This feature "from the package" will be implemented later. Now you can take part
 Now you can define your notifier with the required number of states and then `attach` a callback (you can attach as many callbacks to the card as you like):
 
 ```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' hide Card;
+
 class OrderNotifier with ChangeNotifier, NotifierDetacher {
   final _orders = <String>[];
 
@@ -242,6 +245,82 @@ cardoteka.attach(
   },
   detacher: notifier.onDispose,
 );
+```
+
+### Cubit (bloc)
+
+This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability": (Participate in the discussion (🙏) to implement such functionality into the package - [Way to remove a callback using `Watcher.attach` + `Cubit` · Issue #10 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/10).)
+
+```dart
+import 'package:flutter/foundation.dart' show VoidCallback;
+import 'package:meta/meta.dart' show protected;
+
+/// Perhaps this mixin will be included in the package in one form or another...
+mixin Detachability {
+  List<VoidCallback>? _onDisposeCallbacks;
+
+  void onDetach(void Function() cb) {
+    _onDisposeCallbacks ??= [];
+    _onDisposeCallbacks!.add(cb);
+  }
+
+  @protected
+  void detach() {
+    _onDisposeCallbacks?.forEach((cb) => cb.call());
+    _onDisposeCallbacks = null;
+  }
+}
+```
+
+Next we define our cubit and logic, chain `Detachability` to it and override the behavior of the `close` method:
+
+```dart
+import 'package:bloc/bloc.dart';
+
+class CubitImpl extends Cubit<int> with Detachability {
+  CubitImpl(super.initialState);
+
+  void setValue(int value) => emit(value);
+
+  @override
+  void onChange(Change<int> change) {
+    super.onChange(change);
+    print('Value has been changed:${change.currentState}->${change.nextState}');
+  }
+
+  @override
+  Future<void> close() async {
+    super.detach();
+    return super.close();
+  }
+}
+```
+
+We can now interact with `Cardoteka` in this way:
+
+```dart
+import 'package:cardoteka/cardoteka.dart';
+
+class CardotekaImpl = Cardoteka with WatcherImpl;
+
+Future<void> main() async {
+  await Cardoteka.init();
+  // ignore_for_file: definitely_unassigned_late_local_variable
+  // to☝️do: create an instance of cardoteka and pass configuration with cards
+  late CardotekaImpl cardoteka;
+  late Card<int> counterCard; // defaultValue = 99
+
+  final cubit = CubitImpl(counterCard.defaultValue);
+  cardoteka.attach(
+    counterCard,
+    cubit.setValue,
+    detacher: cubit.onDetach,
+  );
+
+  await cardoteka.set(counterCard, 321);
+  // 1. a value was saved to storage
+  // 2. console-> Value has been changed:99->321
+}
 ```
 
 ### Provider (riverpod)
