@@ -239,6 +239,63 @@ cardoteka.attach(
 );
 ```
 
+### Provider (riverpod)
+
+This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. First, you need to create a provider to `Cardoteka` an instance of your onboarding and a provider of your desired state:
+
+```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// ignore_for_file: definitely_unassigned_late_local_variable
+// to☝️do: create an instance of cardoteka and pass configuration with cards
+late CardotekaImpl cardoteka;
+late Card<RoomDoorState> doorStateCard; // defaultValue = RoomDoorState.ajar
+
+final cardotekaProvider = Provider<CardotekaImpl>((ref) {
+  return cardoteka;
+});
+
+final doorStateProvider = Provider<RoomDoorState>((ref) {
+  return ref.watch(cardotekaProvider).attach(
+        doorStateCard,
+        (value) => ref.state = value,
+        onRemove: () => ref.state = RoomDoorState.unknown,
+        detacher: ref.onDispose,
+      );
+});
+```
+
+Note that using `StateProvider` is not necessary because the state change will occur automatically when the value in the store changes.
+
+The usage code will look like this:
+
+```dart
+Future<void> main() async {
+  await Cardoteka.init();
+  final container = ProviderContainer();
+
+  RoomDoorState doorState = container.read(doorStateProvider);
+  print('$doorState'); // lastOrderCard.defaultValue-> RoomDoorState.ajar
+
+  await container.read(cardotekaProvider).set(doorStateCard, RoomDoorState.open);
+  doorState = container.read(doorStateProvider);
+  print('$doorState');
+  // 1. a value was saved to storage
+  // 2. the callback we passed to `attach` is called.
+  // 3. print-> RoomDoorState.open
+
+  await container.read(cardotekaProvider).remove(doorStateCard);
+  doorState = container.read(doorStateProvider);
+  print('$doorState');
+  // 1. a value was removed from storage
+  // 2. the function we passed to `onRemove` is called.
+  // 3. print-> RoomDoorState.unknown
+}
+```
+
+
+
 ## General overview of the library:
 
 card
