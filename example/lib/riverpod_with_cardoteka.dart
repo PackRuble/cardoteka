@@ -1,5 +1,5 @@
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod/riverpod.dart';
 
 // ignore_for_file: definitely_unassigned_late_local_variable
 // to☝️do: create an instance of cardoteka and pass configuration with cards

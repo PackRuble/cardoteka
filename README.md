@@ -7,6 +7,13 @@ In progress...
 
 <!-- TOC -->
   * [How to use?](#how-to-use)
+  * [Use with...](#use-with)
+    * [ChangeNotifier](#changenotifier)
+    * [ValueNotifier](#valuenotifier)
+    * [Cubit (bloc)](#cubit-bloc)
+    * [Provider (riverpod)](#provider-riverpod)
+  * [General overview of the library:](#general-overview-of-the-library)
+  * [OLD Readme](#old-readme-)
   * [How to use with Riverpod?](#how-to-use-with-riverpod)
   * [How to implement key storage?](#how-to-implement-key-storage)
       * [There are several ways to avoid this mistake.](#there-are-several-ways-to-avoid-this-mistake)
@@ -249,7 +256,7 @@ cardoteka.attach(
 
 ### Cubit (bloc)
 
-This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability": (Participate in the discussion (🙏) to implement such functionality into the package - [Way to remove a callback using `Watcher.attach` + `Cubit` · Issue #10 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/10).)
+This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability":
 
 ```dart
 import 'package:flutter/foundation.dart' show VoidCallback;
@@ -271,6 +278,8 @@ mixin Detachability {
   }
 }
 ```
+
+Participate in the discussion (🙏) to implement such functionality into the package: [Way to remove a callback using `Watcher.attach` + `Cubit` · Issue #10 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/10).
 
 Next we define our cubit and logic, chain `Detachability` to it and override the behavior of the `close` method:
 
@@ -329,7 +338,7 @@ This is about using it in conjunction with the [riverpod](https://pub.dev/packag
 
 ```dart
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod/riverpod.dart';
 
 // ignore_for_file: definitely_unassigned_late_local_variable
 // to☝️do: create an instance of cardoteka and pass configuration with cards
