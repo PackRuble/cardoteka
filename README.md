@@ -12,7 +12,11 @@ In progress...
     * [ValueNotifier](#valuenotifier)
     * [Cubit (bloc)](#cubit-bloc)
     * [Provider (riverpod)](#provider-riverpod)
-  * [General overview of the library:](#general-overview-of-the-library)
+  * [Structure](#structure)
+    * [Cardoteka](#cardoteka)
+    * [Card](#card)
+    * [Converter](#converter)
+    * [Watcher](#watcher)
   * [OLD Readme](#old-readme-)
   * [How to use with Riverpod?](#how-to-use-with-riverpod)
   * [How to implement key storage?](#how-to-implement-key-storage)
@@ -387,9 +391,9 @@ Future<void> main() async {
 }
 ```
 
-## General overview of the library:
+## Structure
 
-card
+The structure of the library is very simple! Below are the main classes you will have to work with.
 
 | Basic elements of Cardoteka | Purpose                                       |
 |-----------------------------|-----------------------------------------------|
@@ -397,12 +401,34 @@ card
 | `CardotekaConfig`           | Configuration file for a Cardoteka instance   |
 | `Converter` & `Converters`  | Transforming objects to interact with storage |
 
+### Cardoteka
+
+Main class for implementing your own storage instance. Contains all the basic methods for working with SharedPreferences in a typed style. Serves as a wrapper over SP. Use as many implementations (and instances) as needed, passing a unique name in the parameters. Use mixins to extend functionality.
+
 | Mixin for `Cardoteka`    | Purpose                                     |
 |--------------------------|---------------------------------------------|
 | `Watcher`<-`WatcherImpl` | To implement wiretapping based on callbacks |
 | `AccessToSP`             | To access the original `SharedPreferences`  |
 | `CRUD`                   | To simulate crud operations                 |
 
+
+### Card
+
+Every instance of Cardoteka needs cards. The card contains the characteristics of your key (name, default value, type) that is used to access the storage. It is convenient to implement using the `enum` enumeration, but you can also use the usual `class`, which is certainly less convenient and more error-prone.
+
+### Converter
+
+Converters are used to convert your object into a simple type that can be stored in storage. There are 5 basic types available:
+
+| enum `DataType` | Basic Dart type |
+|-----------------|-----------------|
+| bool            | `bool`          |
+| int             | `int`           |
+| double          | `double`        |
+| string          | `String`        |
+| stringList      | `List<String>`  |
+
+If the default value type specified in the card is not the Dart base type, you must provide the converter as a parameter when creating the `Cardoteka` instance. You can create your own converter based on the `Converter` class by implementing it. For collections, use `CollectionConverter` by extending it (or use `Converter`). However, many converters are already provided out of the box, including for collections.
 
 | Converter                   | Representation of an object in storage |
 |-----------------------------|----------------------------------------|
@@ -422,6 +448,16 @@ card
 | ->`ListConverter`           | `List<E>` as `List<String>`            |
 | ->`MapConverter`            | `Map<K, V>` as `List<String>`          |
 
+### Watcher
+
+I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a callback that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters you can specify:
+- `onRemove` ->  to notify when a value is removed from storage (`remove` or `removeAll` methods)
+- `detacher` -> when listening no longer makes sense
+- `fireImmediately` -> to fire `callback` at the moment the `attach` method is called
+
+Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage.
+
+It is important to emphasize that you can implement your own solution based on `Watcher`.
 
 ## OLD Readme 
 
