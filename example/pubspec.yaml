@@ -1,6 +1,6 @@
 name: example
-description: A new Flutter project.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: A repository of examples on working with `Cardoteka`.
+publish_to: 'none'
 
 version: 1.0.0+1
 
@@ -10,10 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cardoteka:
     path: '../../cardoteka'
-
   flutter_riverpod: ^2.4.9
   riverpod: ^2.4.9
   bloc: ^8.1.2
@@ -22,7 +20,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   lint: ^2.2.0
 
 flutter:
