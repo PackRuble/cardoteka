@@ -210,6 +210,7 @@ Future<void> main() async {
 
           for (final MapEntry(key: card, value: callbacks)
               in detachers.entries) {
+            // ignore: sdk_version_since
             for (final (index, cb) in callbacks.indexed) {
               expect(
                 cardoteka.watchersDebug[card],

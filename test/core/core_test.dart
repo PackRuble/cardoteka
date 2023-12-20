@@ -4,7 +4,6 @@ import 'dart:collection' show UnmodifiableListView;
 
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
-import 'package:cardoteka/src/watcher.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -138,11 +137,15 @@ void main() {
               card,
               testValue,
             );
-            if (isSuccess == null) {
+
+            if (testValue == null) {
               expect(
-                testValue,
-                isNull,
-                reason: tekaReason('The stored value must also be null', card),
+                isSuccess,
+                isTrue,
+                reason: tekaReason(
+                  'A successful deletion should occur because it simulates the saving of a null-value',
+                  card,
+                ),
               );
             } else {
               expect(
@@ -182,11 +185,14 @@ void main() {
               card,
               testValue,
             );
-            if (isSuccess == null) {
+            if (testValue == null) {
               expect(
-                testValue,
-                isNull,
-                reason: tekaReason('The stored value must also be null!', card),
+                isSuccess,
+                isTrue,
+                reason: tekaReason(
+                  'A successful deletion should occur because it simulates the saving of a null-value',
+                  card,
+                ),
               );
             } else {
               expect(
@@ -437,7 +443,8 @@ void main() {
           expect(
             resultGetStoredEntries,
             isEmpty,
-            reason: 'After deleting this $resultGetStoredEntries should be empty!',
+            reason:
+                'After deleting this $resultGetStoredEntries should be empty!',
           );
         },
       );
