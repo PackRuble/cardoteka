@@ -20,9 +20,12 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
 - 🧯 have to frequently check the value for null before saving? Use the `getOrNull` and `setOrNull` methods and don't worry about anything!
 - 🚪 do you still need access to dynamic methods from the original library? It's still there if you specify `with AccessToSP`.
 
+## Table of contents
+
 <!-- TOC -->
   * [Cardoteka](#cardoteka)
   * [Advantages](#advantages)
+  * [Table of contents](#table-of-contents)
   * [How to use?](#how-to-use)
   * [Use with...](#use-with)
     * [ChangeNotifier](#changenotifier)
@@ -34,6 +37,7 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
     * [Card](#card)
     * [Converter](#converter)
     * [Watcher](#watcher)
+  * [Coverage](#coverage)
   * [Author](#author)
 <!-- TOC -->
 
@@ -469,6 +473,12 @@ Calling the `attach` method returns the actual value from storage OR the default
 
 It is important to emphasize that you can implement your own solution based on `Watcher`.
 
+## Coverage
+
+The most important "core" is covered by the tests part and all the places that needed covering in my opinion. There are badges at the very beginning of the current file where you can see the percentage of coverage, among other things. Or, click on the image below. It's relevant for releases. 
+
+[![](https://codecov.io/gh/PackRuble/cardoteka/graphs/sunburst.svg?token=IKB7AEHZPL)][codecov_link]
+
 ## Author
 
 You can contact me or check out my activities on the following platforms:
@@ -489,8 +499,8 @@ You can contact me or check out my activities on the following platforms:
 [pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic
 [pub_link]: https://pub.dev/packages/cardoteka
 
-[codecov_badge]: https://img.shields.io/codecov/c/github/PackRuble/cardoteka?style=plastic&color=00cc00
-[codecov_link]: https://github.com/PackRuble/cardoteka/blob/master/coverage/lcov.info
+[codecov_badge]: https://img.shields.io/codecov/c/github/PackRuble/cardoteka/master?style=plastic&color=00cc00&logo=codecov
+[codecov_link]: https://app.codecov.io/gh/PackRuble/cardoteka
 
 [license_badge]: https://img.shields.io/github/license/PackRuble/cardoteka?style=plastic&color=996600
 [license_link]: https://github.com/PackRuble/cardoteka/blob/master/LICENSE
