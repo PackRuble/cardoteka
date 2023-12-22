@@ -24,7 +24,7 @@ Future<void> main() async {
   // ignore_for_file: definitely_unassigned_late_local_variable
   // to☝️do: create an instance of cardoteka and pass configuration with cards
   late CardotekaImpl cardoteka;
-  late Card<String> card; // with default value = 'nothing to do now'
+  late Card<String> card; // with default value = 'no business...'
 
   final notifier = CurrentTaskNotifier('');
   cardoteka.attach(
@@ -37,7 +37,7 @@ Future<void> main() async {
   );
 
   await cardoteka.set(card, 'new case available!');
-  // 1. console-> nothing to do now
+  // 1. console-> New case: no business...
   // 2. a value was saved to storage
   // 3. console-> New case: new case available!
 }
