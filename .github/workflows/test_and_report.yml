@@ -8,7 +8,7 @@ on:
       - '**' # when any tags are pushed
 
 jobs:
-  build:
+  dart_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +21,11 @@ jobs:
       - run: flutter pub get
       - run: flutter test --coverage
 
+  codecov_report:
+    runs-on: ubuntu-latest
+    needs: dart_test
+
+    steps:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
