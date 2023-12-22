@@ -2,7 +2,7 @@ name: cardoteka
 description: The best type-safe wrapper over SharedPreferences.
   Why so?
   -> strongly typed cards for access to storage
-  -> don't think about type, use get|set
+  -> use get|set
   -> can work with nullable values
   -> callback based updates
 
@@ -10,7 +10,7 @@ homepage: https://t.me/+AkGV73kZi_Q1YTMy
 repository: https://github.com/PackRuble/cardoteka
 issue_tracker: https://github.com/PackRuble/cardoteka/issues
 
-version: 1.0.0
+version: 1.0.1
 
 environment:
   sdk: '>=2.17.0 <4.0.0'

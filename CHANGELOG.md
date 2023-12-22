@@ -1,3 +1,10 @@
+## [1.0.1] - 22-12-2023
+
+### Other
+
+- fix: remove invalid example from `example`
+- upd: description
+
 ## [1.0.0] - 22-12-2023
 
 - first public release 🎊
