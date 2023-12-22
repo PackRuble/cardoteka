@@ -1,4 +1,4 @@
-<a href="https://github.com/PackRuble/cardoteka/"><img src="https://github.com/PackRuble/cardoteka/blob/master/res/cardoteka_banner.png?raw=true"/></a>
+<a href="https://github.com/PackRuble/cardoteka/"><img src="https://github.com/PackRuble/cardoteka/blob/dev/res/cardoteka_banner.png?raw=true"/></a>
 
 ## Cardoteka
 
@@ -503,11 +503,11 @@ You can contact me or check out my activities on the following platforms:
 [pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic
 [pub_link]: https://pub.dev/packages/cardoteka
 
-[codecov_badge]: https://img.shields.io/codecov/c/github/PackRuble/cardoteka/master?style=plastic&color=00cc00&logo=codecov
+[codecov_badge]: https://img.shields.io/codecov/c/github/PackRuble/cardoteka?style=plastic&color=00cc00&logo=codecov
 [codecov_link]: https://app.codecov.io/gh/PackRuble/cardoteka
 
 [license_badge]: https://img.shields.io/github/license/PackRuble/cardoteka?style=plastic&color=996600
-[license_link]: https://github.com/PackRuble/cardoteka/blob/master/LICENSE
+[license_link]: https://github.com/PackRuble/cardoteka/blob/dev/LICENSE
 
 [code_size_badge]: https://img.shields.io/github/languages/code-size/PackRuble/cardoteka?style=plastic&color=339966
 [repo_link]: https://github.com/PackRuble/cardoteka
