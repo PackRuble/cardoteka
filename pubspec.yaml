@@ -7,6 +7,16 @@ description: The best type-safe wrapper over SharedPreferences.
   ▶ have a wiretap
 version: 0.2.1
 # repository: https://github.com/my_org/my_repo
+  Why so?
+  -> strongly typed cards for access to storage
+  -> don't think about type, use get|set
+  -> can work with nullable values
+  -> callback based updates
+
+homepage: https://t.me/+AkGV73kZi_Q1YTMy
+repository: https://github.com/PackRuble/cardoteka
+issue_tracker: https://github.com/PackRuble/cardoteka/issues
+
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
@@ -15,20 +25,17 @@ dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.1.1 # next release contains min dart SDK = 2.18
-
   # A project that was created and uses flutter 3.0.0 has a flutter_test package that depends on meta 1.7.0
   # Therefore, when upgrading the version of this package, you need to take this into account.
   meta: ^1.7.0
 
 dev_dependencies:
-
   flutter_test:
     sdk: flutter
-
   lint: ^2.2.0
 
 screenshots:
-  - description: 'Well met! I am pleased to present a type-safe wrap over SP'
+  - description: 'Cardoteka is a better type-safe wrapper over SharedPreferences.'
     path: res/cardoteka_banner.png
 
 funding:
