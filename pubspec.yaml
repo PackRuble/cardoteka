@@ -1,12 +1,5 @@
 name: cardoteka
 description: The best type-safe wrapper over SharedPreferences.
-  For what?
-  ▶ store strongly typed key-value
-  ▶ get access to get/modify only by typed key
-  ▶ be able to work with null values
-  ▶ have a wiretap
-version: 0.2.1
-# repository: https://github.com/my_org/my_repo
   Why so?
   -> strongly typed cards for access to storage
   -> don't think about type, use get|set
