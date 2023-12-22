@@ -299,7 +299,7 @@ mixin Detachability {
 
 Participate in the discussion (🙏) to implement such functionality into the package: [Way to remove a callback using `Watcher.attach` + `Cubit` · Issue #10 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/10).
 
-Next we define our cubit and logic, chain `Detachability` to it and override the behavior of the `close` method:
+Next we define our cubit and logic, mix `Detachability` to it and override the behavior of the `close` method:
 
 ```dart
 import 'package:bloc/bloc.dart';
@@ -352,7 +352,7 @@ Future<void> main() async {
 
 ### Provider (riverpod)
 
-This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. First, you need to create a provider to `Cardoteka` an instance of your onboarding and a provider of your desired state:
+This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. First, you need to create a "Cardoteka" provider for your storage instance and your desired state provider:
 
 ```dart
 import 'package:cardoteka/cardoteka.dart';
@@ -477,13 +477,17 @@ It is important to emphasize that you can implement your own solution based on `
 
 The most important "core" is covered by the tests part and all the places that needed covering in my opinion. There are badges at the very beginning of the current file where you can see the percentage of coverage, among other things. Or, click on the image below. It's relevant for releases. 
 
-[![](https://codecov.io/gh/PackRuble/cardoteka/graphs/sunburst.svg?token=IKB7AEHZPL)][codecov_link]
+[codecov_tree_badge]: https://codecov.io/gh/PackRuble/cardoteka/graphs/tree.svg
+[codecov_sunburst_badge]: https://codecov.io/gh/PackRuble/cardoteka/graphs/sunburst.svg
+
+| [![codecov_tree_badge]][codecov_link] | [![codecov_sunburst_badge]][codecov_link] |
+|---------------------------------------|-------------------------------------------|
 
 ## Author
 
 You can contact me or check out my activities on the following platforms:
 
-- [Github](https://t.me/+AkGV73kZi_Q1YTMy)
+- [Github](https://github.com/PackRuble)
 - [Telegram Group](https://t.me/+AkGV73kZi_Q1YTMy)
 - [StackOverflow](https://stackoverflow.com/users/17991131/ruble)
 - [Medium](https://medium.com/@pack.ruble)
