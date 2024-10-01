@@ -1,6 +1,7 @@
 import 'dart:ui' show Color;
 
 import 'package:cardoteka/cardoteka.dart';
+import 'package:cardoteka/src/card.dart' show CardAbstract;
 
 import 'models.dart';
 
@@ -8,7 +9,7 @@ mixin AdditionalTestValue<T> {
   abstract final T testValue;
 }
 
-abstract class CardTest<T> = Card<T> with AdditionalTestValue<T>;
+abstract class CardTest<T> = CardAbstract<T> with AdditionalTestValue<T>;
 
 final allCardotekaConfigs = [
   CardotekaConfig(

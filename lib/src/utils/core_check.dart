@@ -58,7 +58,7 @@ bool checkProvidedDataType<T>(
     if (!card.type.isCorrectType(value)) {
       throw AssertionErrorImpl('''
 The provided type [${card.type}] does not match the type of the [$card.defaultValue]:
-->Expected type: ${card.type.getDartType()}
+->Expected type: ${card.type.dartType}
 ->Actual type: ${card.defaultValue.runtimeType}
 ''');
     }
@@ -133,7 +133,7 @@ bool checkMatchingConverters(
 
     // todo: warning messages to the console if the map is of type int or double + web
 
-    final excepted = card.type.getDartType();
+    final excepted = card.type.dartType;
     Type? afterConverted;
     try {
       afterConverted = converter.to(value).runtimeType;

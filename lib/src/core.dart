@@ -316,18 +316,14 @@ abstract class Cardoteka {
   Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
     final key = _keyForSP(card);
-    switch (card.type) {
-      case DataType.bool:
-        return _prefs.setBool(key, resultValue as bool);
-      case DataType.int:
-        return _prefs.setInt(key, resultValue as int);
-      case DataType.double:
-        return _prefs.setDouble(key, resultValue as double);
-      case DataType.string:
-        return _prefs.setString(key, resultValue as String);
-      case DataType.stringList:
-        return _prefs.setStringList(key, (resultValue as List).cast<String>());
-    }
+    return switch (card.type) {
+      DataType.bool => _prefs.setBool(key, resultValue as bool),
+      DataType.int => _prefs.setInt(key, resultValue as int),
+      DataType.double => _prefs.setDouble(key, resultValue as double),
+      DataType.string => _prefs.setString(key, resultValue as String),
+      DataType.stringList =>
+        _prefs.setStringList(key, (resultValue as List).cast<String>())
+    };
   }
 
   /// Get the converter for the [Card] card. Returns null if there is no converter.
@@ -466,17 +462,12 @@ mixin CardotekaUtilsForTest on Cardoteka {
   V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
     final Object result = _getConverter(card)?.to(value) ?? value;
 
-    switch (card.type) {
-      case DataType.bool:
-        return (result as bool) as V;
-      case DataType.int:
-        return (result as int) as V;
-      case DataType.double:
-        return (result as double) as V;
-      case DataType.string:
-        return (result as String) as V;
-      case DataType.stringList:
-        return ((result as List).cast<String>()) as V;
-    }
+    return switch (card.type) {
+      DataType.bool => (result as bool) as V,
+      DataType.int => (result as int) as V,
+      DataType.double => (result as double) as V,
+      DataType.string => (result as String) as V,
+      DataType.stringList => ((result as List).cast<String>()) as V
+    };
   }
 }

@@ -9,7 +9,7 @@ class TestItem {
   final String index;
 }
 
-class TestIterableConverter extends IterableConverter<TestItem> {
+final class TestIterableConverter extends IterableConverter<TestItem> {
   const TestIterableConverter();
 
   @override
@@ -19,7 +19,7 @@ class TestIterableConverter extends IterableConverter<TestItem> {
   String objTo(TestItem obj) => obj.index;
 }
 
-class TestListConverter extends ListConverter<int> {
+final class TestListConverter extends ListConverter<int> {
   const TestListConverter();
 
   @override
@@ -30,7 +30,7 @@ class TestListConverter extends ListConverter<int> {
 }
 
 /// Values are assumed to be stored as a '---'-delimited string "key$value"
-class TestMapConverter extends MapConverter<int, double> {
+final class TestMapConverter extends MapConverter<int, double> {
   const TestMapConverter();
 
   static const _delimiter = '---';

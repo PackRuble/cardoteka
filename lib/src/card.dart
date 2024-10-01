@@ -1,5 +1,7 @@
 import 'dart:core' as dc;
 
+import 'package:meta/meta.dart' show reopen, visibleForTesting;
+
 /// Type of data to be saved.
 enum DataType {
   /// Represents type [dc.bool].
@@ -55,7 +57,7 @@ enum DataType {
 /// For each card you can use a generic type and converters as needed.
 ///
 /// However, a regular `class` will also work.
-abstract class Card<V extends dc.Object?> {
+abstract interface class Card<V extends dc.Object?> {
   /// Type of data to be saved. Select the one that matches either the type
   /// of your [defaultValue] or the type after using the [Converter.to]
   /// converter method.
@@ -72,3 +74,8 @@ abstract class Card<V extends dc.Object?> {
       'defaultValue: $defaultValue, '
       'type: $type)';
 }
+
+/// Designed to allow inheritance during testing.
+@reopen
+@visibleForTesting
+abstract class CardAbstract<T> extends Card<T> {}
