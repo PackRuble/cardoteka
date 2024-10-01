@@ -20,7 +20,7 @@ Future<void> main() async {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);
-      cardoteka.setMockInitialValues({});
+      cardoteka.setMockInitialCards({});
       await Cardoteka.init();
     }
 

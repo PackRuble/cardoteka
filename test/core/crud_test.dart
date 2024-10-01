@@ -16,7 +16,7 @@ void main() {
     late CardotekaCRUD cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaCRUD(config: config);
-      cardoteka.setMockInitialValues({});
+      cardoteka.setMockInitialCards({});
       await Cardoteka.init();
     }
 
@@ -87,7 +87,7 @@ void main() {
         '$Cardoteka.create-> create[value]-read',
         setUp: setUpAction,
         tearDown: tearDownAction,
-            () async {
+        () async {
           for (final card in cardoteka.cards) {
             // CRUD can only work with non-nullable cards
             if (card is! Card<Object>) continue;
@@ -157,7 +157,7 @@ void main() {
         '$Cardoteka.update-> update-read',
         setUp: setUpAction,
         tearDown: tearDownAction,
-            () async {
+        () async {
           for (final card in cardoteka.cards) {
             // CRUD can only work with non-nullable cards
             if (card is! Card<Object>) continue;

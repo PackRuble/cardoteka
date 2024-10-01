@@ -14,7 +14,7 @@ Future<void> main() async {
     cardoteka = CardotekaImplTest(
       config: allCardotekaConfigs.firstWhere((el) => el.name == '$ForestCard'),
     );
-    cardoteka.setMockInitialValues({});
+    cardoteka.setMockInitialCards({});
     await Cardoteka.init();
   });
 

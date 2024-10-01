@@ -451,12 +451,19 @@ mixin CardotekaUtilsForTest on Cardoteka {
 
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
-  void setMockInitialValues(Map<Card<Object?>, Object> values) {
+  void setMockInitialCards(Map<Card<Object?>, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
       for (final MapEntry<Card<Object?>, Object> entry in values.entries)
         _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
     });
+  }
+
+  /// The original [SharedPreferences.setMockInitialValues] method.
+  @visibleForTesting
+  static void setMockInitialValues(Map<String, Object> values) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    SharedPreferences.setMockInitialValues(values);
   }
 
   V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
