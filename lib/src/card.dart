@@ -5,19 +5,19 @@ import 'package:meta/meta.dart' show reopen, visibleForTesting;
 /// Type of data to be saved.
 enum DataType {
   /// Represents type [dc.bool].
-  bool(),
+  bool,
 
   /// Represents type [dc.int].
-  int(),
+  int,
 
   /// Represents type [dc.double].
-  double(),
+  double,
 
   /// Represents type [dc.String].
-  string(),
+  string,
 
   /// Represents type [dc.List]<[dc.String]>.
-  stringList(),
+  stringList,
 }
 
 /// Cards for using the [Cardoteka] implementation.
