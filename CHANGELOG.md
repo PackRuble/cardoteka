@@ -1,7 +1,8 @@
 ## [1.1.0] - 00-00-2024
 
 - upd: minimum supported SDK version to Flutter 3.13/Dart 3.1.0
-- upd: 
+- fix: incorrect assert message about initialization, close #12
+- 
 
 ## [1.0.1] - 22-12-2023
 

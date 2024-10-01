@@ -402,7 +402,7 @@ abstract class Cardoteka {
     assert(
       isInitialized,
       'The storage [${_config.name}] was not initialized! '
-      'Need to call `await $runtimeType.init()`',
+      'Need to call `await Cardoteka.init()`.',
     );
   }
 }
