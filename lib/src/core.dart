@@ -394,6 +394,16 @@ abstract class Cardoteka {
   /// The original [SharedPreferences.reload] method.
   Future<void> Function() get reload => _prefs.reload;
 
+  /// The original [SharedPreferences.setPrefix] method.
+  ///
+  /// No migration of existing preferences is performed by this method.
+  /// If you set a different prefix, and have previously stored preferences,
+  /// you will need to handle any migration yourself.
+  ///
+  /// This cannot be called after [Cardoteka.init].
+  static void setPrefix({String prefix = 'flutter.', Set<String>? allowList}) =>
+      SharedPreferences.setPrefix(prefix, allowList: allowList);
+
   void _assertCheckInit() {
     assert(
       isInitialized,
@@ -408,16 +418,6 @@ abstract class Cardoteka {
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs => Cardoteka._prefs;
-
-  /// The original [SharedPreferences.setPrefix] method.
-  void setPrefix(
-    String prefix,
-    // todo: add [allowList] after upgrading SP
-    /*{Set<String>? allowList}*/
-  ) =>
-      SharedPreferences.setPrefix(
-        prefix, /*allowList: allowList*/
-      );
 
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
