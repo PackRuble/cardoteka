@@ -1,17 +1,21 @@
-## [1.0.1] - 22-12-2023
+## [1.1.0] - 00-00-2024
 
-### Other
+- upd: minimum supported SDK version to Flutter 3.13/Dart 3.1.0
+- upd: 
+
+## [1.0.1] - 22-12-2023
 
 - fix: remove invalid example from `example`
 - upd: description
 
 ## [1.0.0] - 22-12-2023
 
-- first public release 🎊
-  - fully documented code
-  - with examples of use in the `example/lib` folder
-  - code is covered by tests (with a coverage percentage >80%)
-  - prepared readme.md with architecture overview
+first public release 🎊
+
+- fully documented code
+- with examples of use in the `example/lib` folder
+- code is covered by tests (with a coverage percentage >80%)
+- prepared readme.md with architecture overview
 
 ## [0.0.1] - 04-11-2022
 
