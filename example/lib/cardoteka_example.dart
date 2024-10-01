@@ -29,6 +29,9 @@ class SettingsCardoteka extends Cardoteka with WatcherImpl {
 }
 
 void main() async {
+  // if binding occurs before runApp is called
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Cardoteka.init();
   final cardoteka = SettingsCardoteka(
     config: CardotekaConfig(

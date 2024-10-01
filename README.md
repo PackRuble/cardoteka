@@ -86,6 +86,8 @@ class SettingsCardoteka extends Cardoteka with WatcherImpl {
 
 ```dart
 main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   await Cardoteka.init();
   final cardoteka = SettingsCardoteka(
     config: CardotekaConfig(
