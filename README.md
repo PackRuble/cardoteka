@@ -37,6 +37,7 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
     * [Card](#card)
     * [Converter](#converter)
     * [Watcher](#watcher)
+  * [Obfuscate](#obfuscate)
   * [Coverage](#coverage)
   * [Author](#author)
 <!-- TOC -->
@@ -474,6 +475,14 @@ I will mention `Watcher` and its implementation `WatcherImpl` separately. This i
 Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage.
 
 It is important to emphasize that you can implement your own solution based on `Watcher`.
+
+## Obfuscate
+
+At the time of writing, the [documentation](https://docs.flutter.dev/deployment/obfuscate#caveat) states that obfuscation does not apply to `Enum`:
+
+> Enum names are not obfuscated currently.
+
+However, this behavior may change in the future. So for now you can safely use `String get key => name;` as keys for your cards.
 
 ## Coverage
 
