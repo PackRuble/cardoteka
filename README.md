@@ -27,11 +27,14 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
   * [Advantages](#advantages)
   * [Table of contents](#table-of-contents)
   * [How to use?](#how-to-use)
+  * [Materials](#materials)
+  * [Apps](#apps)
   * [Use with...](#use-with)
     * [ChangeNotifier](#changenotifier)
     * [ValueNotifier](#valuenotifier)
     * [Cubit (bloc)](#cubit-bloc)
     * [Provider (riverpod)](#provider-riverpod)
+  * [Saving null values](#saving-null-values)
   * [Structure](#structure)
     * [Cardoteka](#cardoteka-1)
     * [Card](#card)
@@ -140,6 +143,21 @@ main() async {
 ```
 
 **Don't worry!** If you do something wrong, you will receive a detailed correction message in the console.
+
+## Materials
+
+List of resources to learn more about the capabilities of this library:
+- [Я сделал Cardoteka и вот как её использовать [кто любит черпать] / Хабр](https://habr.com/ru/articles/783712/)
+- [Stop using dynamic key-value storage! Use Cardoteka for typed access to Shared Preferences | by Ruble | Medium](https://medium.com/@pack.ruble/stop-using-dynamic-key-value-storage-use-cardoteka-for-typed-access-to-shared-preferences-567c9f799d7d)
+- [Cardoteka — техническая начинка и аналитика решений типобезопасной SP [кто любит вдаваться] / Хабр](https://habr.com/ru/articles/801089/)
+- [Приложение викторины: внедрение Cardoteka и основные паттерны проектирования с Riverpod / Хабр](https://habr.com/ru/articles/799437/)
+
+## Apps
+
+Applications that use this library:
+- [Weather Today](https://github.com/PackRuble/weather_today) - weather app
+- [Quiz Prize](https://github.com/PackRuble/quiz_prize_app) - quiz game deployed on [web](https://packruble.github.io/quiz_prize_app)
+- [PackRuble/reactive_domain_playground](https://github.com/PackRuble/reactive_domain_playground) - sandbox for practicing skills in a reactive Domain layer
 
 ## Use with...
 
@@ -408,6 +426,23 @@ Future<void> main() async {
 }
 ```
 
+## Saving null values
+
+If your card can contain a null value, then use the `getOrNull` and `setOrNull` methods. It works like this:
+- `getOrNull` - if pair is absent in storage, we will get `null`
+- `setOrNull` - if we save `null`, the pair will be deleted from storage
+
+Below is a table showing the compatibility of methods with cards:
+
+|   method    | Card<Object\> | Card<Object?> |
+|:-----------:|:-------------:|:-------------:|
+|    `get`    |       ✅       |       ❌       |
+|    `set`    |       ✅       |       ✅       |
+| `getOrNull` |       ✅       |       ✅       |
+| `setOrNull` |       ✅       |       ✅       |
+
+By and large, most often you will use `get`/`set`, and when you need to simulate working with null, or when there is no pair, you want to get `null` (and not the default value) - we use `getOrNull`/ `setOrNull`.
+
 ## Structure
 
 The structure of the library is very simple! Below are the main classes you will have to work with.
@@ -508,7 +543,7 @@ You can contact me or check out my activities on the following platforms:
 > 
 > With respect to everyone involved, Ruble.
 
-[telegram_badge]: https://img.shields.io/badge/Telegram%20channel-❤️-_?style=plastic&logo=telegram&color=33cccc
+[telegram_badge]: https://img.shields.io/badge/Telegram_channel-❤️-_?style=plastic&logo=telegram&color=33cccc
 [telegram_link]: https://t.me/+AkGV73kZi_Q1YTMy
 
 [pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic

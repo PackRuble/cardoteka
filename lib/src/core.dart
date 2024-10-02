@@ -392,6 +392,8 @@ abstract class Cardoteka {
       {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
 
   /// The original [SharedPreferences.reload] method.
+  ///
+  /// Attention, this method does not launch an update for watchers.
   Future<void> Function() get reload => _prefs.reload;
 
   /// The original [SharedPreferences.setPrefix] method.

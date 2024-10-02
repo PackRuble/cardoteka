@@ -2,6 +2,8 @@ import 'dart:core' as dc;
 
 import 'package:meta/meta.dart' show reopen, visibleForTesting;
 
+// coverage:ignore-file
+
 /// Type of data to be saved.
 enum DataType {
   /// Represents type [dc.bool].
