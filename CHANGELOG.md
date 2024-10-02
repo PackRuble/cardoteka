@@ -7,7 +7,7 @@
 - 🧨add: use `CardotekaUtilsForTest.setMockInitialCards` method instead of `CardotekaUtilsForTest.setMockInitialValues`, which is now responsible for the original `SharedPreferences.setMockInitialValues` method. Close #16
 - doc: `Obfuscate`, `Materials`, `Apps`, `Saving null values` sections were added to readme
 
-You can see all closed issues in [Milestone v1.1.0](https://github.com/PackRuble/cardoteka/milestone/1)
+You can see all closed issues in [Milestone v1.1.0](https://github.com/PackRuble/cardoteka/milestone/1?closed=1)
 
 ## [1.0.1] - 22-12-2023
 
