@@ -25,8 +25,9 @@ void main() {
   late CardotekaTest cardoteka;
   late Card<Object> card;
   setUp(() {
-    cardoteka = CardotekaTest(config: const CardotekaConfig(name: '', cards: []));
-    cardoteka.setMockInitialValues({});
+    cardoteka =
+        CardotekaTest(config: const CardotekaConfig(name: '', cards: []));
+    cardoteka.setMockInitialCards({});
 
     card = const CardMock();
   });

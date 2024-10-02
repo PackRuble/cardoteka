@@ -32,7 +32,7 @@ abstract class Converter<Element extends Object?, ElementFrom extends Object> {
 }
 
 /// Use to convert a collection of elements to a collection of allowed types.
-abstract class CollectionConverter<
+abstract base class CollectionConverter<
         Collection extends Object,
         Element extends Object,
         CollectionFrom extends Object,
@@ -248,7 +248,7 @@ class _NumAsStringConverter implements Converter<num, String> {
 ///
 /// Converts [Iterable]<[Element]> to [List]<[String]> using [Iterable.map].
 ///
-abstract class IterableConverter<Element extends Object>
+abstract base class IterableConverter<Element extends Object>
     implements
         CollectionConverter<Iterable<Element>, Element, List<String>, String> {
   const IterableConverter();
@@ -272,7 +272,7 @@ abstract class IterableConverter<Element extends Object>
 ///
 /// Converts [List]<[T]> to [List]<[String]>.
 ///
-abstract class ListConverter<Element extends Object>
+abstract base class ListConverter<Element extends Object>
     implements
         CollectionConverter<List<Element>, Element, List<String>, String> {
   const ListConverter();
@@ -296,7 +296,7 @@ abstract class ListConverter<Element extends Object>
 /// Converts [Map]<[K], [V]> to [List]<[String]>.
 ///
 /// Use a suitable delimiter for your data to represent the key-value as a `String`.
-abstract class MapConverter<K, V>
+abstract base class MapConverter<K, V>
     implements
         CollectionConverter<Map<K, V>, MapEntry<K, V>, List<String>, String> {
   const MapConverter();

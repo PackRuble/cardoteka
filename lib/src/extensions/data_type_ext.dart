@@ -8,20 +8,13 @@ import '../card.dart';
 extension DataTypeExt on DataType {
   /// Get dart type.
   @internal
-  Type getDartType() {
-    switch (this) {
-      case DataType.bool:
-        return bool;
-      case DataType.int:
-        return int;
-      case DataType.double:
-        return double;
-      case DataType.string:
-        return String;
-      case DataType.stringList:
-        return List<String>;
-    }
-  }
+  Type get dartType => switch (this) {
+        DataType.bool => bool,
+        DataType.int => int,
+        DataType.double => double,
+        DataType.string => String,
+        DataType.stringList => List<String>
+      };
 
   /// Checks that the type of the specified value is the same as the valid value.
   ///
@@ -33,17 +26,12 @@ extension DataTypeExt on DataType {
         (value is double || value is int) &&
         (this == DataType.bool || this == DataType.int)) return true;
 
-    switch (this) {
-      case DataType.bool:
-        return value is bool;
-      case DataType.int:
-        return value is int;
-      case DataType.double:
-        return value is double;
-      case DataType.string:
-        return value is String;
-      case DataType.stringList:
-        return value is List<String>;
-    }
+    return switch (this) {
+      DataType.bool => value is bool,
+      DataType.int => value is int,
+      DataType.double => value is double,
+      DataType.string => value is String,
+      DataType.stringList => value is List<String>
+    };
   }
 }

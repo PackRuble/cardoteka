@@ -1,5 +1,3 @@
-// @dart = 3.2
-
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
 import 'package:cardoteka/cardoteka.dart' show Card, Converter, DataType;
@@ -55,7 +53,7 @@ class TekaTool {
     final converter = converters?[card];
     final value = converter?.to(defaultValue) ?? defaultValue;
 
-    final testValue =  switch (card.type) {
+    final testValue = switch (card.type) {
       DataType.string => (value as String) + '_test',
       DataType.int => (value as int) * 2,
       DataType.double => (value as double) + 1.11111,

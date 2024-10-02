@@ -4,7 +4,6 @@ import 'dart:collection' show UnmodifiableListView;
 
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
-
 import 'package:flutter_test/flutter_test.dart';
 
 import '../source/cards.dart';
@@ -19,7 +18,7 @@ void main() {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);
-      cardoteka.setMockInitialValues({});
+      cardoteka.setMockInitialCards({});
       await Cardoteka.init();
     }
 

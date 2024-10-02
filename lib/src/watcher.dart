@@ -7,7 +7,7 @@ import 'card.dart';
 ///
 /// The [Watcher.notify] method will be called whenever the value in the store
 /// changes.
-abstract class Watcher {
+abstract interface class Watcher {
   /// Called whenever a new value is provided for the storage. To implement
   /// this method, please refer to the documentation [Cardoteka.watcher].
   @internal

@@ -316,18 +316,14 @@ abstract class Cardoteka {
   Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
     final key = _keyForSP(card);
-    switch (card.type) {
-      case DataType.bool:
-        return _prefs.setBool(key, resultValue as bool);
-      case DataType.int:
-        return _prefs.setInt(key, resultValue as int);
-      case DataType.double:
-        return _prefs.setDouble(key, resultValue as double);
-      case DataType.string:
-        return _prefs.setString(key, resultValue as String);
-      case DataType.stringList:
-        return _prefs.setStringList(key, (resultValue as List).cast<String>());
-    }
+    return switch (card.type) {
+      DataType.bool => _prefs.setBool(key, resultValue as bool),
+      DataType.int => _prefs.setInt(key, resultValue as int),
+      DataType.double => _prefs.setDouble(key, resultValue as double),
+      DataType.string => _prefs.setString(key, resultValue as String),
+      DataType.stringList =>
+        _prefs.setStringList(key, (resultValue as List).cast<String>())
+    };
   }
 
   /// Get the converter for the [Card] card. Returns null if there is no converter.
@@ -396,13 +392,25 @@ abstract class Cardoteka {
       {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
 
   /// The original [SharedPreferences.reload] method.
+  ///
+  /// Attention, this method does not launch an update for watchers.
   Future<void> Function() get reload => _prefs.reload;
+
+  /// The original [SharedPreferences.setPrefix] method.
+  ///
+  /// No migration of existing preferences is performed by this method.
+  /// If you set a different prefix, and have previously stored preferences,
+  /// you will need to handle any migration yourself.
+  ///
+  /// This cannot be called after [Cardoteka.init].
+  static void setPrefix({String prefix = 'flutter.', Set<String>? allowList}) =>
+      SharedPreferences.setPrefix(prefix, allowList: allowList);
 
   void _assertCheckInit() {
     assert(
       isInitialized,
       'The storage [${_config.name}] was not initialized! '
-      'Need to call `await $runtimeType.init()`',
+      'Need to call `await Cardoteka.init()`.',
     );
   }
 }
@@ -412,16 +420,6 @@ abstract class Cardoteka {
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
   SharedPreferences get prefs => Cardoteka._prefs;
-
-  /// The original [SharedPreferences.setPrefix] method.
-  void setPrefix(
-    String prefix,
-    // todo: add [allowList] after upgrading SP
-    /*{Set<String>? allowList}*/
-  ) =>
-      SharedPreferences.setPrefix(
-        prefix, /*allowList: allowList*/
-      );
 
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
@@ -455,7 +453,7 @@ mixin CardotekaUtilsForTest on Cardoteka {
 
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
-  void setMockInitialValues(Map<Card<Object?>, Object> values) {
+  void setMockInitialCards(Map<Card<Object?>, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
       for (final MapEntry<Card<Object?>, Object> entry in values.entries)
@@ -463,20 +461,22 @@ mixin CardotekaUtilsForTest on Cardoteka {
     });
   }
 
+  /// The original [SharedPreferences.setMockInitialValues] method.
+  @visibleForTesting
+  static void setMockInitialValues(Map<String, Object> values) {
+    // ignore: invalid_use_of_visible_for_testing_member
+    SharedPreferences.setMockInitialValues(values);
+  }
+
   V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
     final Object result = _getConverter(card)?.to(value) ?? value;
 
-    switch (card.type) {
-      case DataType.bool:
-        return (result as bool) as V;
-      case DataType.int:
-        return (result as int) as V;
-      case DataType.double:
-        return (result as double) as V;
-      case DataType.string:
-        return (result as String) as V;
-      case DataType.stringList:
-        return ((result as List).cast<String>()) as V;
-    }
+    return switch (card.type) {
+      DataType.bool => (result as bool) as V,
+      DataType.int => (result as int) as V,
+      DataType.double => (result as double) as V,
+      DataType.string => (result as String) as V,
+      DataType.stringList => ((result as List).cast<String>()) as V
+    };
   }
 }
