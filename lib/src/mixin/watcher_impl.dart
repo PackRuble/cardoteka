@@ -34,7 +34,7 @@ mixin WatcherImpl on Cardoteka implements Watcher {
   @internal
   Watcher get watcher => this;
 
-  final _watchers = <Card, List<ValueCallback>>{};
+  late final _watchers = <Card, List<ValueCallback>>{};
 
   @override
   @internal
