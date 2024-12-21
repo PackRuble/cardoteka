@@ -1,6 +1,7 @@
 import 'dart:core'
     show
         DateTime,
+        Deprecated,
         Duration,
         Enum,
         EnumName,
@@ -59,6 +60,9 @@ abstract base class CollectionConverter<
 class Converters {
   const Converters._();
 
+  @Deprecated(
+    'Is temporarily obsolete. See more details in `_ColorConverter` constructor',
+  )
   static const Converter<Color, int> colorAsInt = _ColorConverter();
   static const Converter<Uri, String> uriAsString = _UriConverter();
   static const Converter<Duration, int> durationAsInt = _DurationConverter();
@@ -121,7 +125,17 @@ extension _EnumConverters on Converters {
 /// Converter for class [Color].
 ///
 /// Converts [Color] to [int] using [Color.value].
+@Deprecated(
+  'Is temporarily obsolete. See more details here: '
+  '- [[packages] `Color.value` is deprecated · Issue #159739 · flutter/flutter](https://github.com/flutter/flutter/issues/159739) '
+  '- [[Proposal]Provide a alternative to deprecated `Color.value` · Issue #160184 · flutter/flutter](https://github.com/flutter/flutter/issues/160184)',
+)
 class _ColorConverter implements Converter<Color, int> {
+  @Deprecated(
+    'Is temporarily obsolete. See more details here: '
+    '- [[packages] `Color.value` is deprecated · Issue #159739 · flutter/flutter](https://github.com/flutter/flutter/issues/159739) '
+    '- [[Proposal]Provide a alternative to deprecated `Color.value` · Issue #160184 · flutter/flutter](https://github.com/flutter/flutter/issues/160184)',
+  )
   const _ColorConverter();
 
   @override
