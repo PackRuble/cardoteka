@@ -13,23 +13,22 @@ issue_tracker: https://github.com/PackRuble/cardoteka/issues
 version: 1.1.0
 
 environment:
-  sdk: ^3.1.0
+  sdk: ^3.5.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # 2.2.3 release contains min dart SDK = 3.1.0
-  # next release contains min dart SDK = 3.3.0
-  shared_preferences: ^2.2.3
+  # dart sdk limitation matches - ^3.5.0
+  shared_preferences: ^2.3.4
 
   # version is clearly related to the minimum version of the dart sdk
-  meta: ^1.9.1
+  meta: ^1.15.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lint: ^2.2.0
+  lint: ^2.3.0
 
 screenshots:
   - description: 'Cardoteka is a better type-safe wrapper over SharedPreferences.'
