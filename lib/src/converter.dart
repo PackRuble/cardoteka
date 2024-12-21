@@ -63,15 +63,17 @@ class Converters {
   @Deprecated(
     'Is temporarily obsolete. See more details in `_ColorConverter` constructor',
   )
-  static const Converter<Color, int> colorAsInt = _ColorConverter();
-  static const Converter<Uri, String> uriAsString = _UriConverter();
-  static const Converter<Duration, int> durationAsInt = _DurationConverter();
-  static const Converter<DateTime, String> dateTimeAsString =
-      _DateTimeConverter();
-  static const Converter<DateTime, int> dateTimeAsInt =
-      _DateTimeAsIntConverter();
-  static const Converter<num, double> numAsDouble = _NumConverter();
-  static const Converter<num, String> numAsString = _NumAsStringConverter();
+  static Converter<Color, int> get colorAsInt => const _ColorConverter();
+  static Converter<Uri, String> get uriAsString => const _UriConverter();
+  static Converter<Duration, int> get durationAsInt =>
+      const _DurationConverter();
+  static Converter<DateTime, String> get dateTimeAsString =>
+      const _DateTimeConverter();
+  static Converter<DateTime, int> get dateTimeAsInt =>
+      const _DateTimeAsIntConverter();
+  static Converter<num, double> get numAsDouble => const _NumConverter();
+  static Converter<num, String> get numAsString =>
+      const _NumAsStringConverter();
 
   // fixdep(15.12.2023): there is no way to use something like a generic getter
   // https://github.com/dart-lang/language/issues/1622
