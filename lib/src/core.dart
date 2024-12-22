@@ -10,7 +10,7 @@ import 'converter.dart';
 import 'utils/core_check.dart' show checkConfiguration;
 import 'watcher.dart';
 
-/// A wrapper over [SharedPreferences] and the core of the whole system [Cardoteka].
+/// A wrapper over [SharedPreferencesWithCache] and the core of the whole system [Cardoteka].
 /// Allows the use of typed [Card]'s to access storage.
 ///
 /// A typical use case looks like this:
@@ -105,7 +105,7 @@ import 'watcher.dart';
 /// the functionality of your cardoteka:
 /// - [WatcherImpl] to implement listening for changes to values in your storage.
 /// Use your implementation if necessary, extending from [Watcher].
-/// - [AccessToSP] to access static fields [SharedPreferences] as well
+/// - [AccessToSP] to access static fields [SharedPreferencesWithCache] as well
 /// as the singleton itself [_prefs]. If you needed this, you probably already
 /// know what you're doing.
 /// - [CRUD] to use familiar basic CRUD operations (create, read, update, delete).
@@ -119,30 +119,10 @@ import 'watcher.dart';
 ///
 /// Don't worry! If you do something wrong, you will receive a detailed
 /// correction message in the console.
-abstract class Cardoteka {
-  /// Use this constructor to pass a configuration [CardotekaConfig] and create
-  /// an instance of the [Cardoteka].
-  Cardoteka({
-    required CardotekaConfig config,
-  })  :
-        // fixdep(22.05.2023): this behavior is not yet available for const classes
-        // https://github.com/dart-lang/language/issues/2581
-        assert(checkConfiguration(config)),
-        _config = config;
+class Cardoteka extends CardotekaAsync {
+  Cardoteka({required super.config});
 
-  /// List of [Card]'s for accessing the storage [SharedPreferences].
-  UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
-
-  /// Configuration file containing important information about the [Card]s.
-  /// - [CardotekaConfig.name] is used to prefix the key in [SharedPreferences] for
-  /// each of the [Cardoteka] instances;
-  /// - [CardotekaConfig.cards] list of all card keys for accessing the storage.
-  /// Access via [cards] if necessary.
-  /// - [CardotekaConfig.converters] are used to convert a complex object to the base
-  /// types defined in the [DataType] enumeration.
-  final CardotekaConfig _config;
-
-  /// A reference to an instance of [SharedPreferences] from the package
+  /// A reference to an instance of [SharedPreferencesWithCache] from the package
   /// [shared_preferences](https://pub.dev/packages/shared_preferences)
   ///
   /// Initialization of this variable occurs after calling [init] and
@@ -164,13 +144,7 @@ abstract class Cardoteka {
   ///
   /// This can also be useful in cases of gradual migration or quick testing
   /// of some hypotheses.
-  static late SharedPreferences _prefs;
-
-  /// Specify if listeners should be notified of new values in the persistence storage.
-  ///
-  /// Use a mixin based on the [Watcher] interface.
-  @internal
-  Watcher? get watcher => null;
+  static late final SharedPreferencesWithCache _prefs;
 
   /// Indicates whether the storage is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
@@ -180,7 +154,7 @@ abstract class Cardoteka {
 
   static bool _isInitialized = false;
 
-  /// Initialization [Cardoteka]. It is necessary to wait for completion.
+  /// Initialization [CardotekaAsync]. It is necessary to wait for completion.
   /// Regardless of the number of Cardoteka instances, initialization must be
   /// performed once.
   ///
@@ -194,20 +168,122 @@ abstract class Cardoteka {
   /// final myCardoteka = MyCardoteka(...);
   /// final result = myCardoteka.get(...);
   /// ```
-  static Future<void> init() async {
+  /// // todo(22.12.2024): doc migrateV2
+  static FutureOr<void> init(
+      // {required bool migrateV2}
+      ) async {
     if (!_isInitialized) {
-      _prefs = await SharedPreferences.getInstance();
+      // todo(22.12.2024): use migrateV2
+      // _prefsOld = await SharedPreferences.getInstance();
+      _prefs = await SharedPreferencesWithCache.create(
+        cacheOptions: const SharedPreferencesWithCacheOptions(
+          allowList: {},
+        ),
+      );
       _isInitialized = true;
     }
   }
 
+  @override
+  V get<V extends Object>(Card<V> card) {
+    _assertCheckInit();
+
+    return _getValueFromSP(card) ?? card.defaultValue;
+  }
+
+  @override
+  V? getOrNull<V extends Object?>(Card<V?> card) {
+    _assertCheckInit();
+
+    return _getValueFromSP(card);
+  }
+
+  /// Internal method to retrieve data from [SharedPreferencesWithCache].
+  @override
+  V? _getValueFromSP<V>(Card<V?> card) {
+    // todo(22.12.2024): можно выделить некоторые части в отдельный метод для переопределения
+    final key = _keyForSP(card);
+
+    final Object? value = switch (card.type) {
+      // use internal implementation of `Object` to cast `List<String>`
+      DataType.stringList => _prefs.getStringList(key),
+      _ => _prefs.get(key),
+    };
+
+    if (value == null) {
+      // value was not in cached storage
+      return value as V?;
+    } else {
+      return (_getConverter(card)?.from(value) ?? value) as V?;
+    }
+  }
+
+  @override
+  Set<Card> getStoredCards() {
+    final resultKeys = <Card>{
+      for (final card in cards)
+        if (_prefs.keys.contains(_keyForSP(card))) card
+    };
+
+    return resultKeys;
+  }
+
+  @override
+  Map<Card, Object> getStoredEntries() =>
+      {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
+
+  /// The original [SharedPreferencesWithCache.reload] method.
+  ///
+  /// Attention, this method does not launch an update for watchers.
+  Future<void> reloadCache() => _prefs.reloadCache();
+
+  void _assertCheckInit() {
+    assert(
+      isInitialized,
+      'The storage [${_config.name}] was not initialized! '
+      'Need to call `await Cardoteka.init()`.',
+    );
+  }
+}
+
+class CardotekaAsync {
+  /// Use this constructor to pass a configuration [CardotekaConfig] and create
+  /// an instance of the [CardotekaAsync].
+  CardotekaAsync({
+    required CardotekaConfig config,
+  })  :
+        // fixdep(22.05.2023): this behavior is not yet available for const classes
+        // https://github.com/dart-lang/language/issues/2581
+        assert(checkConfiguration(config)),
+        _config = config;
+
+  /// List of [Card]'s for accessing the storage [SharedPreferencesAsync].
+  UnmodifiableListView<Card> get cards => UnmodifiableListView(_config.cards);
+
+  /// Configuration file containing important information about the [Card]s.
+  /// - [CardotekaConfig.name] is used to prefix the key in [SharedPreferencesAsync] for
+  /// each of the [CardotekaAsync] instances;
+  /// - [CardotekaConfig.cards] list of all card keys for accessing the storage.
+  /// Access via [cards] if necessary.
+  /// - [CardotekaConfig.converters] are used to convert a complex object to the base
+  /// types defined in the [DataType] enumeration.
+  final CardotekaConfig _config;
+
+  static final _prefsAsync = SharedPreferencesAsync();
+
+  /// Specify if listeners should be notified of new values in the persistence storage.
+  ///
+  /// Use a mixin based on the [Watcher] interface.
+  @internal
+  Watcher? get watcher => null;
+
   /// Get a [CardotekaConfig.name]-based key from the [_config] and [Card.key] to use
-  /// in the [SharedPreferences] storage.
+  /// in the [SharedPreferencesAsync] storage.
   String _keyForSP(Card card) => '${_config.name}.${card.key}';
 
-  /// Get value from [SharedPreferences] storage using [Card]<[Object]>.
+  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object]>.
   ///
-  /// The default behavior assumes that if [SharedPreferences] does not have
+  /// The default behavior assumes that if [SharedPreferencesAsync] does not have
   /// a record with the provided card, then `defaultValue` will be returned.
   ///
   /// The returned object is always non-nullable.
@@ -216,34 +292,31 @@ abstract class Cardoteka {
   ///   OR
   /// your card is of nullable type [Card]<[Object?]>,
   ///   then use the [getOrNull] method.
-  V get<V extends Object>(Card<V> card) {
-    _assertCheckInit();
+  FutureOr<V> get<V extends Object>(Card<V> card) => Future(
+        () async {
+          return await _getValueFromSP<V>(card) ?? card.defaultValue;
+        },
+      );
 
-    return _getValueFromSP<V>(card) ?? card.defaultValue;
-  }
-
-  /// Get value from [SharedPreferences] storage using [Card]<[Object?]>.
+  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object?]>.
   ///
   /// If the record was not in the storage, then null will be returned. If you
   /// need to return a default value [Card.defaultValue] when there is no record
   /// in storage, use the [get] method.
-  V? getOrNull<V extends Object?>(Card<V?> card) {
-    _assertCheckInit();
+  FutureOr<V?> getOrNull<V extends Object?>(Card<V?> card) =>
+      _getValueFromSP<V>(card);
 
-    return _getValueFromSP<V>(card);
-  }
-
-  /// Internal method to retrieve data from [SharedPreferences].
-  V? _getValueFromSP<V>(Card<V?> card) {
+  /// Internal method to retrieve data from [SharedPreferencesAsync].
+  FutureOr<V?> _getValueFromSP<V>(Card<V?> card) async {
     final key = _keyForSP(card);
 
-    final Object? value;
-    if (card.type == DataType.stringList) {
-      value = _prefs.getStringList(key);
-    } else {
-      // simple types do not need "as" now
-      value = _prefs.get(key);
-    }
+    final Object? value = await switch (card.type) {
+      DataType.string => _prefsAsync.getString(key),
+      DataType.int => _prefsAsync.getInt(key),
+      DataType.double => _prefsAsync.getDouble(key),
+      DataType.bool => _prefsAsync.getBool(key),
+      DataType.stringList => _prefsAsync.getStringList(key),
+    };
 
     if (value == null) {
       // value was not in the storage
@@ -253,7 +326,7 @@ abstract class Cardoteka {
     }
   }
 
-  /// Save the new value in [SharedPreferences] using [Card].
+  /// Save the new value in [SharedPreferencesAsync] using [Card].
   ///
   /// NOTE: Always specify a generic type and do so according to the type
   /// of your [Card.defaultValue]. This will help prevent compilation errors
@@ -268,14 +341,12 @@ abstract class Cardoteka {
   ///
   /// If successful, it will return true.
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
-    _assertCheckInit();
-
     watcher?.notify<V?>(card, value);
 
     return _setValueToSP<V>(card, value);
   }
 
-  /// Store the new value in [SharedPreferences] using [Card], which can be
+  /// Store the new value in [SharedPreferencesAsync] using [Card], which can be
   /// of nullable type for [Card.defaultValue]. This method allows you to simulate
   /// saving of nullable values by saving or deleting them from storage. It means:
   /// - if you set null for a given [card] then the value will be removed
@@ -296,34 +367,32 @@ abstract class Cardoteka {
   /// - if [value]==null, then the value was successfully removed
   /// - in any other case, the value was successfully saved
   Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) async {
-    _assertCheckInit();
-
-    bool toNotify = true;
-
     if (value == null) {
-      toNotify = false;
-      return remove(card);
+      await remove(card);
+      // todo(22.12.2024): имитация успеха
+      return true;
+    } else {
+      watcher?.notify<V?>(card, value);
+      return _setValueToSP<V>(card, value);
     }
-
-    if (toNotify) watcher?.notify<V?>(card, value);
-
-    return _setValueToSP<V>(card, value);
   }
 
-  /// Internal method to save data in [SharedPreferences].
+  /// Internal method to save data in [SharedPreferencesAsync].
   ///
   /// Returns true if the value was successfully saved.
   Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
     final resultValue = _getConverter(card)?.to(value) ?? value;
     final key = _keyForSP(card);
-    return switch (card.type) {
-      DataType.bool => _prefs.setBool(key, resultValue as bool),
-      DataType.int => _prefs.setInt(key, resultValue as int),
-      DataType.double => _prefs.setDouble(key, resultValue as double),
-      DataType.string => _prefs.setString(key, resultValue as String),
+    await switch (card.type) {
+      DataType.bool => _prefsAsync.setBool(key, resultValue as bool),
+      DataType.int => _prefsAsync.setInt(key, resultValue as int),
+      DataType.double => _prefsAsync.setDouble(key, resultValue as double),
+      DataType.string => _prefsAsync.setString(key, resultValue as String),
       DataType.stringList =>
-        _prefs.setStringList(key, (resultValue as List).cast<String>())
+        _prefsAsync.setStringList(key, (resultValue as List).cast<String>())
     };
+    // todo(22.12.2024): имитация успеха
+    return true;
   }
 
   /// Get the converter for the [Card] card. Returns null if there is no converter.
@@ -334,12 +403,12 @@ abstract class Cardoteka {
   ///
   /// If successful, it will return true.
   ///
-  /// Works similarly to the [SharedPreferences.remove] method of the same name.
+  /// Works similarly to the [SharedPreferencesAsync.remove] method of the same name.
   Future<bool> remove(Card card) async {
-    _assertCheckInit();
-
     watcher?.notify(card, null);
-    return _prefs.remove(_keyForSP(card));
+    await _prefsAsync.remove(_keyForSP(card));
+    // todo(22.12.2024): имитация успеха
+    return true;
   }
 
   /// Iteratively removes all values associated with the provided [cards]
@@ -349,81 +418,71 @@ abstract class Cardoteka {
   ///
   /// Returns true only if the result was true for each card.
   ///
-  /// Works similarly to the [SharedPreferences.clear] method of the same name.
+  /// Works similarly to the [SharedPreferencesAsync.clear] method of the same name.
   Future<bool> removeAll() async {
-    _assertCheckInit();
-
-    bool overallResult = true;
-    for (final card in cards) {
-      overallResult &= await remove(card);
-    }
-
+    final results = await Future.wait([for (final card in cards) remove(card)]);
+    final overallResult = results.fold(true, (prev, el) => prev && el);
     return overallResult;
   }
 
   /// Returns all [cards] that contains in the persistent storage.
   ///
-  /// Works similarly to the [SharedPreferences.getKeys] method of the same name.
-  Set<Card> getStoredCards() {
-    _assertCheckInit();
+  /// Works similarly to the [SharedPreferencesAsync.getKeys] method of the same name.
+  FutureOr<Set<Card>> getStoredCards() => Future(
+        () async {
+          final Set<String> storedKeys = await _prefsAsync.getKeys(
+            // todo(22.12.2024):
+            allowList: null,
+          );
+          final resultKeys = <Card>{
+            for (final card in cards)
+              if (storedKeys.contains(_keyForSP(card))) card
+          };
 
-    final Set<String> allStoredKey = _prefs.getKeys();
-    final resultKeys = <Card>{
-      for (final card in cards)
-        if (allStoredKey.contains(_keyForSP(card))) card
-    };
-
-    return resultKeys;
-  }
+          return resultKeys;
+        },
+      );
 
   /// Returns true if persistent storage the contains the given [card].
   ///
-  /// Works similarly to the [SharedPreferences.containsKey] method of the same name.
-  Future<bool> containsCard(Card card) async {
-    _assertCheckInit();
-
-    return _prefs.containsKey(_keyForSP(card));
-  }
+  /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
+  Future<bool> containsCard(Card card) async =>
+      _prefsAsync.containsKey(_keyForSP(card));
 
   /// Returns all stored entities from the persistent storage.
   ///
   /// Works similarly to the [AccessToSP.getEntries] method of the same name.
-  Map<Card, Object> getStoredEntries() =>
-      {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
+  FutureOr<Map<Card, Object>> getStoredEntries() {
+    return Future(
+      () async => {
+        // todo(22.12.2024): use getAll method
+        for (final Card card in await getStoredCards())
+          card: (await _getValueFromSP(card))!
+      },
+    );
+  }
 
-  /// The original [SharedPreferences.reload] method.
-  ///
-  /// Attention, this method does not launch an update for watchers.
-  Future<void> Function() get reload => _prefs.reload;
-
-  /// The original [SharedPreferences.setPrefix] method.
+  /// The original [SharedPreferencesAsync.setPrefix] method.
   ///
   /// No migration of existing preferences is performed by this method.
   /// If you set a different prefix, and have previously stored preferences,
   /// you will need to handle any migration yourself.
   ///
-  /// This cannot be called after [Cardoteka.init].
-  static void setPrefix({String prefix = 'flutter.', Set<String>? allowList}) =>
-      SharedPreferences.setPrefix(prefix, allowList: allowList);
-
-  void _assertCheckInit() {
-    assert(
-      isInitialized,
-      'The storage [${_config.name}] was not initialized! '
-      'Need to call `await Cardoteka.init()`.',
-    );
-  }
+  /// This cannot be called after [CardotekaAsync.init].
+  // todo(22.12.2024): удалить
+  // static void setPrefix({String prefix = 'flutter.', Set<String>? allowList}) =>
+  //     SharedPreferences.setPrefix(prefix, allowList: allowList);
 }
 
-/// Get access to all the original methods of the [SharedPreferences] library.
+/// Get access to all the original methods of the [SharedPreferencesWithCache] library.
 ///
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
 mixin AccessToSP on Cardoteka {
-  SharedPreferences get prefs => Cardoteka._prefs;
+  SharedPreferencesWithCache get prefs => Cardoteka._prefs;
 
   /// Returns all entries (key: value) in the persistent storage.
   Map<String, Object> getEntries() =>
-      {for (final key in prefs.getKeys()) key: prefs.get(key)!};
+      {for (final key in prefs.keys) key: prefs.get(key)!};
 }
 
 /// Contains various utilities, mainly designed for testing.
@@ -442,17 +501,20 @@ mixin CardotekaUtilsForTest on Cardoteka {
   /// The original [SharedPreferences.resetStatic] method.
   @visibleForTesting
   // ignore: invalid_use_of_visible_for_testing_member
-  void Function() get resetStatic => SharedPreferences.resetStatic;
+  // todo(22.12.2024): удалить
+  // void Function() get resetStatic => SharedPreferencesAsync.resetStatic;
 
   /// The original [SharedPreferences.getInstance] method.
   ///
   /// Useful in tests after call [SharedPreferences.setMockInitialValues].
-  @visibleForTesting
-  Future<void> reInit() async =>
-      Cardoteka._prefs = await SharedPreferences.getInstance();
+  // todo(22.12.2024): изменить
+  // @visibleForTesting
+  // Future<void> reInit() async =>
+  //     Cardoteka._prefs = await SharedPreferences.getInstance();
 
   /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
   @visibleForTesting
+  // todo(22.12.2024): удалить
   void setMockInitialCards(Map<Card<Object?>, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({
@@ -463,6 +525,7 @@ mixin CardotekaUtilsForTest on Cardoteka {
 
   /// The original [SharedPreferences.setMockInitialValues] method.
   @visibleForTesting
+  // todo(22.12.2024): удалить
   static void setMockInitialValues(Map<String, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues(values);
