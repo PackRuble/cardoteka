@@ -7,6 +7,7 @@ import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
 import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
@@ -16,6 +17,8 @@ class CardotekaTest extends Cardoteka
 }
 
 Future<void> main() async {
+  initSP();
+
   for (final config in allCardotekaConfigs) {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {

@@ -144,7 +144,7 @@ class Cardoteka extends CardotekaAsync {
   ///
   /// This can also be useful in cases of gradual migration or quick testing
   /// of some hypotheses.
-  static late final SharedPreferencesWithCache _prefs;
+  static late SharedPreferencesWithCache _prefs;
 
   /// Indicates whether the storage is initialized. Use the [init] method to
   /// initialize and wait for it to complete.
@@ -177,7 +177,10 @@ class Cardoteka extends CardotekaAsync {
       // _prefsOld = await SharedPreferences.getInstance();
       _prefs = await SharedPreferencesWithCache.create(
         cacheOptions: const SharedPreferencesWithCacheOptions(
-          allowList: {},
+          // we don't want to enumerate all the cards because then we need
+          // to access them on a static basis
+          // ignore: avoid_redundant_argument_values
+          allowList: null,
         ),
       );
       _isInitialized = true;
@@ -219,7 +222,52 @@ class Cardoteka extends CardotekaAsync {
   }
 
   @override
+  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
+    _assertCheckInit();
+
+    return super.set<V>(card, value);
+  }
+
+  @override
+  Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) async {
+    _assertCheckInit();
+
+    return super.setOrNull<V>(card, value);
+  }
+
+  @override
+  Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
+    final resultValue = _getConverter(card)?.to(value) ?? value;
+    final key = _keyForSP(card);
+    await switch (card.type) {
+      DataType.bool => _prefs.setBool(key, resultValue as bool),
+      DataType.int => _prefs.setInt(key, resultValue as int),
+      DataType.double => _prefs.setDouble(key, resultValue as double),
+      DataType.string => _prefs.setString(key, resultValue as String),
+      DataType.stringList =>
+        _prefs.setStringList(key, (resultValue as List).cast<String>())
+    };
+    // todo(22.12.2024): имитация успеха
+    return true;
+  }
+
+  /// Returns true if persistent storage the contains the given [card].
+  ///
+  /// Works similarly to the [SharedPreferencesWithCache.containsKey] method of the same name.
+  @override
+  bool containsCard(Card card) {
+    _assertCheckInit();
+
+    return _prefs.containsKey(_keyForSP(card));
+  }
+
+  /// Returns all [cards] that contains in the persistent storage.
+  ///
+  /// Works similarly to the [SharedPreferencesWithCache.keys] method of the same name.
+  @override
   Set<Card> getStoredCards() {
+    _assertCheckInit();
+
     final resultKeys = <Card>{
       for (final card in cards)
         if (_prefs.keys.contains(_keyForSP(card))) card
@@ -229,13 +277,51 @@ class Cardoteka extends CardotekaAsync {
   }
 
   @override
-  Map<Card, Object> getStoredEntries() =>
-      {for (final Card card in getStoredCards()) card: _getValueFromSP(card)!};
+  Map<Card, Object> getStoredEntries() {
+    _assertCheckInit();
+
+    return {
+      for (final Card card in getStoredCards()) card: _getValueFromSP(card)!
+    };
+  }
+
+  /// Removes an entry by using [card] from persistent storage.
+  /// The [watcher] will be notified anyway (if it is not null).
+  ///
+  /// If successful, it will return true.
+  ///
+  /// Works similarly to the [SharedPreferencesWithCache.remove] method of the same name.
+  @override
+  Future<bool> remove(Card card) async {
+    _assertCheckInit();
+
+    watcher?.notify(card, null);
+    await _prefs.remove(_keyForSP(card));
+    // todo(22.12.2024): имитация успеха
+    return true;
+  }
+
+  @override
+  Future<bool> removeAll() async {
+    _assertCheckInit();
+
+    // We don't use the `_prefs.clear()` method because `prefs`
+    // and `SharedPreferencesWithCache._cache` are common to all `Cardoteka` instances.
+    // This could probably change in the future if `_prefs.clear` has
+    // an explicit `allowList` option.
+    //
+    // The `super.removeAll` currently uses cyclic `remove`.
+    return super.removeAll();
+  }
 
   /// The original [SharedPreferencesWithCache.reload] method.
   ///
   /// Attention, this method does not launch an update for watchers.
-  Future<void> reloadCache() => _prefs.reloadCache();
+  Future<void> reloadCache() {
+    _assertCheckInit();
+
+    return _prefs.reloadCache();
+  }
 
   void _assertCheckInit() {
     assert(
@@ -446,7 +532,7 @@ class CardotekaAsync {
   /// Returns true if persistent storage the contains the given [card].
   ///
   /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
-  Future<bool> containsCard(Card card) async =>
+  FutureOr<bool> containsCard(Card card) async =>
       _prefsAsync.containsKey(_keyForSP(card));
 
   /// Returns all stored entities from the persistent storage.
@@ -461,17 +547,6 @@ class CardotekaAsync {
       },
     );
   }
-
-  /// The original [SharedPreferencesAsync.setPrefix] method.
-  ///
-  /// No migration of existing preferences is performed by this method.
-  /// If you set a different prefix, and have previously stored preferences,
-  /// you will need to handle any migration yourself.
-  ///
-  /// This cannot be called after [CardotekaAsync.init].
-  // todo(22.12.2024): удалить
-  // static void setPrefix({String prefix = 'flutter.', Set<String>? allowList}) =>
-  //     SharedPreferences.setPrefix(prefix, allowList: allowList);
 }
 
 /// Get access to all the original methods of the [SharedPreferencesWithCache] library.
@@ -517,10 +592,10 @@ mixin CardotekaUtilsForTest on Cardoteka {
   // todo(22.12.2024): удалить
   void setMockInitialCards(Map<Card<Object?>, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
-    SharedPreferences.setMockInitialValues({
-      for (final MapEntry<Card<Object?>, Object> entry in values.entries)
-        _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
-    });
+    // SharedPreferences.setMockInitialValues({
+    //   for (final MapEntry<Card<Object?>, Object> entry in values.entries)
+    //     _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
+    // });
   }
 
   /// The original [SharedPreferences.setMockInitialValues] method.
@@ -528,7 +603,7 @@ mixin CardotekaUtilsForTest on Cardoteka {
   // todo(22.12.2024): удалить
   static void setMockInitialValues(Map<String, Object> values) {
     // ignore: invalid_use_of_visible_for_testing_member
-    SharedPreferences.setMockInitialValues(values);
+    // SharedPreferences.setMockInitialValues(values);
   }
 
   V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {

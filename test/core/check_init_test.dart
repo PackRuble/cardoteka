@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_final_locals, prefer_const_declarations, prefer_function_declarations_over_variables, unreachable_from_main
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core.dart';
+import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
 import 'package:flutter_test/flutter_test.dart';
+
+import '../init_sp.dart';
 
 class CardotekaTest extends Cardoteka with CardotekaUtilsForTest {
   CardotekaTest({required super.config});
@@ -12,24 +14,45 @@ class CardMock<T extends Object> implements Card<T> {
   const CardMock();
 
   @override
-  T get defaultValue => throw UnimplementedError();
+  T get defaultValue => 'CardMock.defaultValue' as T;
 
   @override
-  String get key => throw UnimplementedError();
+  String get key => 'CardMock.key';
 
   @override
-  DataType get type => throw UnimplementedError();
+  DataType get type => DataType.string;
+}
+
+class CardMockNull<T extends Object?> implements Card<T> {
+  const CardMockNull();
+
+  @override
+  T get defaultValue => 'CardMockNull.defaultValue' as T;
+
+  @override
+  String get key => 'CardMockNull.key';
+
+  @override
+  DataType get type => DataType.string;
 }
 
 void main() {
+  initSP();
+
   late CardotekaTest cardoteka;
   late Card<Object> card;
+  late Card<Object?> cardNull;
   setUp(() {
-    cardoteka =
-        CardotekaTest(config: const CardotekaConfig(name: '', cards: []));
-    cardoteka.setMockInitialCards({});
-
     card = const CardMock();
+    cardNull = const CardMockNull();
+
+    cardoteka = CardotekaTest(
+      config: CardotekaConfig(
+        name: 'CardotekaTest',
+        cards: [card, cardNull],
+      ),
+    );
+    cardoteka.setMockInitialCards({});
   });
 
   tearDown(() {
@@ -63,12 +86,20 @@ void main() {
       expect(cardoteka.isInitialized, false);
     });
     test('set', () async {
-      void Function() resultFunc = () => cardoteka.set(card, 0);
+      void Function() resultFunc =
+          () => cardoteka.set(card, 'defaultValue_test');
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
     test('setOrNull', () async {
-      void Function() resultFunc = () => cardoteka.setOrNull(card, 0);
+      void Function() resultFunc =
+          () => cardoteka.setOrNull(card, 'card_value');
+      expect(resultFunc, throwsAssertionError);
+      expect(cardoteka.isInitialized, false);
+    });
+    test('setOrNull when card.value=null', () async {
+      void Function() resultFunc =
+          () => cardoteka.setOrNull<Object>(cardNull, null);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
@@ -82,8 +113,8 @@ void main() {
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('getCards', () async {
-      void Function() resultFunc = () => cardoteka.removeAll();
+    test('getStoredCards', () async {
+      void Function() resultFunc = () => cardoteka.getStoredCards();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });

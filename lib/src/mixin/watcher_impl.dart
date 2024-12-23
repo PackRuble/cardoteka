@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../card.dart';
@@ -29,7 +31,7 @@ typedef Detacher = void Function(void Function() onDetach);
 ///   detacher: (onDetach) {...},
 /// );
 /// ```
-mixin WatcherImpl on Cardoteka implements Watcher {
+mixin WatcherImpl on CardotekaAsync implements Watcher {
   @override
   @internal
   Watcher get watcher => this;
@@ -118,9 +120,20 @@ mixin WatcherImpl on Cardoteka implements Watcher {
       }
     });
 
-    final V value = getOrNull(card) ?? card.defaultValue;
-    if (fireImmediately) newCallback.call(value);
-    return value;
+    // todo(23.12.2024): doc
+    // todo(23.12.2024): такой способ позволяет работать и с `CardotekaAsync`
+    // - однако, хотим ли мы такое поведение?
+    // - иначе нам нужно разделить Watcher и WatcherAsync
+    // ignore: discarded_futures
+    FutureOr<V?> value = getOrNull(card);
+    if (value is V) {
+      value = value ?? card.defaultValue;
+      if (fireImmediately) newCallback.call(value);
+      return value;
+    } else {
+      Future(() async => newCallback.call(await value));
+      return card.defaultValue;
+    }
   }
 }
 
