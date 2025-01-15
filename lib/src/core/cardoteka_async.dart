@@ -4,37 +4,71 @@ import 'package:shared_preferences/shared_preferences.dart'
 import '../card.dart';
 import 'cardoteka_core.dart';
 
+/// Asynchronous implementation of a Cardoteka representing a wrapper over [SharedPreferencesAsync].
+///
+/// {@macro cardoteka.CardotekaCore}
+///
+/// A complete example of working with the asynchronous version of [CardotekaAsync]:
+/// ```dart
+/// main() async {
+///   // for the asynchronous version, initialization is not needed.
+///   final cardoteka = CardotekaAsync(
+///     config: CardotekaConfig(
+///       name: 'settings',
+///       cards: SettingsCards.values,
+///       converters: SettingsCards.converters,
+///     ),
+///   );
+///
+///   // and further, all `get` and `getOrNull` are asynchronous operations
+///   // also applies to `getStoredCards` and `getStoredEntries`
+///
+///   ThemeMode themeMode = await cardoteka.get(SettingsCards.themeMode); // will return default value
+///   await cardoteka.set<ThemeMode>(SettingsCards.themeMode, ThemeMode.light);
+///   themeMode = await cardoteka.get(SettingsCards.themeMode); // ThemeMode.light
+///
+///   DateTime? lastLoginTime = await cardoteka.getOrNull(SettingsCards.lastLoginTime); // null
+///   await cardoteka.setOrNull<DateTime>(SettingsCards.lastLoginTime, DateTime.now());
+///   lastLoginTime = await cardoteka.getOrNull(SettingsCards.lastLoginTime); // will return the saved time
+///
+///   await cardoteka.getStoredCards(); // {SettingsCards.themeMode, SettingsCards.lastLoginTime}
+///
+///   await cardoteka.remove(SettingsCards.userColor); // nothing will happen
+///   await cardoteka.remove(SettingsCards.lastLoginTime); // lastLoginTime removed from storage
+///   await cardoteka.getStoredEntries(); // {SettingsCards.themeMode: ThemeMode.light}
+///
+///   await cardoteka.removeAll();
+///   await cardoteka.getStoredCards(); // {}
+/// }
+/// ```
 base class CardotekaAsync extends CardotekaCore {
+  /// {@macro cardoteka.CardotekaCore.constructor}
+  /// and create an instance of the [CardotekaAsync].
   CardotekaAsync({required super.config});
 
+  /// A reference to an instance of [SharedPreferencesAsync] from the package
+  /// [shared_preferences](https://pub.dev/packages/shared_preferences)
+  ///
+  /// No initialization required.
+  ///
+  /// If you need to access this instance, use
+  /// the 'package:cardoteka/access_to_sp.dart' import.
+  /// This can also be useful in cases of gradual migration or quick testing
+  /// of some hypotheses.
   static final _prefsAsync = SharedPreferencesAsync();
 
-  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object]>.
+  /// {@macro cardoteka.CardotekaCore.get}
   ///
-  /// The default behavior assumes that if [SharedPreferencesAsync] does not have
-  /// a record with the provided card, then `defaultValue` will be returned.
-  ///
-  /// The returned object is always non-nullable.
-  ///
-  /// If you need to return a null-value when there is no record in storage
-  ///   OR
-  /// your card is of nullable type [Card]<[Object?]>,
-  ///   then use the [getOrNull] method.
+  /// Works similarly to the [SharedPreferencesAsync.getBool] method and
+  /// others of the same name.
   @override
-  Future<V> get<V extends Object>(Card<V> card) async {
-    return await getValueFromSP<V>(card) ?? card.defaultValue;
-  }
+  Future<V> get<V extends Object>(Card<V> card) async =>
+      await getValueFromSP<V>(card) ?? card.defaultValue;
 
-  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object?]>.
-  ///
-  /// If the record was not in the storage, then null will be returned. If you
-  /// need to return a default value [Card.defaultValue] when there is no record
-  /// in storage, use the [get] method.
   @override
   Future<V?> getOrNull<V extends Object?>(Card<V?> card) =>
       getValueFromSP<V>(card);
 
-  /// Internal method to retrieve data from [SharedPreferencesAsync].
   @override
   Future<V?> getValueFromSP<V>(Card<V?> card) async {
     final key = keyForSP(card);
@@ -55,20 +89,10 @@ base class CardotekaAsync extends CardotekaCore {
     }
   }
 
-  /// Save the new value in [SharedPreferencesAsync] using [Card].
+  /// {@macro cardoteka.CardotekaCore.set}
   ///
-  /// NOTE: Always specify a generic type and do so according to the type
-  /// of your [Card.defaultValue]. This will help prevent compilation errors
-  /// because without specifying a generic type, a type will be output
-  /// based on the [card] provided and the stored [value].
-  ///
-  /// What you need to know:
-  /// - type of [card] and [value] must match.
-  /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
-  /// to simulate storing null.
-  /// - [watcher] will be notified anyway (if it is not null).
-  ///
-  /// If successful, it will return true.
+  /// Works similarly to the [SharedPreferencesAsync.setBool] method and
+  /// others of the same name.
   @override
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     watcher?.notify<V?>(card, value);
@@ -76,9 +100,6 @@ base class CardotekaAsync extends CardotekaCore {
     return setValueToSP<V>(card, value);
   }
 
-  /// Internal method to save data in [SharedPreferencesAsync].
-  ///
-  /// Returns true if the value was successfully saved.
   @override
   Future<bool> setValueToSP<V extends Object>(Card<V?> card, V value) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
@@ -95,22 +116,26 @@ base class CardotekaAsync extends CardotekaCore {
     return true;
   }
 
-  /// Removes an entry by using [card] from persistent storage.
-  /// The [watcher] will be notified anyway (if it is not null).
-  ///
-  /// If successful, it will return true.
+  /// {@macro cardoteka.CardotekaCore.remove}
   ///
   /// Works similarly to the [SharedPreferencesAsync.remove] method of the same name.
   @override
   Future<bool> remove(Card card) async {
-    await super.remove(card);
+    watcher?.notify(card, null);
 
     await _prefsAsync.remove(keyForSP(card));
     // todo(22.12.2024): имитация успеха
     return true;
   }
 
-  /// Returns all [cards] that contains in the persistent storage.
+  /// {@macro cardoteka.CardotekaCore.containsCard}
+  ///
+  /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
+  @override
+  Future<bool> containsCard(Card card) async =>
+      _prefsAsync.containsKey(keyForSP(card));
+
+  /// {@macro cardoteka.CardotekaCore.getStoredCards}
   ///
   /// Works similarly to the [SharedPreferencesAsync.getKeys] method of the same name.
   @override
@@ -127,21 +152,13 @@ base class CardotekaAsync extends CardotekaCore {
     return resultKeys;
   }
 
-  /// Returns true if persistent storage the contains the given [card].
+  /// {@macro cardoteka.CardotekaCore.getStoredCards}
   ///
-  /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
-  @override
-  Future<bool> containsCard(Card card) async =>
-      _prefsAsync.containsKey(keyForSP(card));
-
-  /// Returns all stored entities from the persistent storage.
-  ///
-  /// Works similarly to the [AccessToSP.getEntries] method of the same name.
+  /// Works similarly to the [SharedPreferencesAsync.getAll] method of the same name.
   @override
   Future<Map<Card, Object>> getStoredEntries() async {
     return {
-      // todo(22.12.2024): use getAll method
-      for (final Card card in await getStoredCards())
+      for (final card in await getStoredCards())
         card: (await getValueFromSP(card))!
     };
   }

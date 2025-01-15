@@ -22,7 +22,7 @@ enum DataType {
   stringList,
 }
 
-/// Cards for using the [Cardoteka] implementation.
+/// Cards for using the [CardotekaCore] implementation.
 ///
 /// You may not specify a generic when implementing, in which case the type
 /// will be inferred automatically based on the specified [defaultValue].
@@ -31,7 +31,7 @@ enum DataType {
 ///
 /// The card consists of:
 /// - [type] -> type of data to be saved;
-/// - [key] -> the cardoteka impl uses this key to access [SharedPreferences];
+/// - [key] -> the cardoteka impl uses this key to access SharedPreferences;
 /// - [defaultValue] -> default value for this key (for type [V]).
 ///
 /// It is assumed to be implemented with [dc.Enum] for key definition. Here's an
@@ -68,7 +68,7 @@ abstract interface class Card<V extends dc.Object?> {
   /// The default value for this [Card].
   V get defaultValue;
 
-  /// The key to access the value in the [SharedPreferences] store.
+  /// The key to access the value in the SharedPreferences store.
   dc.String get key;
 
   @dc.override
