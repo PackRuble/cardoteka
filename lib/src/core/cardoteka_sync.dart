@@ -116,7 +116,7 @@ import 'cardoteka_core.dart';
 ///
 /// Don't worry! If you do something wrong, you will receive a detailed
 /// correction message in the console.
-abstract base class Cardoteka extends CardotekaCore {
+base class Cardoteka extends CardotekaCore {
   Cardoteka({required super.config});
 
   /// A reference to an instance of [SharedPreferencesWithCache] from the package

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'source/cards.dart';
 
-class CardotekaImplTest extends Cardoteka with CardotekaUtilsForTest {
+final class CardotekaImplTest extends Cardoteka with CardotekaUtilsForTest {
   CardotekaImplTest({required super.config});
 }
 
