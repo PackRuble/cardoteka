@@ -9,7 +9,7 @@ import '../converter.dart';
 import '../watcher.dart';
 import 'core_checks.dart' show checkConfiguration;
 
-abstract class CardotekaCore {
+abstract base class CardotekaCore {
   /// Use this constructor to pass a configuration [CardotekaConfig] and create
   /// an instance of the [CardotekaCore].
   CardotekaCore({

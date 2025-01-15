@@ -4,7 +4,7 @@ import '../core/cardoteka_sync.dart';
 /// Work with the [Cardoteka] using familiar CRUD operations.
 ///
 /// The work is only possible with non-nullable cards.
-mixin CRUD on Cardoteka {
+base mixin CRUD on Cardoteka {
   /// Calls [Cardoteka.get] method.
   V read<V extends Object>(Card<V> card) => super.get<V>(card);
 

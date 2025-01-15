@@ -12,7 +12,7 @@ import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-class CardotekaTest extends Cardoteka
+final class CardotekaTest extends Cardoteka
     with WatcherImpl, WatcherImplDebug, CardotekaUtilsForTest, AccessToSP {
   CardotekaTest({required super.config});
 }

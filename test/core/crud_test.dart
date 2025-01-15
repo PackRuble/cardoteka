@@ -9,7 +9,7 @@ import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-class CardotekaCRUD extends Cardoteka with CRUD, CardotekaUtilsForTest {
+final class CardotekaCRUD extends Cardoteka with CRUD, CardotekaUtilsForTest {
   CardotekaCRUD({required super.config});
 }
 

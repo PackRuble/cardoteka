@@ -5,6 +5,7 @@ enum SettingsCards<T extends Object> implements Card<T> {
   userColor(DataType.int, Color(0x00FF4BFF)),
   themeMode<ThemeMode>(DataType.string, ThemeMode.light),
   isPremium(DataType.bool, false),
+  // todo(26.12.2024): работа со списком
   ;
 
   const SettingsCards(this.type, this.defaultValue);
@@ -24,7 +25,7 @@ enum SettingsCards<T extends Object> implements Card<T> {
       };
 }
 
-class SettingsCardoteka extends Cardoteka with WatcherImpl {
+final class SettingsCardoteka extends Cardoteka with WatcherImpl {
   SettingsCardoteka({required super.config});
 }
 

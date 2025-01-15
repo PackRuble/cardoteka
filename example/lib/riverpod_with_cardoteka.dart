@@ -6,7 +6,7 @@ import 'package:riverpod/riverpod.dart';
 late CardotekaImpl cardoteka;
 late Card<RoomDoorState> doorStateCard; // defaultValue = RoomDoorState.ajar
 
-class CardotekaImpl = Cardoteka with WatcherImpl;
+final class CardotekaImpl = Cardoteka with WatcherImpl;
 
 enum RoomDoorState { open, closed, ajar, unknown }
 
@@ -30,7 +30,9 @@ Future<void> main() async {
   RoomDoorState doorState = container.read(doorStateProvider);
   print('$doorState'); // lastOrderCard.defaultValue-> RoomDoorState.ajar
 
-  await container.read(cardotekaProvider).set(doorStateCard, RoomDoorState.open);
+  await container
+      .read(cardotekaProvider)
+      .set(doorStateCard, RoomDoorState.open);
   doorState = container.read(doorStateProvider);
   print('$doorState');
   // 1. a value was saved to storage

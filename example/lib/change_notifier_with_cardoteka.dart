@@ -32,7 +32,7 @@ class OrderNotifier with ChangeNotifier, NotifierDetacher {
   }
 }
 
-class CardotekaImpl = Cardoteka with WatcherImpl;
+final class CardotekaImpl = Cardoteka with WatcherImpl;
 
 Future<void> main() async {
   await Cardoteka.init();

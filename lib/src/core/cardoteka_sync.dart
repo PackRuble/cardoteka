@@ -116,7 +116,7 @@ import 'cardoteka_core.dart';
 ///
 /// Don't worry! If you do something wrong, you will receive a detailed
 /// correction message in the console.
-class Cardoteka extends CardotekaCore {
+abstract base class Cardoteka extends CardotekaCore {
   Cardoteka({required super.config});
 
   /// A reference to an instance of [SharedPreferencesWithCache] from the package
@@ -332,7 +332,7 @@ class Cardoteka extends CardotekaCore {
 /// Get access to all the original methods of the [SharedPreferencesWithCache] library.
 ///
 /// Sometimes can be useful for debugging/testing or for use outside the system [Cardoteka].
-mixin AccessToSP on Cardoteka {
+base mixin AccessToSP on Cardoteka {
   SharedPreferencesWithCache get prefs => Cardoteka._prefs;
 
   /// Returns all entries (key: value) in the persistent storage.
@@ -342,7 +342,7 @@ mixin AccessToSP on Cardoteka {
 
 /// Contains various utilities, mainly designed for testing.
 @visibleForTesting
-mixin CardotekaUtilsForTest on Cardoteka {
+base mixin CardotekaUtilsForTest on Cardoteka {
   /// A way to reset the initialization state.
   @visibleForTesting
   @internal

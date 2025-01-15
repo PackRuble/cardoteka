@@ -11,7 +11,7 @@ import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-class CardotekaTest extends Cardoteka with CardotekaUtilsForTest {
+final class CardotekaTest extends Cardoteka with CardotekaUtilsForTest {
   CardotekaTest({required super.config});
 }
 

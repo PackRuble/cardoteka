@@ -31,7 +31,7 @@ typedef Detacher = void Function(void Function() onDetach);
 ///   detacher: (onDetach) {...},
 /// );
 /// ```
-mixin WatcherImpl on CardotekaCore implements Watcher {
+base mixin WatcherImpl on CardotekaCore implements Watcher {
   @override
   @internal
   Watcher get watcher => this;
@@ -146,7 +146,7 @@ mixin WatcherImpl on CardotekaCore implements Watcher {
 
 @visibleForTesting
 @internal
-mixin WatcherImplDebug on WatcherImpl {
+base mixin WatcherImplDebug on WatcherImpl {
   @visibleForTesting
   @internal
   Map<Card, List<ValueCallback>> get watchersDebug => _watchers;

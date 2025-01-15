@@ -37,7 +37,7 @@ class CubitImpl extends Cubit<int> with Detachability {
   }
 }
 
-class CardotekaImpl = Cardoteka with WatcherImpl;
+final class CardotekaImpl = Cardoteka with WatcherImpl;
 
 Future<void> main() async {
   await Cardoteka.init();
