@@ -31,7 +31,7 @@ typedef Detacher = void Function(void Function() onDetach);
 ///   detacher: (onDetach) {...},
 /// );
 /// ```
-mixin WatcherImpl on CardotekaAsync implements Watcher {
+mixin WatcherImpl on CardotekaCore implements Watcher {
   @override
   @internal
   Watcher get watcher => this;

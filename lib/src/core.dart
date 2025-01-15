@@ -119,7 +119,7 @@ import 'watcher.dart';
 ///
 /// Don't worry! If you do something wrong, you will receive a detailed
 /// correction message in the console.
-class Cardoteka extends CardotekaAsync {
+class Cardoteka extends CardotekaCore {
   Cardoteka({required super.config});
 
   /// A reference to an instance of [SharedPreferencesWithCache] from the package
@@ -295,7 +295,7 @@ class Cardoteka extends CardotekaAsync {
   Future<bool> remove(Card card) async {
     _assertCheckInit();
 
-    watcher?.notify(card, null);
+    await super.remove(card);
     await _prefs.remove(_keyForSP(card));
     // todo(22.12.2024): имитация успеха
     return true;
@@ -332,10 +332,10 @@ class Cardoteka extends CardotekaAsync {
   }
 }
 
-class CardotekaAsync {
+abstract class CardotekaCore {
   /// Use this constructor to pass a configuration [CardotekaConfig] and create
-  /// an instance of the [CardotekaAsync].
-  CardotekaAsync({
+  /// an instance of the [CardotekaCore].
+  CardotekaCore({
     required CardotekaConfig config,
   })  :
         // fixdep(22.05.2023): this behavior is not yet available for const classes
@@ -355,8 +355,6 @@ class CardotekaAsync {
   /// types defined in the [DataType] enumeration.
   final CardotekaConfig _config;
 
-  static final _prefsAsync = SharedPreferencesAsync();
-
   /// Specify if listeners should be notified of new values in the persistence storage.
   ///
   /// Use a mixin based on the [Watcher] interface.
@@ -367,65 +365,15 @@ class CardotekaAsync {
   /// in the [SharedPreferencesAsync] storage.
   String _keyForSP(Card card) => '${_config.name}.${card.key}';
 
-  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object]>.
-  ///
-  /// The default behavior assumes that if [SharedPreferencesAsync] does not have
-  /// a record with the provided card, then `defaultValue` will be returned.
-  ///
-  /// The returned object is always non-nullable.
-  ///
-  /// If you need to return a null-value when there is no record in storage
-  ///   OR
-  /// your card is of nullable type [Card]<[Object?]>,
-  ///   then use the [getOrNull] method.
-  FutureOr<V> get<V extends Object>(Card<V> card) => Future(
-        () async {
-          return await _getValueFromSP<V>(card) ?? card.defaultValue;
-        },
-      );
+  /// Get the converter for the [Card] card. Returns null if there is no converter.
+  Converter? _getConverter(Card card) => _config.converters?[card];
 
-  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object?]>.
-  ///
-  /// If the record was not in the storage, then null will be returned. If you
-  /// need to return a default value [Card.defaultValue] when there is no record
-  /// in storage, use the [get] method.
-  FutureOr<V?> getOrNull<V extends Object?>(Card<V?> card) =>
-      _getValueFromSP<V>(card);
+  FutureOr<V> get<V extends Object>(Card<V> card);
 
-  /// Internal method to retrieve data from [SharedPreferencesAsync].
-  FutureOr<V?> _getValueFromSP<V>(Card<V?> card) async {
-    final key = _keyForSP(card);
+  FutureOr<V?> getOrNull<V extends Object?>(Card<V?> card);
 
-    final Object? value = await switch (card.type) {
-      DataType.string => _prefsAsync.getString(key),
-      DataType.int => _prefsAsync.getInt(key),
-      DataType.double => _prefsAsync.getDouble(key),
-      DataType.bool => _prefsAsync.getBool(key),
-      DataType.stringList => _prefsAsync.getStringList(key),
-    };
+  FutureOr<V?> _getValueFromSP<V>(Card<V?> card);
 
-    if (value == null) {
-      // value was not in the storage
-      return value as V?;
-    } else {
-      return (_getConverter(card)?.from(value) ?? value) as V?;
-    }
-  }
-
-  /// Save the new value in [SharedPreferencesAsync] using [Card].
-  ///
-  /// NOTE: Always specify a generic type and do so according to the type
-  /// of your [Card.defaultValue]. This will help prevent compilation errors
-  /// because without specifying a generic type, a type will be output
-  /// based on the [card] provided and the stored [value].
-  ///
-  /// What you need to know:
-  /// - type of [card] and [value] must match.
-  /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
-  /// to simulate storing null.
-  /// - [watcher] will be notified anyway (if it is not null).
-  ///
-  /// If successful, it will return true.
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     watcher?.notify<V?>(card, value);
 
@@ -463,37 +411,12 @@ class CardotekaAsync {
     }
   }
 
-  /// Internal method to save data in [SharedPreferencesAsync].
-  ///
-  /// Returns true if the value was successfully saved.
-  Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
-    final resultValue = _getConverter(card)?.to(value) ?? value;
-    final key = _keyForSP(card);
-    await switch (card.type) {
-      DataType.bool => _prefsAsync.setBool(key, resultValue as bool),
-      DataType.int => _prefsAsync.setInt(key, resultValue as int),
-      DataType.double => _prefsAsync.setDouble(key, resultValue as double),
-      DataType.string => _prefsAsync.setString(key, resultValue as String),
-      DataType.stringList =>
-        _prefsAsync.setStringList(key, (resultValue as List).cast<String>())
-    };
-    // todo(22.12.2024): имитация успеха
-    return true;
-  }
+  Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value);
 
-  /// Get the converter for the [Card] card. Returns null if there is no converter.
-  Converter? _getConverter(Card card) => _config.converters?[card];
-
-  /// Removes an entry by using [card] from persistent storage.
-  /// The [watcher] will be notified anyway (if it is not null).
-  ///
-  /// If successful, it will return true.
-  ///
-  /// Works similarly to the [SharedPreferencesAsync.remove] method of the same name.
+  @mustCallSuper
   Future<bool> remove(Card card) async {
     watcher?.notify(card, null);
-    await _prefsAsync.remove(_keyForSP(card));
-    // todo(22.12.2024): имитация успеха
+
     return true;
   }
 
@@ -511,9 +434,125 @@ class CardotekaAsync {
     return overallResult;
   }
 
+  FutureOr<bool> containsCard(Card card);
+
+  FutureOr<Set<Card>> getStoredCards();
+
+  FutureOr<Map<Card, Object>> getStoredEntries();
+}
+
+base class CardotekaAsync extends CardotekaCore {
+  CardotekaAsync({required super.config});
+
+  static final _prefsAsync = SharedPreferencesAsync();
+
+  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object]>.
+  ///
+  /// The default behavior assumes that if [SharedPreferencesAsync] does not have
+  /// a record with the provided card, then `defaultValue` will be returned.
+  ///
+  /// The returned object is always non-nullable.
+  ///
+  /// If you need to return a null-value when there is no record in storage
+  ///   OR
+  /// your card is of nullable type [Card]<[Object?]>,
+  ///   then use the [getOrNull] method.
+  @override
+  FutureOr<V> get<V extends Object>(Card<V> card) => Future(
+        () async {
+          return await _getValueFromSP<V>(card) ?? card.defaultValue;
+        },
+      );
+
+  /// Get value from [SharedPreferencesAsync] storage using [Card]<[Object?]>.
+  ///
+  /// If the record was not in the storage, then null will be returned. If you
+  /// need to return a default value [Card.defaultValue] when there is no record
+  /// in storage, use the [get] method.
+  @override
+  FutureOr<V?> getOrNull<V extends Object?>(Card<V?> card) =>
+      _getValueFromSP<V>(card);
+
+  /// Internal method to retrieve data from [SharedPreferencesAsync].
+  @override
+  FutureOr<V?> _getValueFromSP<V>(Card<V?> card) async {
+    final key = _keyForSP(card);
+
+    final Object? value = await switch (card.type) {
+      DataType.string => _prefsAsync.getString(key),
+      DataType.int => _prefsAsync.getInt(key),
+      DataType.double => _prefsAsync.getDouble(key),
+      DataType.bool => _prefsAsync.getBool(key),
+      DataType.stringList => _prefsAsync.getStringList(key),
+    };
+
+    if (value == null) {
+      // value was not in the storage
+      return value as V?;
+    } else {
+      return (_getConverter(card)?.from(value) ?? value) as V?;
+    }
+  }
+
+  /// Save the new value in [SharedPreferencesAsync] using [Card].
+  ///
+  /// NOTE: Always specify a generic type and do so according to the type
+  /// of your [Card.defaultValue]. This will help prevent compilation errors
+  /// because without specifying a generic type, a type will be output
+  /// based on the [card] provided and the stored [value].
+  ///
+  /// What you need to know:
+  /// - type of [card] and [value] must match.
+  /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
+  /// to simulate storing null.
+  /// - [watcher] will be notified anyway (if it is not null).
+  ///
+  /// If successful, it will return true.
+  @override
+  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
+    watcher?.notify<V?>(card, value);
+
+    return _setValueToSP<V>(card, value);
+  }
+
+  /// Internal method to save data in [SharedPreferencesAsync].
+  ///
+  /// Returns true if the value was successfully saved.
+  @override
+  Future<bool> _setValueToSP<V extends Object>(Card<V?> card, V value) async {
+    final resultValue = _getConverter(card)?.to(value) ?? value;
+    final key = _keyForSP(card);
+    await switch (card.type) {
+      DataType.bool => _prefsAsync.setBool(key, resultValue as bool),
+      DataType.int => _prefsAsync.setInt(key, resultValue as int),
+      DataType.double => _prefsAsync.setDouble(key, resultValue as double),
+      DataType.string => _prefsAsync.setString(key, resultValue as String),
+      DataType.stringList =>
+        _prefsAsync.setStringList(key, (resultValue as List).cast<String>())
+    };
+    // todo(22.12.2024): имитация успеха
+    return true;
+  }
+
+  /// Removes an entry by using [card] from persistent storage.
+  /// The [watcher] will be notified anyway (if it is not null).
+  ///
+  /// If successful, it will return true.
+  ///
+  /// Works similarly to the [SharedPreferencesAsync.remove] method of the same name.
+  @override
+  Future<bool> remove(Card card) async {
+    await super.remove(card);
+
+    await _prefsAsync.remove(_keyForSP(card));
+    // todo(22.12.2024): имитация успеха
+    return true;
+  }
+
   /// Returns all [cards] that contains in the persistent storage.
   ///
   /// Works similarly to the [SharedPreferencesAsync.getKeys] method of the same name.
+  @override
   FutureOr<Set<Card>> getStoredCards() => Future(
         () async {
           final Set<String> storedKeys = await _prefsAsync.getKeys(
@@ -532,13 +571,15 @@ class CardotekaAsync {
   /// Returns true if persistent storage the contains the given [card].
   ///
   /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
-  FutureOr<bool> containsCard(Card card) async =>
+  @override
+  Future<bool> containsCard(Card card) async =>
       _prefsAsync.containsKey(_keyForSP(card));
 
   /// Returns all stored entities from the persistent storage.
   ///
   /// Works similarly to the [AccessToSP.getEntries] method of the same name.
-  FutureOr<Map<Card, Object>> getStoredEntries() {
+  @override
+  Future<Map<Card, Object>> getStoredEntries() {
     return Future(
       () async => {
         // todo(22.12.2024): use getAll method
