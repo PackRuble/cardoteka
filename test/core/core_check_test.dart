@@ -2,7 +2,7 @@
 
 import 'package:cardoteka/src/card.dart';
 import 'package:cardoteka/src/config.dart';
-import 'package:cardoteka/src/utils/core_check.dart';
+import 'package:cardoteka/src/core/core_checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../source/cards.dart';

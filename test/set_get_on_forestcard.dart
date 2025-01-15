@@ -1,5 +1,6 @@
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core.dart' show CardotekaUtilsForTest;
+import 'package:cardoteka/src/core/cardoteka_sync.dart'
+    show CardotekaUtilsForTest;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'source/cards.dart';

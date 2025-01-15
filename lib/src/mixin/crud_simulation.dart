@@ -1,5 +1,5 @@
 import '../card.dart';
-import '../core.dart';
+import '../core/cardoteka_sync.dart';
 
 /// Work with the [Cardoteka] using familiar CRUD operations.
 ///

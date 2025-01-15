@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../card.dart';
-import '../core.dart';
+import '../core/cardoteka_core.dart';
 import '../watcher.dart';
 
 // ignore_for_file: prefer_function_declarations_over_variables
