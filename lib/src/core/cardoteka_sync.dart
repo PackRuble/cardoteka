@@ -119,6 +119,8 @@ base class Cardoteka extends CardotekaCore {
     return getValueFromStorage(card);
   }
 
+  @internal
+  @protected
   @override
   V? getValueFromStorage<V>(Card<V?> card) {
     // todo(22.12.2024): можно выделить некоторые части в отдельный метод для переопределения
@@ -156,6 +158,8 @@ base class Cardoteka extends CardotekaCore {
     return super.setOrNull<V>(card, value);
   }
 
+  @internal
+  @protected
   @override
   Future<bool> setValueToStorage<V extends Object>(
       Card<V?> card, V value) async {

@@ -123,21 +123,25 @@ abstract base class CardotekaCore {
   /// - [CardotekaConfig.converters] are used to convert a complex object to the base
   /// types defined in the [DataType] enumeration.
   @internal
+  @protected
   final CardotekaConfig config;
 
   /// Specify if listeners should be notified of new values in storage.
   ///
   /// Use a mixin based on the [Watcher] interface.
   @internal
+  @protected
   Watcher? get watcher => null;
 
   /// Get a [CardotekaConfig.name]-based key from the [config] and [Card.key]
   /// to use in storage.
   @internal
+  @protected
   String getStorageKey(Card card) => '${config.name}.${card.key}';
 
   /// Get converter for the [Card] card. Returns null if there is no converter.
   @internal
+  @protected
   Converter? getConverter(Card card) => config.converters?[card];
 
   /// {@template cardoteka.CardotekaCore.get}
@@ -164,6 +168,7 @@ abstract base class CardotekaCore {
 
   /// Internal method to retrieve data from storage.
   @internal
+  @protected
   FutureOr<V?> getValueFromStorage<V>(Card<V?> card);
 
   /// {@template cardoteka.CardotekaCore.set}
@@ -220,6 +225,7 @@ abstract base class CardotekaCore {
   ///
   /// Returns true if the value was successfully saved.
   @internal
+  @protected
   Future<bool> setValueToStorage<V extends Object>(Card<V?> card, V value);
 
   /// {@template cardoteka.CardotekaCore.remove}
@@ -228,7 +234,6 @@ abstract base class CardotekaCore {
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  @mustCallSuper
   Future<bool> remove(Card card);
 
   /// Iteratively removes all values associated with the provided [cards]

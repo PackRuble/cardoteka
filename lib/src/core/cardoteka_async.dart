@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferencesAsync;
 
@@ -69,6 +70,8 @@ base class CardotekaAsync extends CardotekaCore {
   Future<V?> getOrNull<V extends Object?>(Card<V?> card) =>
       getValueFromStorage<V>(card);
 
+  @internal
+  @protected
   @override
   Future<V?> getValueFromStorage<V>(Card<V?> card) async {
     final key = getStorageKey(card);
@@ -100,6 +103,8 @@ base class CardotekaAsync extends CardotekaCore {
     return setValueToStorage<V>(card, value);
   }
 
+  @internal
+  @protected
   @override
   Future<bool> setValueToStorage<V extends Object>(
       Card<V?> card, V value) async {
