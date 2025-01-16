@@ -123,20 +123,18 @@ base class Cardoteka extends CardotekaCore {
   @protected
   @override
   V? getValueFromStorage<V>(Card<V?> card) {
-    // todo(22.12.2024): можно выделить некоторые части в отдельный метод для переопределения
     final key = getStorageKey(card);
-
-    final Object? value = switch (card.type) {
+    final Object? object = switch (card.type) {
       // use internal implementation of `Object` to cast `List<String>`
       DataType.stringList => _prefs.getStringList(key),
       _ => _prefs.get(key),
     };
 
-    if (value == null) {
-      // value was not in cached storage
-      return value as V?;
+    if (object == null) {
+      // value was not in storage
+      return object as V?;
     } else {
-      return (getConverter(card)?.from(value) ?? value) as V?;
+      return (getConverter(card)?.from(object) ?? object) as V?;
     }
   }
 
@@ -162,7 +160,9 @@ base class Cardoteka extends CardotekaCore {
   @protected
   @override
   Future<bool> setValueToStorage<V extends Object>(
-      Card<V?> card, V value) async {
+    Card<V?> card,
+    V value,
+  ) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
     final key = getStorageKey(card);
     await switch (card.type) {

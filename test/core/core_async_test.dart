@@ -1,37 +1,30 @@
 import 'dart:collection' show UnmodifiableListView;
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-final class CardotekaTest extends Cardoteka with CardotekaTestUtils {
-  CardotekaTest({required super.config});
+final class CardotekaAsyncTest extends CardotekaAsync {
+  CardotekaAsyncTest({required super.config});
 }
 
 void main() {
   initSP();
 
   for (final config in allCardotekaConfigs) {
-    late CardotekaTest cardoteka;
+    late CardotekaAsyncTest cardoteka;
     Future<void> setUpAction() async {
-      cardoteka = CardotekaTest(config: config);
-      await Cardoteka.init();
-    }
-
-    Future<void> tearDownAction() async {
-      cardoteka.deInit();
+      cardoteka = CardotekaAsyncTest(config: config);
     }
 
     group('$config', () {
       // ignore_for_file: discarded_futures
       testWith(
-        '$Cardoteka.watcher--> watcher==null',
+        '$CardotekaAsync.watcher--> watcher==null',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () {
           final actualWatcher = cardoteka.watcher;
 
@@ -39,15 +32,14 @@ void main() {
             actualWatcher,
             isNull,
             reason:
-                'Watcher must be null when $CardotekaTest without mix $Watcher',
+                'Watcher must be null when $CardotekaAsyncTest without mix $Watcher',
           );
         },
       );
 
       testWith(
-        '$Cardoteka.set-get-> saving and then retrieving the value',
+        '$CardotekaAsync.set-get-> saving and then retrieving the value',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
             final testValue = TekaTool.getTestValueBasedOnDefaultValue(
@@ -71,7 +63,7 @@ void main() {
 
             // the [get] method should not receive cards that may have a nullable value
             if (card is! Card<Object>) continue;
-            final getValue = cardoteka.get(card);
+            final getValue = await cardoteka.get(card);
             expect(
               getValue,
               testValue,
@@ -85,9 +77,8 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.set-getOrNull-> saving and then retrieving the value or null',
+        '$CardotekaAsync.set-getOrNull-> saving and then retrieving the value or null',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
             final testValue = TekaTool.getTestValueBasedOnDefaultValue(
@@ -109,7 +100,7 @@ void main() {
               ),
             );
 
-            final getValue = cardoteka.getOrNull(card);
+            final getValue = await cardoteka.getOrNull(card);
             expect(
               getValue,
               testValue,
@@ -123,9 +114,8 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.setOrNull-get-> saving and then retrieving the value',
+        '$CardotekaAsync.setOrNull-get-> saving and then retrieving the value',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
             final testValue = TekaTool.getTestValueBasedOnDefaultValue(
@@ -157,7 +147,7 @@ void main() {
 
             // the [get] method should not receive cards that may have a nullable value
             if (card is! Card<Object>) continue;
-            final getValue = cardoteka.get(card);
+            final getValue = await cardoteka.get(card);
             expect(
               getValue,
               testValue,
@@ -171,9 +161,8 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.setOrNull-getOrNull-> saving and then retrieving the value or null',
+        '$CardotekaAsync.setOrNull-getOrNull-> saving and then retrieving the value or null',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
             final testValue = TekaTool.getTestValueBasedOnDefaultValue(
@@ -202,7 +191,7 @@ void main() {
               );
             }
 
-            final getValue = cardoteka.getOrNull(card);
+            final getValue = await cardoteka.getOrNull(card);
             expect(
               getValue,
               testValue,
@@ -216,9 +205,8 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.containsCard--> setOrNull-containsCard-remove-containsCard',
+        '$CardotekaAsync.containsCard--> setOrNull-containsCard-remove-containsCard',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
             final testValue = TekaTool.getTestValueBasedOnDefaultValue(
@@ -230,7 +218,7 @@ void main() {
               card,
               testValue,
             );
-            bool isContains = cardoteka.containsCard(card);
+            bool isContains = await cardoteka.containsCard(card);
 
             // means that [testValue] was null.
             // Therefore, the value is deleted from the store.
@@ -261,7 +249,7 @@ void main() {
             final isSuccessRemove = await cardoteka.remove(card);
             expect(isSuccessRemove, isTrue);
 
-            isContains = cardoteka.containsCard(card);
+            isContains = await cardoteka.containsCard(card);
             expect(
               isContains,
               isFalse,
@@ -275,9 +263,8 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.cards--> Taken from the configuration $CardotekaConfig',
+        '$CardotekaAsync.cards--> Taken from the configuration $CardotekaConfig',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () {
           final actualCards = cardoteka.cards;
 
@@ -296,25 +283,9 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.isInitialized',
-        setUp: setUpAction,
-        tearDown: tearDownAction,
-        () {
-          final actualInitialize = cardoteka.isInitialized;
-
-          expect(
-            actualInitialize,
-            isTrue,
-            reason: 'The storage must be initialized!',
-          );
-        },
-      );
-
-      testWith(
-        '$Cardoteka.remove-> set-{getCards-remove}-getCards.isEmpty '
+        '$CardotekaAsync.remove-> set-{getCards-remove}-getCards.isEmpty '
         'Added value can be removed',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           final cards = [...config.cards]..shuffle();
 
@@ -333,7 +304,7 @@ void main() {
             await cardoteka.set(card, testValue!);
           }
 
-          final savedCards = cardoteka.getStoredCards().toList();
+          final savedCards = (await cardoteka.getStoredCards()).toList();
           for (final card in beenSavedCards) {
             final resultRemove = await cardoteka.remove(card);
             expect(
@@ -343,7 +314,7 @@ void main() {
             );
 
             savedCards.remove(card);
-            final resultGetCards = cardoteka.getStoredCards().toList();
+            final resultGetCards = (await cardoteka.getStoredCards()).toList();
             expect(
               resultGetCards,
               unorderedEquals(savedCards),
@@ -351,7 +322,7 @@ void main() {
             );
           }
 
-          final resultGetCards = cardoteka.getStoredCards();
+          final resultGetCards = await cardoteka.getStoredCards();
           expect(
             resultGetCards,
             isEmpty,
@@ -361,10 +332,9 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.removeAll-> set-getCards-removeAll-getCards '
+        '$CardotekaAsync.removeAll-> set-getCards-removeAll-getCards '
         'Added values should be removed',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           final cards = [...config.cards]..shuffle();
 
@@ -384,7 +354,7 @@ void main() {
             expect(resultSet, isTrue, reason: tekaReason('set != false', card));
           }
 
-          var resultGetCards = cardoteka.getStoredCards().toList();
+          var resultGetCards = (await cardoteka.getStoredCards()).toList();
           expect(
             resultGetCards,
             unorderedEquals(beenSavedCards),
@@ -398,7 +368,7 @@ void main() {
             reason: 'All saved cards should be removed!',
           );
 
-          resultGetCards = cardoteka.getStoredCards().toList();
+          resultGetCards = (await cardoteka.getStoredCards()).toList();
           expect(
             resultGetCards,
             isEmpty,
@@ -408,10 +378,9 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.getStoredEntries-> set-getStoredEntries-removeAll-getStoredEntries '
+        '$CardotekaAsync.getStoredEntries-> set-getStoredEntries-removeAll-getStoredEntries '
         'The entities received are equal to those that were stored',
         setUp: setUpAction,
-        tearDown: tearDownAction,
         () async {
           final cards = [...config.cards]..shuffle();
 
@@ -431,7 +400,7 @@ void main() {
             expect(resultSet, isTrue, reason: tekaReason('set != false', card));
           }
 
-          var resultGetStoredEntries = cardoteka.getStoredEntries();
+          var resultGetStoredEntries = await cardoteka.getStoredEntries();
           expect(
             resultGetStoredEntries,
             equals(beenSavedCards),
@@ -439,7 +408,7 @@ void main() {
           );
 
           await cardoteka.removeAll();
-          resultGetStoredEntries = cardoteka.getStoredEntries();
+          resultGetStoredEntries = await cardoteka.getStoredEntries();
           expect(
             resultGetStoredEntries,
             isEmpty,

@@ -131,6 +131,7 @@ abstract base class CardotekaCore {
   /// Use a mixin based on the [Watcher] interface.
   @internal
   @protected
+  @visibleForTesting
   Watcher? get watcher => null;
 
   /// Get a [CardotekaConfig.name]-based key from the [config] and [Card.key]

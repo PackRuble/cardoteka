@@ -67,7 +67,7 @@ base class CardotekaAsync extends CardotekaCore {
       await getValueFromStorage<V>(card) ?? card.defaultValue;
 
   @override
-  Future<V?> getOrNull<V extends Object?>(Card<V?> card) =>
+  Future<V?> getOrNull<V extends Object?>(Card<V?> card) async =>
       getValueFromStorage<V>(card);
 
   @internal
@@ -75,8 +75,7 @@ base class CardotekaAsync extends CardotekaCore {
   @override
   Future<V?> getValueFromStorage<V>(Card<V?> card) async {
     final key = getStorageKey(card);
-
-    final Object? value = await switch (card.type) {
+    final Object? object = await switch (card.type) {
       DataType.string => _prefsAsync.getString(key),
       DataType.int => _prefsAsync.getInt(key),
       DataType.double => _prefsAsync.getDouble(key),
@@ -84,11 +83,11 @@ base class CardotekaAsync extends CardotekaCore {
       DataType.stringList => _prefsAsync.getStringList(key),
     };
 
-    if (value == null) {
-      // value was not in the storage
-      return value as V?;
+    if (object == null) {
+      // value was not in storage
+      return object as V?;
     } else {
-      return (getConverter(card)?.from(value) ?? value) as V?;
+      return (getConverter(card)?.from(object) ?? object) as V?;
     }
   }
 
@@ -107,7 +106,9 @@ base class CardotekaAsync extends CardotekaCore {
   @protected
   @override
   Future<bool> setValueToStorage<V extends Object>(
-      Card<V?> card, V value) async {
+    Card<V?> card,
+    V value,
+  ) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
     final key = getStorageKey(card);
     await switch (card.type) {
