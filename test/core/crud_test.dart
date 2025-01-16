@@ -12,6 +12,10 @@ final class CardotekaCRUD extends Cardoteka with CRUD, CardotekaTestUtils {
   CardotekaCRUD({required super.config});
 }
 
+final class CardotekaAsyncCRUD extends CardotekaAsync with CRUD {
+  CardotekaAsyncCRUD({required super.config});
+}
+
 void main() {
   initSP();
 
