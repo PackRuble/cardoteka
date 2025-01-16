@@ -103,7 +103,7 @@ base class Cardoteka extends CardotekaCore {
 
   /// {@macro cardoteka.CardotekaCore.get}
   ///
-  /// Works similarly to the [SharedPreferencesWithCache.getBool] method and
+  /// Works similarly to the [SharedPreferencesWithCache.get] method and
   /// others of the same name.
   @override
   V get<V extends Object>(Card<V> card) {
@@ -254,7 +254,7 @@ base class Cardoteka extends CardotekaCore {
 
 /// Contains various utilities, mainly designed for testing.
 @visibleForTesting
-base mixin CardotekaUtilsForTest on Cardoteka {
+base mixin CardotekaTestUtils on Cardoteka {
   /// A way to reset the initialization state.
   @visibleForTesting
   @internal
@@ -264,49 +264,4 @@ base mixin CardotekaUtilsForTest on Cardoteka {
   @internal
   @visibleForTesting
   void Function() get assertCheckInit => _assertCheckInit;
-
-  /// The original [SharedPreferences.resetStatic] method.
-  @visibleForTesting
-  // ignore: invalid_use_of_visible_for_testing_member
-  // todo(22.12.2024): удалить
-  // void Function() get resetStatic => SharedPreferencesAsync.resetStatic;
-
-  /// The original [SharedPreferences.getInstance] method.
-  ///
-  /// Useful in tests after call [SharedPreferences.setMockInitialValues].
-  // todo(22.12.2024): изменить
-  // @visibleForTesting
-  // Future<void> reInit() async =>
-  //     Cardoteka._prefs = await SharedPreferences.getInstance();
-
-  /// Acts according to the [SharedPreferences.setMockInitialValues] method of the same name.
-  @visibleForTesting
-  // todo(22.12.2024): удалить
-  void setMockInitialCards(Map<Card<Object?>, Object> values) {
-    // ignore: invalid_use_of_visible_for_testing_member
-    // SharedPreferences.setMockInitialValues({
-    //   for (final MapEntry<Card<Object?>, Object> entry in values.entries)
-    //     _keyForSP(entry.key): _convertedValueForSP(entry.key, entry.value)
-    // });
-  }
-
-  /// The original [SharedPreferences.setMockInitialValues] method.
-  @visibleForTesting
-  // todo(22.12.2024): удалить
-  static void setMockInitialValues(Map<String, Object> values) {
-    // ignore: invalid_use_of_visible_for_testing_member
-    // SharedPreferences.setMockInitialValues(values);
-  }
-
-  V _convertedValueForSP<V extends Object>(Card<V?> card, Object value) {
-    final Object result = getConverter(card)?.to(value) ?? value;
-
-    return switch (card.type) {
-      DataType.bool => (result as bool) as V,
-      DataType.int => (result as int) as V,
-      DataType.double => (result as double) as V,
-      DataType.string => (result as String) as V,
-      DataType.stringList => ((result as List).cast<String>()) as V
-    };
-  }
 }

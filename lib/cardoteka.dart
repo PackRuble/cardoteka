@@ -22,7 +22,7 @@ export 'src/converter.dart'
         MapConverter;
 export 'src/core/cardoteka_async.dart' show CardotekaAsync;
 export 'src/core/cardoteka_core.dart' show CardotekaCore;
-export 'src/core/cardoteka_sync.dart' show AccessToSP, Cardoteka;
+export 'src/core/cardoteka_sync.dart' show Cardoteka;
 export 'src/mixin/crud_simulation.dart' show CRUD;
 export 'src/mixin/watcher_impl.dart' show Detacher, ValueCallback, WatcherImpl;
 export 'src/watcher.dart' show Watcher;

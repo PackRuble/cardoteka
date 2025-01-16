@@ -1,15 +1,14 @@
 // ignore_for_file: discarded_futures
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart'
-    show CardotekaUtilsForTest;
+import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../init_sp.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-final class CardotekaCRUD extends Cardoteka with CRUD, CardotekaUtilsForTest {
+final class CardotekaCRUD extends Cardoteka with CRUD, CardotekaTestUtils {
   CardotekaCRUD({required super.config});
 }
 
@@ -20,7 +19,6 @@ void main() {
     late CardotekaCRUD cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaCRUD(config: config);
-      cardoteka.setMockInitialCards({});
       await Cardoteka.init();
     }
 

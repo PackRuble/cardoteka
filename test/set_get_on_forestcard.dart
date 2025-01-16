@@ -1,11 +1,10 @@
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart'
-    show CardotekaUtilsForTest;
+import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'source/cards.dart';
 
-final class CardotekaImplTest extends Cardoteka with CardotekaUtilsForTest {
+final class CardotekaImplTest extends Cardoteka with CardotekaTestUtils {
   CardotekaImplTest({required super.config});
 }
 
@@ -15,7 +14,6 @@ Future<void> main() async {
     cardoteka = CardotekaImplTest(
       config: allCardotekaConfigs.firstWhere((el) => el.name == '$ForestCard'),
     );
-    cardoteka.setMockInitialCards({});
     await Cardoteka.init();
   });
 

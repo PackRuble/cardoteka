@@ -3,8 +3,7 @@
 import 'dart:math';
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart'
-    show CardotekaUtilsForTest;
+import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,7 +12,7 @@ import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
 final class CardotekaTest extends Cardoteka
-    with WatcherImpl, WatcherImplDebug, CardotekaUtilsForTest {
+    with WatcherImpl, WatcherImplDebug, CardotekaTestUtils {
   CardotekaTest({required super.config});
 }
 
@@ -24,7 +23,6 @@ Future<void> main() async {
     late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
       cardoteka = CardotekaTest(config: config);
-      cardoteka.setMockInitialCards({});
       await Cardoteka.init();
     }
 
