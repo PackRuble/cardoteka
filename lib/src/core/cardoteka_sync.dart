@@ -109,20 +109,20 @@ base class Cardoteka extends CardotekaCore {
   V get<V extends Object>(Card<V> card) {
     _assertCheckInit();
 
-    return getValueFromSP(card) ?? card.defaultValue;
+    return getValueFromStorage(card) ?? card.defaultValue;
   }
 
   @override
   V? getOrNull<V extends Object?>(Card<V?> card) {
     _assertCheckInit();
 
-    return getValueFromSP(card);
+    return getValueFromStorage(card);
   }
 
   @override
-  V? getValueFromSP<V>(Card<V?> card) {
+  V? getValueFromStorage<V>(Card<V?> card) {
     // todo(22.12.2024): можно выделить некоторые части в отдельный метод для переопределения
-    final key = keyForSP(card);
+    final key = getStorageKey(card);
 
     final Object? value = switch (card.type) {
       // use internal implementation of `Object` to cast `List<String>`
@@ -157,9 +157,10 @@ base class Cardoteka extends CardotekaCore {
   }
 
   @override
-  Future<bool> setValueToSP<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> setValueToStorage<V extends Object>(
+      Card<V?> card, V value) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
-    final key = keyForSP(card);
+    final key = getStorageKey(card);
     await switch (card.type) {
       DataType.bool => _prefs.setBool(key, resultValue as bool),
       DataType.int => _prefs.setInt(key, resultValue as int),
@@ -180,7 +181,7 @@ base class Cardoteka extends CardotekaCore {
     _assertCheckInit();
 
     watcher?.notify(card, null);
-    await _prefs.remove(keyForSP(card));
+    await _prefs.remove(getStorageKey(card));
     // todo(22.12.2024): имитация успеха
     return true;
   }
@@ -205,7 +206,7 @@ base class Cardoteka extends CardotekaCore {
   bool containsCard(Card card) {
     _assertCheckInit();
 
-    return _prefs.containsKey(keyForSP(card));
+    return _prefs.containsKey(getStorageKey(card));
   }
 
   /// {@macro cardoteka.CardotekaCore.getStoredCards}
@@ -217,7 +218,7 @@ base class Cardoteka extends CardotekaCore {
 
     final resultKeys = <Card>{
       for (final card in cards)
-        if (_prefs.keys.contains(keyForSP(card))) card
+        if (_prefs.keys.contains(getStorageKey(card))) card
     };
 
     return resultKeys;
@@ -228,7 +229,7 @@ base class Cardoteka extends CardotekaCore {
     _assertCheckInit();
 
     return {
-      for (final Card card in getStoredCards()) card: getValueFromSP(card)!
+      for (final Card card in getStoredCards()) card: getValueFromStorage(card)!
     };
   }
 

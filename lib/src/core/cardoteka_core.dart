@@ -134,7 +134,7 @@ abstract base class CardotekaCore {
   /// Get a [CardotekaConfig.name]-based key from the [config] and [Card.key]
   /// to use in storage.
   @internal
-  String keyForSP(Card card) => '${config.name}.${card.key}';
+  String getStorageKey(Card card) => '${config.name}.${card.key}';
 
   /// Get converter for the [Card] card. Returns null if there is no converter.
   @internal
@@ -164,7 +164,7 @@ abstract base class CardotekaCore {
 
   /// Internal method to retrieve data from storage.
   @internal
-  FutureOr<V?> getValueFromSP<V>(Card<V?> card);
+  FutureOr<V?> getValueFromStorage<V>(Card<V?> card);
 
   /// {@template cardoteka.CardotekaCore.set}
   /// Save new value in storage using [Card].
@@ -187,7 +187,7 @@ abstract base class CardotekaCore {
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     watcher?.notify<V?>(card, value);
 
-    return setValueToSP<V>(card, value);
+    return setValueToStorage<V>(card, value);
   }
 
   /// Save new value in storage using [Card], which can be of nullable type
@@ -212,16 +212,15 @@ abstract base class CardotekaCore {
       return await remove(card);
     } else {
       watcher?.notify<V?>(card, value);
-      return setValueToSP<V>(card, value);
+      return setValueToStorage<V>(card, value);
     }
   }
 
-  // todo(15.01.2025): rename ...ToStorage
   /// Internal method to save data in storage.
   ///
   /// Returns true if the value was successfully saved.
   @internal
-  Future<bool> setValueToSP<V extends Object>(Card<V?> card, V value);
+  Future<bool> setValueToStorage<V extends Object>(Card<V?> card, V value);
 
   /// {@template cardoteka.CardotekaCore.remove}
   /// Removes an entry by using [card] from storage.

@@ -63,15 +63,15 @@ base class CardotekaAsync extends CardotekaCore {
   /// others of the same name.
   @override
   Future<V> get<V extends Object>(Card<V> card) async =>
-      await getValueFromSP<V>(card) ?? card.defaultValue;
+      await getValueFromStorage<V>(card) ?? card.defaultValue;
 
   @override
   Future<V?> getOrNull<V extends Object?>(Card<V?> card) =>
-      getValueFromSP<V>(card);
+      getValueFromStorage<V>(card);
 
   @override
-  Future<V?> getValueFromSP<V>(Card<V?> card) async {
-    final key = keyForSP(card);
+  Future<V?> getValueFromStorage<V>(Card<V?> card) async {
+    final key = getStorageKey(card);
 
     final Object? value = await switch (card.type) {
       DataType.string => _prefsAsync.getString(key),
@@ -97,13 +97,14 @@ base class CardotekaAsync extends CardotekaCore {
   Future<bool> set<V extends Object>(Card<V?> card, V value) async {
     watcher?.notify<V?>(card, value);
 
-    return setValueToSP<V>(card, value);
+    return setValueToStorage<V>(card, value);
   }
 
   @override
-  Future<bool> setValueToSP<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> setValueToStorage<V extends Object>(
+      Card<V?> card, V value) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
-    final key = keyForSP(card);
+    final key = getStorageKey(card);
     await switch (card.type) {
       DataType.bool => _prefsAsync.setBool(key, resultValue as bool),
       DataType.int => _prefsAsync.setInt(key, resultValue as int),
@@ -123,7 +124,7 @@ base class CardotekaAsync extends CardotekaCore {
   Future<bool> remove(Card card) async {
     watcher?.notify(card, null);
 
-    await _prefsAsync.remove(keyForSP(card));
+    await _prefsAsync.remove(getStorageKey(card));
     // todo(22.12.2024): имитация успеха
     return true;
   }
@@ -133,7 +134,7 @@ base class CardotekaAsync extends CardotekaCore {
   /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
   @override
   Future<bool> containsCard(Card card) async =>
-      _prefsAsync.containsKey(keyForSP(card));
+      _prefsAsync.containsKey(getStorageKey(card));
 
   /// {@macro cardoteka.CardotekaCore.getStoredCards}
   ///
@@ -146,7 +147,7 @@ base class CardotekaAsync extends CardotekaCore {
     );
     final resultKeys = <Card>{
       for (final card in cards)
-        if (storedKeys.contains(keyForSP(card))) card
+        if (storedKeys.contains(getStorageKey(card))) card
     };
 
     return resultKeys;
@@ -159,7 +160,7 @@ base class CardotekaAsync extends CardotekaCore {
   Future<Map<Card, Object>> getStoredEntries() async {
     return {
       for (final card in await getStoredCards())
-        card: (await getValueFromSP(card))!
+        card: (await getValueFromStorage(card))!
     };
   }
 }
