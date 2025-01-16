@@ -118,7 +118,7 @@ base class CardotekaAsync extends CardotekaCore {
       DataType.stringList =>
         _prefsAsync.setStringList(key, (resultValue as List).cast<String>())
     };
-    // todo(22.12.2024): имитация успеха
+    // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
   }
 
@@ -130,7 +130,7 @@ base class CardotekaAsync extends CardotekaCore {
     watcher?.notify(card, null);
 
     await _prefsAsync.remove(getStorageKey(card));
-    // todo(22.12.2024): имитация успеха
+    // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
   }
 
