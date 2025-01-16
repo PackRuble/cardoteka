@@ -239,11 +239,12 @@ base class Cardoteka extends CardotekaCore {
 
   /// The original [SharedPreferencesWithCache.reloadCache] method.
   ///
-  /// Attention, this method does not launch an update for [watcher]s.
-  Future<void> reloadCache() {
+  /// This method will also notify all [watcher] listeners.
+  Future<void> reloadCache() async {
     _assertCheckInit();
 
-    return _prefs.reloadCache();
+    await _prefs.reloadCache();
+    await watcher?.notifyAll();
   }
 
   /// Assert controlling the initialization state of the [Cardoteka]

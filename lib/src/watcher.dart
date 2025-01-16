@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'card.dart';
@@ -9,7 +11,10 @@ import 'card.dart';
 /// changes.
 abstract interface class Watcher {
   /// Called whenever a new value is provided for the storage. To implement
-  /// this method, please refer to the documentation [Cardoteka.watcher].
+  /// this method, please refer to the documentation [CardotekaCore.watcher].
   @internal
   void notify<V extends Object?>(Card<V> card, V value);
+
+  /// Allows to notify all listeners with the new values.
+  FutureOr<void> notifyAll();
 }

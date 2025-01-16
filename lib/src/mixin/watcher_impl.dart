@@ -11,14 +11,14 @@ import '../watcher.dart';
 /// Signature for callbacks that report that a new value has been set in the storage.
 typedef ValueCallback<V extends Object?> = void Function(V value);
 
-/// Signature informs that the onDetach function should be called when
+/// Signature informs that the `onDetach` function should be called when
 /// the listener is no longer needed. This will remove the linked resources.
 typedef Detacher = void Function(void Function() onDetach);
 
 /// Provides the ability to listen for new [Card] values when their value
 /// changes in storage.
 ///
-/// To use, simply mix this class to your [Cardoteka] instance:
+/// To use, simply mix this class to your [CardotekaCore] instance:
 /// ```dart
 /// class MyCardoteka extends Cardoteka with WatcherImpl {...}
 ///
@@ -36,16 +36,30 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   @internal
   Watcher get watcher => this;
 
+  /// A collection of [Card]s and callbacks associated with it.
   late final _watchers = <Card, List<ValueCallback>>{};
 
   @override
   @internal
+  @protected
+  @visibleForTesting
   void notify<V extends Object?>(Card<V> card, V value) {
     final List<ValueCallback<V?>>? callbacksByCard = _watchers[card];
 
     if (callbacksByCard != null) {
       for (final cb in callbacksByCard) {
         cb.call(value);
+      }
+    }
+  }
+
+  @override
+  Future<void> notifyAll() async {
+    final Iterable<Card> allWatcherCards = _watchers.keys;
+
+    if (allWatcherCards.isNotEmpty) {
+      for (final card in allWatcherCards) {
+        notify(card, getOrNull(card));
       }
     }
   }
@@ -137,13 +151,11 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   }
 }
 
-// fixdep(1.12.2023): Allow mixins in "extends" clauses
-// https://github.com/dart-lang/language/issues/1942
+// fixdep(1.12.2023): [Allow mixins in "extends" clauses · Issue #1942 · dart-lang/language](https://github.com/dart-lang/language/issues/1942)
 //
-// mixin WatcherImplDebug extends WatcherImpl {}
+// `mixin WatcherImplDebug extends WatcherImpl {}`
 // and then...
-// class CardotekaImpl extends Cardoteka with WatcherImplDebug {}
-
+// `class CardotekaImpl extends Cardoteka with WatcherImplDebug {}`
 @visibleForTesting
 @internal
 base mixin WatcherImplDebug on WatcherImpl {
