@@ -1,54 +1,127 @@
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart';
 
-/// Example of using [Cardoteka] and [WatcherImpl] mixin with [ChangeNotifier].
+import 'app_cardoteka.dart';
 
-/// Perhaps this mixin will be included in the package in one form or another...
-mixin NotifierDetacher on ChangeNotifier {
-  List<VoidCallback>? _onDisposeCallbacks;
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final AppCardoteka cardoteka = appCardoteka;
+const AppSettings<List<String>> card = AppSettings.recentActivityList;
 
-  void onDispose(void Function() cb) {
-    _onDisposeCallbacks ??= [];
-    _onDisposeCallbacks!.add(cb);
+/// An example of using [Cardoteka] with the [WatcherImpl] and
+/// [DetacherChangeNotifier] mixins for the [ChangeNotifier] state class.
+class ActivityNotifier with ChangeNotifier, DetacherChangeNotifier {
+  ActivityNotifier() {
+    cardoteka.attach(
+      card,
+      (value) {
+        recentActivity = value;
+        notifyListeners();
+      },
+      onRemove: () {
+        recentActivity.clear();
+        notifyListeners();
+      },
+      detacher: onDetach,
+      fireImmediately: true,
+    );
   }
 
-  @override
-  void dispose() {
-    _onDisposeCallbacks?.forEach((cb) => cb.call());
-    _onDisposeCallbacks = null;
+  List<String> recentActivity = [];
 
-    super.dispose();
-  }
+  void addActivity(String text) =>
+      cardoteka.set(card, [...recentActivity, text]);
+
+  void removeActivities() => cardoteka.remove(card);
 }
-
-/// A given notifier can have as many states as you like.
-class OrderNotifier with ChangeNotifier, NotifierDetacher {
-  final _orders = <String>[];
-
-  void addOrder(String value) {
-    _orders.add(value);
-    notifyListeners();
-    print('New order: $value');
-  }
-}
-
-final class CardotekaImpl = Cardoteka with WatcherImpl;
 
 Future<void> main() async {
   await Cardoteka.init();
-  // ignore_for_file: definitely_unassigned_late_local_variable
-  // to☝️do: create an instance of cardoteka and pass configuration with cards
-  late CardotekaImpl cardoteka;
-  late Card<String> lastOrderCard;
+  runApp(const RecentActivityApp());
+}
 
-  final notifier = OrderNotifier();
-  cardoteka.attach(
-    lastOrderCard,
-    notifier.addOrder,
-    detacher: notifier.onDispose,
-  );
+class RecentActivityApp extends StatefulWidget {
+  const RecentActivityApp({super.key});
 
-  await cardoteka.set(lastOrderCard, '#341');
-  // 1. a value was saved to storage
-  // 2. console-> New order: #341
+  @override
+  State<RecentActivityApp> createState() => _RecentActivityAppState();
+}
+
+class _RecentActivityAppState extends State<RecentActivityApp> {
+  final _activityNR = ActivityNotifier();
+  final _textCR = TextEditingController();
+
+  @override
+  void dispose() {
+    _activityNR.dispose();
+    _textCR.dispose();
+    super.dispose();
+  }
+
+  void addRecord() {
+    _activityNR.addActivity(_textCR.text);
+    _textCR.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Column(
+          children: [
+            Expanded(
+              child: ListenableBuilder(
+                listenable: _activityNR,
+                builder: (context, child) => ListView(
+                  padding: const EdgeInsets.all(8.0),
+                  children: [
+                    for (final activity in _activityNR.recentActivity.reversed)
+                      Text(
+                        activity,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(
+                  onPressed: _activityNR.removeActivities,
+                  child: const Text('Delete all records'),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textCR,
+                      minLines: 2,
+                      maxLines: 2,
+                      onEditingComplete: addRecord,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  IconButton.filledTonal(
+                    onPressed: addRecord,
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
