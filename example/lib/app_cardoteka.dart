@@ -1,10 +1,13 @@
 import 'package:cardoteka/cardoteka.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 
+enum HomePageState { open, closed, minimized, unknown }
+
 enum AppSettings<T> implements Card<T> {
   themeMode(DataType.string, ThemeMode.system),
   recentActivityList(DataType.stringList, <String>[]),
   isPremium(DataType.bool, false),
+  homePageState(DataType.string, HomePageState.unknown),
   ;
 
   const AppSettings(this.type, this.defaultValue);
@@ -20,6 +23,7 @@ enum AppSettings<T> implements Card<T> {
 
   static const converters = {
     themeMode: EnumAsStringConverter(ThemeMode.values),
+    homePageState: EnumAsStringConverter(HomePageState.values),
   };
 }
 

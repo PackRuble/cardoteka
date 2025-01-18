@@ -1,48 +1,42 @@
 import 'package:cardoteka/cardoteka.dart';
 import 'package:riverpod/riverpod.dart';
 
-// ignore_for_file: definitely_unassigned_late_local_variable
-// to☝️do: create an instance of cardoteka and pass configuration with cards
-late CardotekaImpl cardoteka;
-late Card<RoomDoorState> doorStateCard; // defaultValue = RoomDoorState.ajar
+import 'app_cardoteka.dart';
 
-final class CardotekaImpl = Cardoteka with WatcherImpl;
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final cardotekaProvider = Provider((_) => appCardoteka);
+const AppSettings<HomePageState> card =
+    AppSettings.homePageState; // with defaultValue=HomePageState.unknown
 
-enum RoomDoorState { open, closed, ajar, unknown }
-
-final cardotekaProvider = Provider<CardotekaImpl>((ref) {
-  return cardoteka;
-});
-
-final doorStateProvider = Provider<RoomDoorState>((ref) {
-  return ref.watch(cardotekaProvider).attach(
-        doorStateCard,
+final homePageStateProvider = Provider<HomePageState>(
+  (ref) => ref.watch(cardotekaProvider).attach(
+        card,
         (value) => ref.state = value,
-        onRemove: () => ref.state = RoomDoorState.unknown,
+        onRemove: () => ref.state = HomePageState.unknown,
         detacher: ref.onDispose,
-      );
-});
+      ),
+);
 
 Future<void> main() async {
   await Cardoteka.init();
   final container = ProviderContainer();
+  final cardoteka = container.read(cardotekaProvider);
 
-  RoomDoorState doorState = container.read(doorStateProvider);
-  print('$doorState'); // lastOrderCard.defaultValue-> RoomDoorState.ajar
+  HomePageState homePageState = container.read(homePageStateProvider);
+  print('$homePageState'); // card.defaultValue-> HomePageState.unknown
 
-  await container
-      .read(cardotekaProvider)
-      .set(doorStateCard, RoomDoorState.open);
-  doorState = container.read(doorStateProvider);
-  print('$doorState');
+  await cardoteka.set(card, HomePageState.open);
+  homePageState = container.read(homePageStateProvider);
+  print('$homePageState');
   // 1. a value was saved to storage
   // 2. the callback we passed to `attach` is called.
-  // 3. print-> RoomDoorState.open
+  // 3. print-> HomePageState.open
 
-  await container.read(cardotekaProvider).remove(doorStateCard);
-  doorState = container.read(doorStateProvider);
-  print('$doorState');
+  await cardoteka.remove(card);
+  homePageState = container.read(homePageStateProvider);
+  print('$homePageState');
   // 1. a value was removed from storage
   // 2. the function we passed to `onRemove` is called.
-  // 3. print-> RoomDoorState.unknown
+  // 3. print-> HomePageState.unknown
 }
