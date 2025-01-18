@@ -75,13 +75,7 @@ base class CardotekaAsync extends CardotekaCore {
   @override
   Future<V?> getValueFromStorage<V>(Card<V?> card) async {
     final key = getStorageKey(card);
-    final Object? object = await switch (card.type) {
-      DataType.string => _prefsAsync.getString(key),
-      DataType.int => _prefsAsync.getInt(key),
-      DataType.double => _prefsAsync.getDouble(key),
-      DataType.bool => _prefsAsync.getBool(key),
-      DataType.stringList => _prefsAsync.getStringList(key),
-    };
+    final Object? object = await getObjectFromStorage(key, card.type);
 
     if (object == null) {
       // value was not in storage
@@ -90,6 +84,18 @@ base class CardotekaAsync extends CardotekaCore {
       return (getConverter(card)?.from(object) ?? object) as V?;
     }
   }
+
+  @internal
+  @protected
+  @override
+  Future<Object?> getObjectFromStorage(String key, DataType type) async =>
+      switch (type) {
+        DataType.string => _prefsAsync.getString(key),
+        DataType.int => _prefsAsync.getInt(key),
+        DataType.double => _prefsAsync.getDouble(key),
+        DataType.bool => _prefsAsync.getBool(key),
+        DataType.stringList => _prefsAsync.getStringList(key),
+      };
 
   /// {@macro cardoteka.CardotekaCore.set}
   ///
@@ -121,6 +127,31 @@ base class CardotekaAsync extends CardotekaCore {
     };
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
+  }
+
+  @override
+  @protected
+  Future<bool?> setObjectToStorage<V extends Object>(
+    String key,
+    V value,
+  ) async {
+    Object? result = Object();
+
+    final void _ = await switch (value) {
+      final bool value => _prefsAsync.setBool(key, value),
+      final int value => _prefsAsync.setInt(key, value),
+      final double value => _prefsAsync.setDouble(key, value),
+      final String value => _prefsAsync.setString(key, value),
+      final List value => value.isNotEmpty
+          ? value.first is String
+              ? _prefsAsync.setStringList(key, value.cast<String>())
+              : result = null
+          : _prefsAsync.setStringList(key, []),
+      _ => result = null,
+    };
+
+    // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
+    return result == null ? null : true;
   }
 
   /// {@macro cardoteka.CardotekaCore.remove}

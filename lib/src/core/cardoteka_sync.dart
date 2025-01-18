@@ -82,13 +82,8 @@ base class Cardoteka extends CardotekaCore {
   /// final сardoteka = MyCardoteka(...);
   /// final result = сardoteka.get(...);
   /// ```
-  /// // todo(22.12.2024): doc migrateV2
-  static FutureOr<void> init(
-      // {required bool migrateV2}
-      ) async {
+  static FutureOr<void> init() async {
     if (!_isInitialized) {
-      // todo(22.12.2024): use migrateV2
-      // _prefsOld = await SharedPreferences.getInstance();
       _prefs = await SharedPreferencesWithCache.create(
         cacheOptions: const SharedPreferencesWithCacheOptions(
           // we don't want to enumerate all the cards because then we need
@@ -124,11 +119,7 @@ base class Cardoteka extends CardotekaCore {
   @override
   V? getValueFromStorage<V>(Card<V?> card) {
     final key = getStorageKey(card);
-    final Object? object = switch (card.type) {
-      // use internal implementation of `Object` to cast `List<String>`
-      DataType.stringList => _prefs.getStringList(key),
-      _ => _prefs.get(key),
-    };
+    final Object? object = getObjectFromStorage(key, card.type);
 
     if (object == null) {
       // value was not in storage
@@ -137,6 +128,15 @@ base class Cardoteka extends CardotekaCore {
       return (getConverter(card)?.from(object) ?? object) as V?;
     }
   }
+
+  @internal
+  @protected
+  @override
+  Object? getObjectFromStorage(String key, DataType type) => switch (type) {
+        // use internal implementation of `Object` to cast `List<String>`
+        DataType.stringList => _prefs.getStringList(key),
+        _ => _prefs.get(key),
+      };
 
   /// {@macro cardoteka.CardotekaCore.set}
   ///
@@ -175,6 +175,31 @@ base class Cardoteka extends CardotekaCore {
     };
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
+  }
+
+  @override
+  @protected
+  Future<bool?> setObjectToStorage<V extends Object>(
+    String key,
+    V value,
+  ) async {
+    Object? result = Object();
+
+    final void _ = await switch (value) {
+      final bool value => _prefs.setBool(key, value),
+      final int value => _prefs.setInt(key, value),
+      final double value => _prefs.setDouble(key, value),
+      final String value => _prefs.setString(key, value),
+      final List value => value.isNotEmpty
+          ? value.first is String
+              ? _prefs.setStringList(key, value.cast<String>())
+              : result = null
+          : _prefs.setStringList(key, []),
+      _ => result = null,
+    };
+
+    // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
+    return result == null ? null : true;
   }
 
   /// {@macro cardoteka.CardotekaCore.remove}

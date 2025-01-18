@@ -7,6 +7,7 @@ import '../card.dart';
 import '../config.dart';
 import '../converter.dart';
 import '../watcher.dart';
+import 'cardoteka_migrator.dart';
 import 'core_checks.dart' show checkConfiguration;
 
 /// {@template cardoteka.CardotekaCore}
@@ -111,6 +112,31 @@ abstract base class CardotekaCore {
         // fixdep(22.05.2023): this behavior is not yet available for const classes
         // [Allow run-time-only assertion checking in constant constructors · Issue #2581 · dart-lang/language](https://github.com/dart-lang/language/issues/2581)
         assert(checkConfiguration(config));
+
+  // todo(18.01.2025): allow list
+  // Future<void> migrate(
+  //     {({
+  //       bool migrate,
+  //       Set<String>? allowList
+  //     }) toV2 = (migrate: true, allowList: null)}) async {
+  //
+  // todo(18.01.2025): doc
+  // todo(18.01.2025): tests
+  Future<void> migrate({bool toV2 = true}) async {
+    if (toV2) {
+      const migrationKey = '_cardoteka_package_did_migrate_v2';
+      final didMigrate =
+          (getObjectFromStorage(migrationKey, DataType.bool) as bool?) ?? false;
+      if (didMigrate) {
+        final isSuccess = await CardotekaMigrator.migrateToV2(
+          saveMethod: <V extends Object>(String key, V value) async =>
+              await setObjectToStorage(key, value) ?? false,
+        );
+
+        await setObjectToStorage(migrationKey, isSuccess);
+      }
+    }
+  }
 
   /// List of [Card]'s for accessing the storage.
   UnmodifiableListView<Card> get cards => UnmodifiableListView(config.cards);
@@ -228,6 +254,31 @@ abstract base class CardotekaCore {
   @internal
   @protected
   Future<bool> setValueToStorage<V extends Object>(Card<V?> card, V value);
+
+  /// Internal method to save object in storage.
+  /// The [V] can be a type:
+  /// - [bool]
+  /// - [int]
+  /// - [double]
+  /// - [String]
+  /// - [List]<[String]>
+  ///
+  /// Returns null if [V] is an invalid type.
+  ///
+  /// Returns true if the value was successfully saved.
+  @internal
+  @protected
+  Future<bool?> setObjectToStorage<V extends Object>(String key, V value);
+
+  /// Internal method to get object from storage. The returned value can be:
+  /// - [bool]
+  /// - [int]
+  /// - [double]
+  /// - [String]
+  /// - [List]<[String]>
+  @internal
+  @protected
+  FutureOr<Object?> getObjectFromStorage(String key, DataType type);
 
   /// {@template cardoteka.CardotekaCore.remove}
   /// Removes an entry by using [card] from storage.
