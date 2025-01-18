@@ -1,6 +1,8 @@
 import 'package:cardoteka/cardoteka.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 
+enum AppLocale { ru, de, en, pl, uk }
+
 enum HomePageState { open, closed, minimized, unknown }
 
 enum AppSettings<T> implements Card<T> {
@@ -8,6 +10,7 @@ enum AppSettings<T> implements Card<T> {
   recentActivityList(DataType.stringList, <String>[]),
   isPremium(DataType.bool, false),
   homePageState(DataType.string, HomePageState.unknown),
+  appLocale(DataType.string, AppLocale.en),
   ;
 
   const AppSettings(this.type, this.defaultValue);
@@ -24,6 +27,7 @@ enum AppSettings<T> implements Card<T> {
   static const converters = {
     themeMode: EnumAsStringConverter(ThemeMode.values),
     homePageState: EnumAsStringConverter(HomePageState.values),
+    appLocale: EnumAsStringConverter(AppLocale.values),
   };
 }
 
