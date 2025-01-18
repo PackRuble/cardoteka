@@ -263,4 +263,10 @@ abstract base class CardotekaCore {
   /// Returns all stored entities from storage.
   /// {@endtemplate}
   FutureOr<Map<Card, Object>> getStoredEntries();
+
+  @override
+  String toString() => '$runtimeType('
+      '\n  config=$config,'
+      '\n  watcher=$watcher,'
+      '\n)';
 }

@@ -28,6 +28,9 @@ class CardotekaConfig {
   final Map<Card<Object?>, Converter<Object?, Object>>? converters;
 
   @override
-  String toString() =>
-      '$CardotekaConfig(name: $name, \ncards: $cards, \nconverters: $converters)';
+  String toString() => '$CardotekaConfig('
+      '\n  name=$name,'
+      '\n  cards=$cards,'
+      '\n  converters=$converters,'
+      '\n)';
 }
