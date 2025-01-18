@@ -1,59 +1,107 @@
 import 'package:bloc/bloc.dart';
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/foundation.dart' show VoidCallback;
-import 'package:meta/meta.dart' show protected;
+import 'package:flutter/material.dart' show ThemeMode;
+import 'package:meta/meta.dart';
 
-/// Perhaps this mixin will be included in the package in one form or another...
-mixin Detachability {
-  List<VoidCallback>? _onDisposeCallbacks;
+import 'app_cardoteka.dart';
 
-  void onDetach(void Function() cb) {
-    _onDisposeCallbacks ??= [];
-    _onDisposeCallbacks!.add(cb);
-  }
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final AppCardoteka cardoteka = appCardoteka;
+const AppSettings<ThemeMode> card =
+    AppSettings.themeMode; // with defaultValue=ThemeMode.system
 
-  @protected
-  void detach() {
-    _onDisposeCallbacks?.forEach((cb) => cb.call());
-    _onDisposeCallbacks = null;
-  }
-}
-
-class CubitImpl extends Cubit<int> with Detachability {
+class CubitImpl extends Cubit<ThemeMode> with DetacherCubitV2 {
   CubitImpl(super.initialState);
 
-  void setValue(int value) => emit(value);
+  void onNewValue(ThemeMode value) => emit(value);
+}
 
-  @override
-  void onChange(Change<int> change) {
-    super.onChange(change);
-    print('Value has been changed:${change.currentState}->${change.nextState}');
-  }
+Future<void> main() async {
+  await Cardoteka.init();
 
+  final themeMode = cardoteka.get(card);
+
+  final cubit = CubitImpl(themeMode);
+  cardoteka.attach(
+    card,
+    cubit.onNewValue,
+    detacher: cubit.onDetach, // a line that allows you to fix memory leaks
+  );
+
+  await cardoteka.set<ThemeMode>(card, ThemeMode.light);
+  // What happened?
+  // 1. Get current `themeMode` from storage by card
+  // 2. Create `CubitImpl` with actual `themeMode`
+  // 3. Attach a watcher to this card, which will notify the `CubitImpl` about new values
+  // 4. We save the new value to cardoteka, and after triggering watcher...
+  // 4. What does the `onNewValue` method call...
+  // 5. And `CubitImpl` emit new state `ThemeMode.light`.
+}
+
+/// Below are two versions of the [Detachability] functionality that you can use.
+/// Just copy one of them into your code and use it everywhere for any cubit.
+
+// fixdep(1.12.2023): [Allow mixins in "extends" clauses · Issue #1942 · dart-lang/language](https://github.com/dart-lang/language/issues/1942)
+// ```dart
+// mixin CubitDetacher<T> on Cubit<T> extends Detachability {}
+// // and then...
+// class MyCubit extends Cubit<Object> with CubitDetacher {}
+// ```
+/// First implementation of [Detachability] from `cardoteka` package. Copy.
+mixin DetacherCubitV1<T> on Cubit<T> implements Detachability {
   @override
+  @mustCallSuper
   Future<void> close() async {
-    super.detach();
+    detach();
+
     return super.close();
   }
 }
 
-final class CardotekaImpl = Cardoteka with WatcherImpl;
+class CubitThemeModeV1 extends Cubit<ThemeMode>
+    with DetacherCubitV1, Detachability {
+  CubitThemeModeV1() : super(card.defaultValue) {
+    appCardoteka.attach(
+      card,
+      (ThemeMode value) => emit(value),
+      fireImmediately: true,
+      detacher: onDetach,
+    );
+  }
 
-Future<void> main() async {
-  await Cardoteka.init();
-  // ignore_for_file: definitely_unassigned_late_local_variable
-  // to☝️do: create an instance of cardoteka and pass configuration with cards
-  late CardotekaImpl cardoteka;
-  late Card<int> counterCard; // defaultValue = 99
+  void setThemeMode(ThemeMode value) =>
+      appCardoteka.set(AppSettings.themeMode, value);
+}
 
-  final cubit = CubitImpl(counterCard.defaultValue);
-  cardoteka.attach(
-    counterCard,
-    cubit.setValue,
-    detacher: cubit.onDetach,
-  );
+/// Second implementation of [Detachability] from `cardoteka` package. Copy.
+mixin DetacherCubitV2<T> on Cubit<T> implements Detachability {
+  final _detachability = Detachability();
 
-  await cardoteka.set(counterCard, 321);
-  // 1. a value was saved to storage
-  // 2. console-> Value has been changed:99->321
+  @override
+  void onDetach(void Function() cb) => _detachability.onDetach(cb);
+
+  @override
+  void detach() => _detachability.detach();
+
+  @override
+  @mustCallSuper
+  Future<void> close() async {
+    detach();
+    return super.close();
+  }
+}
+
+class CubitThemeModeV2 extends Cubit<ThemeMode> with DetacherCubitV2 {
+  CubitThemeModeV2() : super(card.defaultValue) {
+    appCardoteka.attach(
+      card,
+      (ThemeMode value) => emit(value),
+      fireImmediately: true,
+      detacher: onDetach,
+    );
+  }
+
+  void setThemeMode(ThemeMode value) =>
+      appCardoteka.set(AppSettings.themeMode, value);
 }
