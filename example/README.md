@@ -1,4 +1,4 @@
-# example
+# cardoteka_example
 
 One application - different main files. Run locally to test Cardoteka functionality/ideas.
 
