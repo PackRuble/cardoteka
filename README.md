@@ -46,6 +46,7 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
     * [Provider (riverpod)](#provider-riverpod)
     * [Notifier (riverpod)](#notifier-riverpod)
   * [Migration](#migration)
+    * [Cardoteka from v1 to v2](#cardoteka-from-v1-to-v2)
   * [Obfuscate](#obfuscate)
   * [Coverage](#coverage)
   * [Author](#author)
@@ -720,7 +721,35 @@ The `AsyncNotifier` is used in the same way.
 
 ## Migration
 
-### `toV2` and using `toV2Handler`
+### Cardoteka from v1 to v2
+
+I tried to make the transition from version 1 as gentle as possible AND still very productive on new features. 
+
+1. **All declarations of own classes from `Cardoteka` and `CardotekaAsync` (new) must now necessarily be declared as `final` or `base` or `sealed`.**
+
+2. **The `Watcher.attach` method is updated.**
+
+Before:
+```dart
+cardoteka.attach(
+  card,
+  (value) {/* Do something with the new value */},
+  onRemove: () {/* Was optional */},
+);
+```
+
+After:
+```dart
+cardoteka.attach(
+  card,
+  onChange: (value) {/* This parameter is now named */},
+  onRemove: () {/*This parameter is now required */},
+);
+```
+
+3. **The `AccessToSP` has been deleted.** Use `import package:cardoteka/access_to_sp.dart`.
+
+4. **Data migration**
 
 Migration version 2 must be carried out if:
 - you previously used `cardoteka` package version `1.*.*`;
@@ -746,9 +775,7 @@ If you don't need migration, then either don't call this method, or do this:
 await cardoteka.migrate(toV2Handler: null);
 ```
 
-The result `HandlerEntryV2` of executing `toV2Handler` shows what should
-be done with the given entry.
-`HandlerEntryV2` represents a record resulting from the execution of a data migration handler.
+The result `HandlerEntryV2` of executing `toV2Handler` shows what should be done with the given entry. `HandlerEntryV2` represents a record resulting from the execution of a data migration handler.
 ```dart
 typedef HandlerEntryV2 = (
   String key,
