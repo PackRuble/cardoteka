@@ -18,7 +18,7 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
 - 🎼 use `get` or `set` instead of a heap of `getBool`, `setDouble`, `getInt`, `getStringList`, `setString`... Think about the entities being stored, not how to store or retrieve them.
 - 📞 update the state as soon as new data arrives in the storage. No to code duplication - use `Watcher`.
 - 🧯 have to frequently check the value for null before saving? Use the `getOrNull` and `setOrNull` methods and don't worry about anything!
-- 🚪 do you still need access to dynamic methods from the original library? It's still there if you specify `with AccessToSP`.
+- 🚪 do you still need access to dynamic methods or an SP instance from the original library? Just add the import `package:cardoteka/access_to_sp.dart`.
 
 ## Table of contents
 
@@ -47,74 +47,56 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
 
 ## How to use?
 
-1. Define your cards: specify the type to be stored and the default value. Additionally, specify converters if the value type cannot be represented in the existing `DataType` enumeration:
+1. Define your cards: specify the type to be stored and the default value (for default values with nullable support, be sure to specify generic type). Additionally, specify converters if the value type cannot be represented in the existing `DataType` enumeration:
 
 ```dart
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart' show ThemeMode;
 
-enum SettingsCards<T extends Object> implements Card<T> {
-   userColor(DataType.int, Color(0x00FF4BFF)),
-   themeMode(DataType.string, ThemeMode.light),
-   isPremium(DataType.bool, false),
-   ;
+enum AppSettings<T extends Object?> implements Card<T> {
+  themeMode(DataType.string, ThemeMode.system),
+  recentActivityList(DataType.stringList, <String>[]),
+  isPremium(DataType.bool, false),
+  feedCatAtAppointedTime<DateTime?>(DataType.int, null),
+  ;
 
-   const SettingsCards(this.type, this.defaultValue);
+  const AppSettings(this.type, this.defaultValue);
 
-   @override
-   final DataType type;
+  @override
+  final DataType type;
 
-   @override
-   final T defaultValue;
+  @override
+  final T defaultValue;
 
-   @override
-   String get key => name;
+  @override
+  String get key => name;
 
-   static Map<SettingsCards, Converter> get converters => const {
-      themeMode: EnumAsStringConverter(ThemeMode.values),
-      userColor: Converters.colorAsInt,
-   };
-}
-
-```
-
-2. Define storage for cards and mix in functionality as you see fit:
-
-```dart
-class SettingsCardoteka extends Cardoteka with WatcherImpl {
-  SettingsCardoteka({required super.config});
+  static const converters = <Card, Converter>{
+    themeMode: EnumAsStringConverter(ThemeMode.values),
+    feedCatAtAppointedTime: Converters.dateTimeAsInt,
+  };
 }
 ```
 
-3. Perform initialization (once) via `Cardoteka.init` and take advantage of all the features of your cardoteka: save, read, delete, listen to your saved data using typed cards:
+2. Perform initialization (once) via `Cardoteka.init` and take advantage of all the features of your cardoteka: save, read, delete, listen to your saved data using typed cards:
 
 ```dart
-main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Cardoteka.init();
-  final cardoteka = SettingsCardoteka(
-    config: CardotekaConfig(
+  final cardoteka = Cardoteka(
+    config: const CardotekaConfig(
       name: 'settings',
       cards: SettingsCards.values,
       converters: SettingsCards.converters,
     ),
   );
 
-  final log = StringBuffer('All notifications for SettingsCards.themeMode:\n');
-  cardoteka.attach(
-    SettingsCards.themeMode,
-    (value) => log.writeln('-> $value'),
-    onRemove: () => log.writeln('-> has been removed from storage'),
-    detacher: (onDetach) {
-      // pass onDetach to whoever is responsible for the lifetime of the object
-    },
-  );
-
   ThemeMode themeMode = cardoteka.get(SettingsCards.themeMode);
   print(themeMode); // will return default value -> ThemeMode.light
 
-  await cardoteka.set(SettingsCards.themeMode, ThemeMode.dark); // first log
+  await cardoteka.set(SettingsCards.themeMode, ThemeMode.dark);
   themeMode = cardoteka.get(SettingsCards.themeMode);
   print(themeMode); // ThemeMode.dark
 
@@ -123,7 +105,7 @@ main() async {
   await cardoteka.set<bool>(SettingsCards.isPremium, true);
   await cardoteka.set<Color>(SettingsCards.userColor, Colors.deepOrange);
 
-  await cardoteka.remove(SettingsCards.themeMode); // second log
+  await cardoteka.remove(SettingsCards.themeMode);
   Map<Card<Object?>, Object> storedEntries = cardoteka.getStoredEntries();
   print(storedEntries);
   // {
@@ -131,14 +113,9 @@ main() async {
   //   SettingsCards.isPremium: true
   // }
 
-  await cardoteka.removeAll(); // third log
+  await cardoteka.removeAll();
   storedEntries = cardoteka.getStoredEntries();
   print(storedEntries); // {}
-
-  print(log); // All notifications for SettingsCards.themeMode:
-  // -> ThemeMode.dark
-  // -> has been removed from storage
-  // -> has been removed from storage
 }
 ```
 
@@ -163,213 +140,291 @@ Applications that use this library:
 
 All the most up-to-date examples can be found in the [example/lib](https://github.com/PackRuble/cardoteka/tree/dev/example/lib) folder of this project. Here are just some simple practices to use with different tools.
 
-### ChangeNotifier
-
-You will need a notifier (by the way, stop extending on it. Use `with` instead of `extends`) and one helper method for caching callbacks for later calling them when the notifier is disposed. For now, you can implement this yourself as a mixin:
-
-```dart
-mixin NotifierDetacher on ChangeNotifier {
-  List<VoidCallback>? _onDisposeCallbacks;
-
-  void onDispose(void Function() cb) {
-    _onDisposeCallbacks ??= [];
-    _onDisposeCallbacks!.add(cb);
-  }
-
-  @override
-  void dispose() {
-    _onDisposeCallbacks?.forEach((cb) => cb.call());
-    _onDisposeCallbacks = null;
-
-    super.dispose();
-  }
-}
-```
-
-This feature "from the package" will be implemented later. Now you can take part in the [discussion #9](https://github.com/PackRuble/cardoteka/issues/9) (🥺) of the API of this aspect.
-
-Now you can define your notifier with the required number of states and then `attach` a callback (you can attach as many callbacks to the card as you like):
-
+One common `AppCardoteka` instance and `AppSettings` cards are defined for all these cases. They look like this:
 ```dart
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' hide Card;
+import 'package:flutter/material.dart' show ThemeMode;
 
-class OrderNotifier with ChangeNotifier, NotifierDetacher {
-  final _orders = <String>[];
+enum AppLocale { ru, de, en, pl, uk }
 
-  void addOrder(String value) {
-    _orders.add(value);
-    notifyListeners();
-    print('New order: $value');
-  }
-}
+enum HomePageState { open, closed, minimized, unknown }
 
-class CardotekaImpl = Cardoteka with WatcherImpl;
+enum AppSettings<T extends Object?> implements Card<T> {
+  themeMode(DataType.string, ThemeMode.system),
+  recentActivityList(DataType.stringList, <String>[]),
+  isPremium(DataType.bool, false),
+  homePageState(DataType.string, HomePageState.unknown),
+  appLocale(DataType.string, AppLocale.en),
+  feedCatAtAppointedTime<DateTime?>(DataType.int, null),
+  ;
 
-Future<void> main() async {
-  await Cardoteka.init();
-  // ignore_for_file: definitely_unassigned_late_local_variable
-  // to☝️do: create an instance of cardoteka and pass configuration with cards
-  late CardotekaImpl cardoteka;
-  late Card<String> lastOrderCard;
-
-  final notifier = OrderNotifier();
-  cardoteka.attach(
-     lastOrderCard,
-     notifier.addOrder,
-     detacher: notifier.onDispose,
-  );
-
-  await cardoteka.set(lastOrderCard, '#341');
-  // 1. a value was saved to storage
-  // 2. console-> New order: #341
-}
-```
-
-### ValueNotifier
-
-Everything is very similar (and not surprising, heh) to the example with `ChangeNotifier`. But instead of using `NotifierDetacher` let's implement this in a concrete class:
-
-```dart
-class CurrentTaskNotifier extends ValueNotifier {
-  CurrentTaskNotifier(super.task);
-
-  VoidCallback? _onDetach;
-
-  void onDispose(void Function() cb) => _onDetach = cb;
+  const AppSettings(this.type, this.defaultValue);
 
   @override
-  void dispose() {
-    _onDetach?.call();
-    super.dispose();
-  }
+  final DataType type;
+
+  @override
+  final T defaultValue;
+
+  @override
+  String get key => name;
+
+  static const converters = <Card, Converter>{
+    themeMode: EnumAsStringConverter(ThemeMode.values),
+    homePageState: EnumAsStringConverter(HomePageState.values),
+    appLocale: EnumAsStringConverter(AppLocale.values),
+    feedCatAtAppointedTime: Converters.dateTimeAsInt,
+  };
 }
-```
 
-Now all the same ingredients, but let's also add the `fireImmediately` flag to get the actual value in our notifier at once:
-
-```dart
-import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' hide Card;
-
-class CardotekaImpl = Cardoteka with WatcherImpl;
-
-Future<void> main() async {
-  await Cardoteka.init();
-  // ignore_for_file: definitely_unassigned_late_local_variable
-  // to☝️do: create an instance of cardoteka and pass configuration with cards
-  late CardotekaImpl cardoteka;
-  late Card<String> card; // with default value = 'no business...'
-
-  final notifier = CurrentTaskNotifier('');
-  cardoteka.attach(
-    card,
-    (value) {
-      notifier.value = value;
-      print('New case: $value');
-    },
-    detacher: notifier.onDispose, // attention to this line
-    fireImmediately: true, // callback will fire immediately
-  );
-
-  await cardoteka.set(card, 'new case available!');
-  // 1. console-> New case: no business...
-  // 2. a value was saved to storage
-  // 3. console-> New case: new case available!
-}
-```
-
-However, if you don't like throwing empty values (perhaps adhering to the "don't use magic constants" principle), then use this option (fully equivalent):
-
-```dart
-final notifier = CurrentTaskNotifier(card.defaultValue);
-cardoteka.attach(
-  card,
-  (value) {
-    notifier.value = value;
-    print('New case: $value');
-  },
-  detacher: notifier.onDispose,
+final class AppCardoteka = Cardoteka with WatcherImpl;
+final appCardoteka = AppCardoteka(
+  config: const CardotekaConfig(
+    name: 'app_settings',
+    cards: AppSettings.values,
+    converters: AppSettings.converters,
+  ),
 );
 ```
 
-### Cubit (bloc)
+### ChangeNotifier
 
-This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability":
+There are several architectural options for using `Cardoteka` in conjunction with `ChangeNotifier`. Below we will consider the variant in which the `Cardoteka.attach` binding is used in the class constructor:
 
 ```dart
-import 'package:flutter/foundation.dart' show VoidCallback;
-import 'package:meta/meta.dart' show protected;
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart';
 
-/// Perhaps this mixin will be included in the package in one form or another...
-mixin Detachability {
-  List<VoidCallback>? _onDisposeCallbacks;
+import 'app_cardoteka.dart';
 
-  void onDetach(void Function() cb) {
-    _onDisposeCallbacks ??= [];
-    _onDisposeCallbacks!.add(cb);
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final AppCardoteka cardoteka = appCardoteka;
+const AppSettings<List<String>> card = AppSettings.recentActivityList;
+
+/// An example of using [Cardoteka] with the [WatcherImpl] and
+/// [DetacherChangeNotifier] mixins for the [ChangeNotifier] state class.
+class ActivityNotifier with ChangeNotifier, DetacherChangeNotifier {
+  ActivityNotifier() {
+    cardoteka.attach(
+      card,
+      (value) {
+        recentActivity = value;
+        notifyListeners();
+      },
+      onRemove: () {
+        recentActivity.clear();
+        notifyListeners();
+      },
+      detacher: onDetach,
+      fireImmediately: true,
+    );
   }
 
-  @protected
-  void detach() {
-    _onDisposeCallbacks?.forEach((cb) => cb.call());
-    _onDisposeCallbacks = null;
+  List<String> recentActivity = [];
+
+  void addActivity(String text) =>
+      cardoteka.set(card, [...recentActivity, text]);
+
+  void removeActivities() => cardoteka.remove(card);
+}
+```
+
+Important! Use `DetacherChangeNotifier` to properly dispose of all related data and pass `onDetach` method to `detacher` parameter of `attach` method. Next in widget I'll show you highlights, and you can find the full code at [example here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/change_notifier_with_cardoteka.dart).
+
+```dart
+class _RecentActivityAppState extends State<RecentActivityApp> {
+  final _activityNR = ActivityNotifier();
+  final _textCR = TextEditingController();
+
+  @override
+  void dispose() {
+    _activityNR.dispose();
+    _textCR.dispose();
+    super.dispose();
+  }
+
+  void addRecord() {
+    _activityNR.addActivity(_textCR.text);
+    _textCR.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+    ListenableBuilder(
+      listenable: _activityNR,
+      builder: (context, child) => ListView(
+        children: [
+          for (final activity in _activityNR.recentActivity.reversed)
+            Text(activity),
+        ],
+      ),
+    );
+    // ...
+    TextButton(
+      onPressed: _activityNR.removeActivities,
+      child: const Text('Delete all records'),
+    );
+    // ...
+    TextField(
+      controller: _textCR,
+      onEditingComplete: addRecord,
+    );
+    // ...
+    IconButton.filledTonal(
+      onPressed: addRecord,
+      icon: const Icon(Icons.add),
+    );
+    // ...
+    
+    return MaterialApp(/*...*/);
   }
 }
 ```
 
-Participate in the discussion (🙏) to implement such functionality into the package: [Way to remove a callback using `Watcher.attach` + `Cubit` · Issue #10 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/10).
+![](https://github.com/PackRuble/cardoteka/blob/dev/res/changenotifier_with_cardoteka.png)
 
-Next we define our cubit and logic, mix `Detachability` to it and override the behavior of the `close` method:
+### ValueNotifier
+
+Everything is very similar (and not surprising) to example with `ChangeNotifier`. However, we will consider a different architectural technique and take `attach`-connection outside the notifier. Let's define a notifier to implement the business logic to manage a user's premium subscription:
+```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart';
+
+import 'app_cardoteka.dart';
+
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final AppCardoteka cardoteka = appCardoteka;
+const AppSettings<bool> card = AppSettings.isPremium; // with defaultValue=false
+
+/// An example of using [Cardoteka] with the [WatcherImpl] and
+/// [DetacherChangeNotifier] mixins for the [ValueNotifier] state class.
+class PremiumNotifier extends ValueNotifier<bool> with DetacherChangeNotifier {
+  PremiumNotifier(super.isPremium);
+
+  Future<void> checkPremium() async {
+    final bool result = await Future.delayed(
+      // simulate server request delay
+      const Duration(milliseconds: 100),
+      () => true,
+    );
+
+    await cardoteka.set(card, result);
+  }
+}
+```
+
+We still need the `DetacherChangeNotifier` mixin for proper resource utilization. Now:
+```dart
+Future<void> main() async {
+  await Cardoteka.init();
+
+  // We get a previously saved value from storage.
+  // If isn't present, `card.defaultValue` will be returned.
+  final isPremium = cardoteka.get(card);
+  final premiumNR = PremiumNotifier(isPremium);
+  print('1️⃣State is premium?: value=${premiumNR.value}');
+
+  cardoteka.attach(
+    card,
+    (value) => premiumNR.value = value,
+    detacher: premiumNR.onDetach, // a line that allows you to fix memory leaks
+  );
+
+  await premiumNR.checkPremium();
+  print('2️⃣State is premium?: value=${premiumNR.value}');
+
+  await cardoteka.set(card, false);
+  print('3️⃣State is premium?: value=${premiumNR.value}');
+
+  premiumNR.dispose();
+}
+```
+
+What happened?
+1. Get current value from storage by card
+2. console-> 1️⃣State is premium?: value=false
+3. Attach a watcher to this card, which will notify the notifier about new values
+4. Check premium on the server by calling `PremiumNotifier.checkPremium` method
+5. console-> 2️⃣State is premium?: value=true
+6. We save the new value to cardoteka, and after triggering watcher..:
+7. console-> 3️⃣State is premium?: value=false
+
+That is, roughly speaking, we can have very many notifiers with wiretapping attached  that will automatically update the state after the values in the storage change.
+
+### Cubit (bloc)
+
+This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability" (there are several options, all see [here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/cubit_with_cardoteka.dart)). It is more convenient if you determine it in the "general" place and will be used everywhere:
 
 ```dart
-import 'package:bloc/bloc.dart';
+import 'package:bloc/bloc.dart' show Cubit;
+import 'package:cardoteka/cardoteka.dart' show Detachability;
+import 'package:meta/meta.dart' show mustCallSuper;
 
-class CubitImpl extends Cubit<int> with Detachability {
-  CubitImpl(super.initialState);
-
-  void setValue(int value) => emit(value);
-
-  @override
-  void onChange(Change<int> change) {
-    super.onChange(change);
-    print('Value has been changed:${change.currentState}->${change.nextState}');
-  }
+/// Second implementation of [Detachability] from `cardoteka` package. Copy.
+mixin DetacherCubitV2<T> on Cubit<T> implements Detachability {
+  final _detachability = Detachability();
 
   @override
+  void onDetach(void Function() cb) => _detachability.onDetach(cb);
+
+  @override
+  void detach() => _detachability.detach();
+
+  @override
+  @mustCallSuper
   Future<void> close() async {
-    super.detach();
+    detach();
     return super.close();
   }
 }
 ```
 
-We can now interact with `Cardoteka` in this way:
-
+Now let's create a cubit that will be responsible for the theme of our application:
 ```dart
+import 'package:bloc/bloc.dart';
 import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 
-class CardotekaImpl = Cardoteka with WatcherImpl;
+import 'app_cardoteka.dart';
+
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final AppCardoteka cardoteka = appCardoteka;
+const AppSettings<ThemeMode> card =
+    AppSettings.themeMode; // with defaultValue=ThemeMode.system
+
+class CubitThemeMode extends Cubit<ThemeMode> with DetacherCubitV2 {
+  CubitThemeMode(super.initialState);
+
+  void onNewTheme(ThemeMode value) => emit(value);
+}
 
 Future<void> main() async {
   await Cardoteka.init();
-  // ignore_for_file: definitely_unassigned_late_local_variable
-  // to☝️do: create an instance of cardoteka and pass configuration with cards
-  late CardotekaImpl cardoteka;
-  late Card<int> counterCard; // defaultValue = 99
 
-  final cubit = CubitImpl(counterCard.defaultValue);
+  final themeMode = cardoteka.get(card);
+
+  final cubit = CubitThemeMode(themeMode);
   cardoteka.attach(
-    counterCard,
-    cubit.setValue,
-    detacher: cubit.onDetach,
+    card,
+    cubit.onNewTheme,
+    detacher: cubit.onDetach, // a line that allows you to fix memory leaks
   );
 
-  await cardoteka.set(counterCard, 321);
-  // 1. a value was saved to storage
-  // 2. console-> Value has been changed:99->321
+  await cardoteka.set<ThemeMode>(card, ThemeMode.light);
 }
 ```
+
+What happened?
+1. Get current `themeMode` from storage by card
+2. Create `CubitThemeMode` with actual `themeMode`
+3. Attach a watcher to this card, which will notify the `CubitImpl` about new values
+4. We save the new value to cardoteka, and after triggering watcher...
+4. What does the `onNewTheme` method call...
+5. And `CubitThemeMode` emit new state `ThemeMode.light`.
 
 ### Provider (riverpod)
 
@@ -379,26 +434,25 @@ This is about using it in conjunction with the [riverpod](https://pub.dev/packag
 import 'package:cardoteka/cardoteka.dart';
 import 'package:riverpod/riverpod.dart';
 
-// ignore_for_file: definitely_unassigned_late_local_variable
-// to☝️do: create an instance of cardoteka and pass configuration with cards
-late CardotekaImpl cardoteka;
-late Card<RoomDoorState> doorStateCard; // defaultValue = RoomDoorState.ajar
+import 'app_cardoteka.dart';
 
-final cardotekaProvider = Provider<CardotekaImpl>((ref) {
-  return cardoteka;
-});
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final cardotekaProvider = Provider((_) => appCardoteka);
+const AppSettings<HomePageState> card =
+    AppSettings.homePageState; // with defaultValue=HomePageState.unknown
 
-final doorStateProvider = Provider<RoomDoorState>((ref) {
-  return ref.watch(cardotekaProvider).attach(
-        doorStateCard,
-        (value) => ref.state = value,
-        onRemove: () => ref.state = RoomDoorState.unknown,
-        detacher: ref.onDispose,
-      );
-});
+final homePageStateProvider = Provider<HomePageState>(
+  (ref) => ref.watch(cardotekaProvider).attach(
+    card,
+    (value) => ref.state = value,
+    onRemove: () => ref.state = HomePageState.unknown,
+    detacher: ref.onDispose,
+  ),
+);
 ```
 
-Note that using `StateProvider` is not necessary because the state change will occur automatically when the value in the store changes.
+Note that using `StateProvider` is not necessary because the state change will occur automatically when the value in the store changes. Note also that we specify a callback in `onRemove` to update the provider state the moment the key-value pair is removed from storage.
 
 The usage code will look like this:
 
@@ -406,25 +460,144 @@ The usage code will look like this:
 Future<void> main() async {
   await Cardoteka.init();
   final container = ProviderContainer();
+  final cardoteka = container.read(cardotekaProvider);
 
-  RoomDoorState doorState = container.read(doorStateProvider);
-  print('$doorState'); // lastOrderCard.defaultValue-> RoomDoorState.ajar
+  HomePageState homePageState = container.read(homePageStateProvider);
+  print('$homePageState'); // card.defaultValue-> HomePageState.unknown
 
-  await container.read(cardotekaProvider).set(doorStateCard, RoomDoorState.open);
-  doorState = container.read(doorStateProvider);
-  print('$doorState');
+  await cardoteka.set(card, HomePageState.open);
+  homePageState = container.read(homePageStateProvider);
+  print('$homePageState');
   // 1. a value was saved to storage
   // 2. the callback we passed to `attach` is called.
-  // 3. print-> RoomDoorState.open
+  // 3. print-> HomePageState.open
 
-  await container.read(cardotekaProvider).remove(doorStateCard);
-  doorState = container.read(doorStateProvider);
-  print('$doorState');
+  await cardoteka.remove(card);
+  homePageState = container.read(homePageStateProvider);
+  print('$homePageState');
   // 1. a value was removed from storage
   // 2. the function we passed to `onRemove` is called.
-  // 3. print-> RoomDoorState.unknown
+  // 3. print-> HomePageState.unknown
 }
 ```
+
+### Notifier (riverpod)
+
+This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. Create a notifier to work with the current locale:
+
+```dart
+import 'package:cardoteka/cardoteka.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+
+import 'app_cardoteka.dart';
+
+// I created an instance of Cardoteka and cards earlier, and here I'm just
+// showing you their types and uses
+final cardotekaProvider = Provider((_) => appCardoteka);
+const AppSettings<AppLocale> card =
+    AppSettings.appLocale; // with defaultValue=AppLocale.en
+
+class LocaleNotifier extends Notifier<AppLocale> {
+  static final i =
+    NotifierProvider<LocaleNotifier, AppLocale>(LocaleNotifier.new);
+
+  late AppCardoteka _storage;
+
+  @override
+  AppLocale build() {
+    _storage = ref.watch(cardotekaProvider);
+
+    return _storage.attach(
+      card,
+      (value) => state = value,
+      detacher: ref.onDispose,
+      onRemove: () => state = card.defaultValue,
+    );
+  }
+
+  Future<void> changeLocale(AppLocale locale) async =>
+      await _storage.set(card, locale);
+
+  Future<void> resetLocale() async => await _storage.remove(card);
+}
+```
+
+Note how convenient it is to pass `ref.onDispose` to `detacher` when `attach`ing a listener to a storage: as soon as the current notifier is disposed of, it will also clear the associated resources in storage. 
+
+Below is the simplest application to change the locale of your application:
+
+```dart
+Future<void> main() async {
+  await Cardoteka.init();
+  runApp(const ProviderScope(child: LocaleSelectorApp()));
+}
+
+class LocaleSelectorApp extends ConsumerWidget {
+  const LocaleSelectorApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localePR = LocaleNotifier.i;
+    final localeNR = ref.watch(localePR.notifier);
+    final locale = ref.watch(localePR);
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Column(
+          children: [
+            const Spacer(),
+            Center(
+              child: Text(
+                locale.localizedName,
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+            ),
+            const Spacer(),
+            DropdownMenu(
+              initialSelection: locale,
+              dropdownMenuEntries: [
+                for (final locale in AppLocale.values)
+                  DropdownMenuEntry(
+                    label: '$locale',
+                    value: locale,
+                  ),
+              ],
+              onSelected: (value) {
+                if (value == null) return;
+                localeNR.changeLocale(value);
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton(
+                onPressed: localeNR.resetLocale,
+                child: const Text('Reset locale'),
+              ),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension AppLocaleX on AppLocale {
+  String get localizedName => switch (this) {
+        AppLocale.ru => 'Русский',
+        AppLocale.en => 'English',
+        AppLocale.uk => 'Українська',
+        AppLocale.pl => 'Polski',
+        AppLocale.de => 'Deutsch',
+      };
+}
+```
+
+With this mini application, we can select locale, see localized text, and reset locale. And thanks to the `attach`ed callback, all you need to do is save/delete a value in storage so that state of ALL notifiers is updated in a timely manner. All this makes it possible to use a large number of notifiers and not worry that some of them are left with an irrelevant state. Check the launch of this application [here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/riverpod_provider_cardoteka.dart).
+
+The `AsyncNotifier` is used in the same way.
 
 ## Saving null values
 

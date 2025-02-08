@@ -11,10 +11,10 @@ final AppCardoteka cardoteka = appCardoteka;
 const AppSettings<ThemeMode> card =
     AppSettings.themeMode; // with defaultValue=ThemeMode.system
 
-class CubitImpl extends Cubit<ThemeMode> with DetacherCubitV2 {
-  CubitImpl(super.initialState);
+class CubitThemeMode extends Cubit<ThemeMode> with DetacherCubitV2 {
+  CubitThemeMode(super.initialState);
 
-  void onNewValue(ThemeMode value) => emit(value);
+  void onNewTheme(ThemeMode value) => emit(value);
 }
 
 Future<void> main() async {
@@ -22,21 +22,21 @@ Future<void> main() async {
 
   final themeMode = cardoteka.get(card);
 
-  final cubit = CubitImpl(themeMode);
+  final cubit = CubitThemeMode(themeMode);
   cardoteka.attach(
     card,
-    cubit.onNewValue,
+    cubit.onNewTheme,
     detacher: cubit.onDetach, // a line that allows you to fix memory leaks
   );
 
   await cardoteka.set<ThemeMode>(card, ThemeMode.light);
   // What happened?
   // 1. Get current `themeMode` from storage by card
-  // 2. Create `CubitImpl` with actual `themeMode`
+  // 2. Create `CubitThemeMode` with actual `themeMode`
   // 3. Attach a watcher to this card, which will notify the `CubitImpl` about new values
   // 4. We save the new value to cardoteka, and after triggering watcher...
-  // 4. What does the `onNewValue` method call...
-  // 5. And `CubitImpl` emit new state `ThemeMode.light`.
+  // 4. What does the `onNewTheme` method call...
+  // 5. And `CubitThemeMode` emit new state `ThemeMode.light`.
 }
 
 /// Below are two versions of the [Detachability] functionality that you can use.
@@ -62,7 +62,7 @@ mixin DetacherCubitV1<T> on Cubit<T> implements Detachability {
 class CubitThemeModeV1 extends Cubit<ThemeMode>
     with DetacherCubitV1, Detachability {
   CubitThemeModeV1() : super(card.defaultValue) {
-    appCardoteka.attach(
+    cardoteka.attach(
       card,
       (ThemeMode value) => emit(value),
       fireImmediately: true,
@@ -71,7 +71,7 @@ class CubitThemeModeV1 extends Cubit<ThemeMode>
   }
 
   void setThemeMode(ThemeMode value) =>
-      appCardoteka.set(AppSettings.themeMode, value);
+      cardoteka.set(AppSettings.themeMode, value);
 }
 
 /// Second implementation of [Detachability] from `cardoteka` package. Copy.
@@ -94,7 +94,7 @@ mixin DetacherCubitV2<T> on Cubit<T> implements Detachability {
 
 class CubitThemeModeV2 extends Cubit<ThemeMode> with DetacherCubitV2 {
   CubitThemeModeV2() : super(card.defaultValue) {
-    appCardoteka.attach(
+    cardoteka.attach(
       card,
       (ThemeMode value) => emit(value),
       fireImmediately: true,
@@ -103,5 +103,5 @@ class CubitThemeModeV2 extends Cubit<ThemeMode> with DetacherCubitV2 {
   }
 
   void setThemeMode(ThemeMode value) =>
-      appCardoteka.set(AppSettings.themeMode, value);
+      cardoteka.set(AppSettings.themeMode, value);
 }

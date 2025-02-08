@@ -1,11 +1,16 @@
 import 'package:cardoteka/cardoteka.dart';
 import 'package:flutter/material.dart' hide Card;
 
-enum SettingsCards<T extends Object> implements Card<T> {
+enum AppLocale { ru, de, en, pl, uk }
+
+enum SettingsCards<T extends Object?> implements Card<T> {
   userColor(DataType.int, Color(0x00FF4BFF)),
-  themeMode<ThemeMode>(DataType.string, ThemeMode.light),
+  themeMode(DataType.string, ThemeMode.light),
+  recentActivityList(DataType.stringList, <String>[]),
   isPremium(DataType.bool, false),
-  // todo(26.12.2024): работа со списком
+  appLocale(DataType.string, AppLocale.en),
+  feedCatAtAppointedTime<DateTime?>(DataType.int, null),
+  backgroundOpacity(DataType.double, 0.8),
   ;
 
   const SettingsCards(this.type, this.defaultValue);
@@ -19,14 +24,20 @@ enum SettingsCards<T extends Object> implements Card<T> {
   @override
   String get key => name;
 
-  static Map<SettingsCards, Converter> get converters => const {
-        themeMode: EnumAsStringConverter(ThemeMode.values),
-        userColor: Converters.colorAsInt,
-      };
+  static const converters = <Card, Converter>{
+    userColor: Converters.colorAsInt,
+    themeMode: EnumAsStringConverter(ThemeMode.values),
+    appLocale: EnumAsStringConverter(AppLocale.values),
+    feedCatAtAppointedTime: Converters.dateTimeAsInt,
+  };
 }
 
 final class SettingsCardoteka extends Cardoteka with WatcherImpl {
   SettingsCardoteka({required super.config});
+}
+
+final class SettingsAsync extends CardotekaAsync {
+  SettingsAsync({required super.config});
 }
 
 void main() async {
@@ -34,13 +45,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Cardoteka.init();
-  final cardoteka = SettingsCardoteka(
-    config: CardotekaConfig(
-      name: 'settings',
-      cards: SettingsCards.values,
-      converters: SettingsCards.converters,
-    ),
+
+  const cardotekaConfig = CardotekaConfig(
+    name: 'settings',
+    cards: SettingsCards.values,
+    converters: SettingsCards.converters,
   );
+
+  // Create an instance based on your cardoteka class
+  final cardoteka = SettingsCardoteka(config: cardotekaConfig);
+
+  // or create an instance using base class
+  // ```dart
+  // final cardoteka = Cardoteka(config: cardotekaConfig);
+  // ```
+  // or create an instance based on your cardoteka class to access asynchronous operations
+  // ```dart
+  // final cardotekaAsync = SettingsAsync(
+  //   config: const CardotekaConfig(
+  //     name: 'settings',
+  //     cards: [SettingsCards.recentActivityList],
+  //   ),
+  // );
+  // ```
 
   final log = StringBuffer('All notifications for SettingsCards.themeMode:\n');
   cardoteka.attach(

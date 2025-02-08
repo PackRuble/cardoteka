@@ -12,15 +12,15 @@ dependencies:
     sdk: flutter
   cardoteka:
     path: '../../cardoteka'
-  flutter_riverpod: ^2.4.9
-  riverpod: ^2.4.9
-  bloc: ^8.1.4
-  meta: ^1.9.1
+  flutter_riverpod: ^2.6.1
+  riverpod: ^2.6.1
+  bloc: ^9.0.0
+  meta: ^1.15.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lint: ^2.2.0
+  lint: ^2.3.0
 
 flutter:
   uses-material-design: true

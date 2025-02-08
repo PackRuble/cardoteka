@@ -5,12 +5,13 @@ enum AppLocale { ru, de, en, pl, uk }
 
 enum HomePageState { open, closed, minimized, unknown }
 
-enum AppSettings<T> implements Card<T> {
+enum AppSettings<T extends Object?> implements Card<T> {
   themeMode(DataType.string, ThemeMode.system),
   recentActivityList(DataType.stringList, <String>[]),
   isPremium(DataType.bool, false),
   homePageState(DataType.string, HomePageState.unknown),
   appLocale(DataType.string, AppLocale.en),
+  feedCatAtAppointedTime<DateTime?>(DataType.int, null),
   ;
 
   const AppSettings(this.type, this.defaultValue);
@@ -24,10 +25,11 @@ enum AppSettings<T> implements Card<T> {
   @override
   String get key => name;
 
-  static const converters = {
+  static const converters = <Card, Converter>{
     themeMode: EnumAsStringConverter(ThemeMode.values),
     homePageState: EnumAsStringConverter(HomePageState.values),
     appLocale: EnumAsStringConverter(AppLocale.values),
+    feedCatAtAppointedTime: Converters.dateTimeAsInt,
   };
 }
 
