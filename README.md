@@ -45,6 +45,7 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
     * [Cubit (bloc)](#cubit-bloc)
     * [Provider (riverpod)](#provider-riverpod)
     * [Notifier (riverpod)](#notifier-riverpod)
+    * [`Detachability`](#detachability)
   * [Migration](#migration)
     * [Cardoteka from v1 to v2](#cardoteka-from-v1-to-v2)
   * [Obfuscate](#obfuscate)
@@ -256,7 +257,15 @@ Calling the `attach` method returns the actual value from storage OR the default
 
 It is important to emphasize that you can implement your own solution based on `Watcher`.
 
-## Use with...
+### `Detachability`
+
+The `Detachability` functionality is the ability to clear bound resources when `attach`ing and listening in a particular case is no longer needed. This has the same function as `close` in the `bloc` package, the `dispose` method in widgets and controllers, and the `ref.onDispose` method in the `riverpod` package. However, the `Detachability` mixin itself does not know how to clean up resources, but only contains a convenient `onDetach` method for storing callbacks and a `detach` method for deleting them later.
+
+The `DetacherChangeNotifier` is a special case to be used in conjunction with `ChangeNotifier` for convenient use of the `onDetach` method in conjunction with `Watcher.attach(detacher: onDetach)`.
+
+Check out examples of using `Detachability` functionality with different state managers in section ["Use with"](https://github.com/PackRuble/cardoteka?tab=readme-ov-file#use-with).
+
+## Use with
 
 All the most up-to-date examples can be found in the [example/lib](https://github.com/PackRuble/cardoteka/tree/dev/example/lib) folder of this project. Here are just some simple practices to use with different tools.
 
