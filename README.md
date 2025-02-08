@@ -31,19 +31,21 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
   * [How to use?](#how-to-use)
   * [Materials](#materials)
   * [Apps](#apps)
-  * [Use with...](#use-with)
-    * [ChangeNotifier](#changenotifier)
-    * [ValueNotifier](#valuenotifier)
-    * [Cubit (bloc)](#cubit-bloc)
-    * [Provider (riverpod)](#provider-riverpod)
-    * [Notifier (riverpod)](#notifier-riverpod)
-  * [Analogy in `SharedPreferencesWithCache` \ `SharedPreferencesAsync`](#analogy-in-sharedpreferenceswithcache--sharedpreferencesasync)
+  * [Analogy in `SharedPreferencesWithCache` and `SharedPreferencesAsync`](#analogy-in-sharedpreferenceswithcache-and-sharedpreferencesasync)
+  * [Sync or Async storage](#sync-or-async-storage)
   * [Saving null values](#saving-null-values)
   * [Structure](#structure)
     * [Cardoteka](#cardoteka-1)
     * [Card](#card)
     * [Converter](#converter)
     * [Watcher](#watcher)
+  * [Use with...](#use-with)
+    * [ChangeNotifier](#changenotifier)
+    * [ValueNotifier](#valuenotifier)
+    * [Cubit (bloc)](#cubit-bloc)
+    * [Provider (riverpod)](#provider-riverpod)
+    * [Notifier (riverpod)](#notifier-riverpod)
+  * [Migration](#migration)
   * [Obfuscate](#obfuscate)
   * [Coverage](#coverage)
   * [Author](#author)
@@ -139,6 +141,119 @@ Applications that use this library:
 - [Weather Today](https://github.com/PackRuble/weather_today) - weather app
 - [Quiz Prize](https://github.com/PackRuble/quiz_prize_app) - quiz game deployed on [web](https://packruble.github.io/quiz_prize_app)
 - [PackRuble/reactive_domain_playground](https://github.com/PackRuble/reactive_domain_playground) - sandbox for practicing skills in a reactive Domain layer
+
+## Analogy in `SharedPreferencesWithCache` and `SharedPreferencesAsync`
+
+| `SharedPreferencesWithCache` or `SharedPreferencesAsync` | Method \ return signature | `Cardoteka`         | `CardotekaAsync`            |
+|----------------------------------------------------------|---------------------------|---------------------|-----------------------------|
+| `get*`                                                   | `get`                     | `V`                 | `Future<V>`                 |
+| —                                                        | `getOrNull`               | `V?`                | `Future<V?>`                |
+| `set*`                                                   | `set`                     | `Future<bool>`      | `Future<bool>`              |
+| —                                                        | `setOrNull`               | `Future<bool>`      | `Future<bool>`              |
+| `remove`                                                 | `remove`                  | `Future<bool>`      | `Future<bool>`              |
+| `clear`                                                  | `removeAll`               | `Future<bool>`      | `Future<bool>`              |
+| `containsKey`                                            | `containsCard`            | `bool`              | `Future<bool>`              |
+| `keys` and `getKeys`                                     | `getStoredCards`          | `Set<Card>`         | `Future<Set<Card>>`         |
+| —                                                        | `getStoredEntries`        | `Map<Card, Object>` | `Future<Map<Card, Object>>` |
+| `reloadCache`                                            | `reloadCache`             | `Future<void>`      | —                           |
+
+
+## Sync or Async storage
+
+The biggest difference between `Cardoteka` and `CardotekaAsync` is where the data is stored when the application is running. In the synchronous case, all data for all cards are loaded once into the device RAM after calling `Cardoteka.init`. This is why you can use methods such as `get`, `getOrNull`, `containsCard`, `getStoredCards`, `getStoredEntries` synchronously. It is also important to understand that if another service on the platform changes your data, you need to call `Cardoteka.reloadCache` to update it before retrieving it via a `Cardoteka` instance.
+
+Things are different for `CardotekaAsync` because data is asynchronously requested from disk when any method is called. This is why initialization is not required in advance. And because of this, you get the most up-to-date data for any query.
+
+But which one to use when? It's simple: 
+- if your data is updated by another service (and you can't track it)
+- OR your data is too heavy (lists with instances of classes with a large number of fields are serialized)
+- OR synchronous reading is not that important to you,
+then feel free to use `CardotekaAsync`. Otherwise, use `Cardoteka`.
+
+## Saving null values
+
+If your card can contain a null value, then use the `getOrNull` and `setOrNull` methods. It works like this:
+- `getOrNull` - if pair is absent in storage, we will get `null`
+- `setOrNull` - if we save `null`, the pair will be deleted from storage
+
+Below is a table showing the compatibility of methods with cards:
+
+|   method    | Card<Object\> | Card<Object?> |
+|:-----------:|:-------------:|:-------------:|
+|    `get`    |       ✅       |       ❌       |
+|    `set`    |       ✅       |       ✅       |
+| `getOrNull` |       ✅       |       ✅       |
+| `setOrNull` |       ✅       |       ✅       |
+
+By and large, most often you will use `get`/`set`, and when you need to simulate working with null, or when there is no pair, you want to get `null` (and not the default value) - we use `getOrNull`/ `setOrNull`.
+
+## Structure
+
+The structure of the library is very simple! Below are the main classes you will have to work with.
+
+| Basic elements of Cardoteka | Purpose                                       |
+|-----------------------------|-----------------------------------------------|
+| `Card`                      | Key to the storage to interact with it        |
+| `CardotekaConfig`           | Configuration file for a Cardoteka instance   |
+| `Converter` & `Converters`  | Transforming objects to interact with storage |
+
+### Cardoteka
+
+Main class for implementing your own storage instance. Contains all the basic methods for working with SharedPreferences in a typed style. Serves as a wrapper over SP. Use as many implementations (and instances) as needed, passing a unique name in the parameters. Use mixins to extend functionality.
+
+| Mixin for `Cardoteka`    | Purpose                                     |
+|--------------------------|---------------------------------------------|
+| `Watcher`<-`WatcherImpl` | To implement wiretapping based on callbacks |
+| `AccessToSP`             | To access the original `SharedPreferences`  |
+| `CRUD`                   | To simulate crud operations                 |
+
+
+### Card
+
+Every instance of Cardoteka needs cards. The card contains the characteristics of your key (name, default value, type) that is used to access the storage. It is convenient to implement using the `enum` enumeration, but you can also use the usual `class`, which is certainly less convenient and more error-prone. Important: `Card.name` is used as a key within the SP, so if the name is changed, the data will be lost (virtually, but not physically).
+
+### Converter
+
+Converters are used to convert your object into a simple type that can be stored in storage. There are 5 basic types available:
+
+| enum `DataType` | Basic Dart type |
+|-----------------|-----------------|
+| bool            | `bool`          |
+| int             | `int`           |
+| double          | `double`        |
+| string          | `String`        |
+| stringList      | `List<String>`  |
+
+If the default value type specified in the card is not the Dart base type, you must provide the converter as a parameter when creating the `Cardoteka` instance. You can create your own converter based on the `Converter` class by implementing it. For collections, use `CollectionConverter` by extending it (or use `Converter`). However, many converters are already provided out of the box, including for collections.
+
+| Converter                   | Representation of an object in storage |
+|-----------------------------|----------------------------------------|
+| `Converters`                |                                        |
+| ->`_ColorConverter`         | `Color` as `int`                       |
+| ->`_UriConverter`           | `Uri` as `String`                      |
+| ->`_DurationConverter`      | `Duration` as `int`                    |
+| ->`_DateTimeConverter`      | `DateTime` as `String`                 |
+| ->`_DateTimeAsIntConverter` | `DateTime` as `int`                    |
+| ->`_NumConverter`           | `num` as `double`                      |
+| ->`_NumAsStringConverter`   | `num` as `String`                      |
+| `Enum`                      |                                        |
+| ->`EnumAsStringConverter`   | `Iterable<Enum>` as `String`           |
+| ->`EnumAsIntConverter`      | `Iterable<Enum>` as `int`              |
+| `CollectionConverter`       |                                        |
+| ->`IterableConverter`       | `Iterable<E>` as `List<String>`        |
+| ->`ListConverter`           | `List<E>` as `List<String>`            |
+| ->`MapConverter`            | `Map<K, V>` as `List<String>`          |
+
+### Watcher
+
+I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a `callback` that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters, you can specify:
+- `onRemove` ->  to notify when a value is removed from storage (`remove` or `removeAll` methods)
+- `detacher` -> when listening no longer makes sense
+- `fireImmediately` -> to fire `callback` at the moment the `attach` method is called
+
+Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage.
+
+It is important to emphasize that you can implement your own solution based on `Watcher`.
 
 ## Use with...
 
@@ -603,106 +718,7 @@ With this mini application, we can select locale, see localized text, and reset 
 
 The `AsyncNotifier` is used in the same way.
 
-## Analogy in `SharedPreferencesWithCache` \ `SharedPreferencesAsync`
-
-| `SharedPreferencesWithCache` or `SharedPreferencesAsync` | Method \ return signature | `Cardoteka`         | `CardotekaAsync`              |
-|----------------------------------------------------------|---------------------------|---------------------|-------------------------------|
-| `get*`                                                   | `get`                     | `V`                 | `FutureOr<V>`                 |
-| —                                                        | `getOrNull`               | `V?`                | `FutureOr<V?>`                |
-| `set*`                                                   | `set`                     | `Future<bool>`      | `FutureOr<bool>`              |
-| —                                                        | `setOrNull`               | `Future<bool>`      | `FutureOr<bool>`              |
-| `remove`                                                 | `remove`                  | `Future<bool>`      | `Future<bool>`                |
-| `clear`                                                  | `removeAll`               | `Future<bool>`      | `Future<bool>`                |
-| `containsKey`                                            | `containsCard`            | `bool`              | `FutureOr<bool>`              |
-| `keys` and `getKeys`                                     | `getStoredCards`          | `Set<Card>`         | `FutureOr<Set<Card>>`         |
-| —                                                        | `getStoredEntries`        | `Map<Card, Object>` | `FutureOr<Map<Card, Object>>` |
-| `reloadCache`                                            | `reloadCache`             | `Future<void>`      | —                             |
-
-
-## Saving null values
-
-If your card can contain a null value, then use the `getOrNull` and `setOrNull` methods. It works like this:
-- `getOrNull` - if pair is absent in storage, we will get `null`
-- `setOrNull` - if we save `null`, the pair will be deleted from storage
-
-Below is a table showing the compatibility of methods with cards:
-
-|   method    | Card<Object\> | Card<Object?> |
-|:-----------:|:-------------:|:-------------:|
-|    `get`    |       ✅       |       ❌       |
-|    `set`    |       ✅       |       ✅       |
-| `getOrNull` |       ✅       |       ✅       |
-| `setOrNull` |       ✅       |       ✅       |
-
-By and large, most often you will use `get`/`set`, and when you need to simulate working with null, or when there is no pair, you want to get `null` (and not the default value) - we use `getOrNull`/ `setOrNull`.
-
-## Structure
-
-The structure of the library is very simple! Below are the main classes you will have to work with.
-
-| Basic elements of Cardoteka | Purpose                                       |
-|-----------------------------|-----------------------------------------------|
-| `Card`                      | Key to the storage to interact with it        |
-| `CardotekaConfig`           | Configuration file for a Cardoteka instance   |
-| `Converter` & `Converters`  | Transforming objects to interact with storage |
-
-### Cardoteka
-
-Main class for implementing your own storage instance. Contains all the basic methods for working with SharedPreferences in a typed style. Serves as a wrapper over SP. Use as many implementations (and instances) as needed, passing a unique name in the parameters. Use mixins to extend functionality.
-
-| Mixin for `Cardoteka`    | Purpose                                     |
-|--------------------------|---------------------------------------------|
-| `Watcher`<-`WatcherImpl` | To implement wiretapping based on callbacks |
-| `AccessToSP`             | To access the original `SharedPreferences`  |
-| `CRUD`                   | To simulate crud operations                 |
-
-
-### Card
-
-Every instance of Cardoteka needs cards. The card contains the characteristics of your key (name, default value, type) that is used to access the storage. It is convenient to implement using the `enum` enumeration, but you can also use the usual `class`, which is certainly less convenient and more error-prone. Important: `Card.name` is used as a key within the SP, so if the name is changed, the data will be lost (virtually, but not physically).
-
-### Converter
-
-Converters are used to convert your object into a simple type that can be stored in storage. There are 5 basic types available:
-
-| enum `DataType` | Basic Dart type |
-|-----------------|-----------------|
-| bool            | `bool`          |
-| int             | `int`           |
-| double          | `double`        |
-| string          | `String`        |
-| stringList      | `List<String>`  |
-
-If the default value type specified in the card is not the Dart base type, you must provide the converter as a parameter when creating the `Cardoteka` instance. You can create your own converter based on the `Converter` class by implementing it. For collections, use `CollectionConverter` by extending it (or use `Converter`). However, many converters are already provided out of the box, including for collections.
-
-| Converter                   | Representation of an object in storage |
-|-----------------------------|----------------------------------------|
-| `Converters`                |                                        |
-| ->`_ColorConverter`         | `Color` as `int`                       |
-| ->`_UriConverter`           | `Uri` as `String`                      |
-| ->`_DurationConverter`      | `Duration` as `int`                    |
-| ->`_DateTimeConverter`      | `DateTime` as `String`                 |
-| ->`_DateTimeAsIntConverter` | `DateTime` as `int`                    |
-| ->`_NumConverter`           | `num` as `double`                      |
-| ->`_NumAsStringConverter`   | `num` as `String`                      |
-| `Enum`                      |                                        |
-| ->`EnumAsStringConverter`   | `Iterable<Enum>` as `String`           |
-| ->`EnumAsIntConverter`      | `Iterable<Enum>` as `int`              |
-| `CollectionConverter`       |                                        |
-| ->`IterableConverter`       | `Iterable<E>` as `List<String>`        |
-| ->`ListConverter`           | `List<E>` as `List<String>`            |
-| ->`MapConverter`            | `Map<K, V>` as `List<String>`          |
-
-### Watcher
-
-I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a `callback` that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters, you can specify:
-- `onRemove` ->  to notify when a value is removed from storage (`remove` or `removeAll` methods)
-- `detacher` -> when listening no longer makes sense
-- `fireImmediately` -> to fire `callback` at the moment the `attach` method is called
-
-Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage.
-
-It is important to emphasize that you can implement your own solution based on `Watcher`.
+## Migration
 
 ## Obfuscate
 
