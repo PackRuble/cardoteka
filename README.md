@@ -4,10 +4,11 @@
 
 [![telegram_badge]][telegram_link]
 [![pub_badge]][pub_link]
+[![pub_likes]][pub_link]
 [![codecov_badge]][codecov_link]
 [![license_badge]][license_link]
 [![code_size_badge]][repo_link]
-[![repo_star_badge]][repo_star_link]
+[![repo_star_badge]][repo_link]
 
 ⭐️ The best type-safe wrapper over SharedPreferences.
 
@@ -16,11 +17,12 @@
 ## Advantages
 
 Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) instead of the original [`shared_preferences`](https://pub.dev/packages/shared_preferences)? The reasons are as follows:
-- 🧭 your keys and default values are stored in a systematic and organized manner. You don't have to think about where to stick them.
-- 🎼 use `get` or `set` instead of a heap of `getBool`, `setDouble`, `getInt`, `getStringList`, `setString`... Think about the entities being stored, not how to store or retrieve them.
-- 📞 update the state as soon as new data arrives in the storage. No to code duplication - use `Watcher`.
-- 🧯 have to frequently check the value for null before saving? Use the `getOrNull` and `setOrNull` methods and don't worry about anything!
-- 🚪 do you still need access to dynamic methods or an SP instance from the original library? Just add the import `package:cardoteka/access_to_sp.dart`.
+- 🎈 Easy data retrieval synchronously (based on pre-caching) or asynchronously using `Cardoteka` and `CardotekaAsync`.
+- 🧭 Your keys and default values are stored in a systematic and organized manner. You don't have to think about where to stick them.
+- 🎼 Use `get` or `set` instead of a heap of `getBool`, `setDouble`, `getInt`, `getStringList`, `setString`... Think about the business logic of entities, not how to store or retrieve them.
+- 📞 Update state as soon as new data arrives in storage. No to code duplication - use `Watcher`.
+- 🧯 Have to frequently check the value for null before saving? Use the `getOrNull` and `setOrNull` methods and don't worry about anything!
+- 🚪 Do you still need access to dynamic methods or an SP instance from the original library? Just add the `import package:cardoteka/access_to_sp.dart`.
 
 ## Table of contents
 
@@ -35,17 +37,17 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
   * [Sync or Async storage](#sync-or-async-storage)
   * [Saving null values](#saving-null-values)
   * [Structure](#structure)
-    * [Cardoteka](#cardoteka-1)
-    * [Card](#card)
-    * [Converter](#converter)
-    * [Watcher](#watcher)
-  * [Use with...](#use-with)
-    * [ChangeNotifier](#changenotifier)
-    * [ValueNotifier](#valuenotifier)
-    * [Cubit (bloc)](#cubit-bloc)
-    * [Provider (riverpod)](#provider-riverpod)
-    * [Notifier (riverpod)](#notifier-riverpod)
+    * [`Cardoteka` and `CardotekaAsync`](#cardoteka-and-cardotekaasync)
+    * [`Card`](#card)
+    * [`Converter`](#converter)
+    * [`Watcher`](#watcher)
     * [`Detachability`](#detachability)
+  * [Use with](#use-with)
+    * [`ChangeNotifier`](#changenotifier)
+    * [`ValueNotifier`](#valuenotifier)
+    * [`Cubit` (bloc)](#cubit-bloc)
+    * [`Provider` (riverpod)](#provider-riverpod)
+    * [`Notifier` (riverpod)](#notifier-riverpod)
   * [Migration](#migration)
     * [Cardoteka from v1 to v2](#cardoteka-from-v1-to-v2)
   * [Obfuscate](#obfuscate)
@@ -132,8 +134,8 @@ Future<void> main() async {
 ## Materials
 
 List of resources to learn more about the capabilities of this library:
-- [Я сделал Cardoteka и вот как её использовать [кто любит черпать] / Хабр](https://habr.com/ru/articles/783712/)
 - [Stop using dynamic key-value storage! Use Cardoteka for typed access to Shared Preferences | by Ruble | Medium](https://medium.com/@pack.ruble/stop-using-dynamic-key-value-storage-use-cardoteka-for-typed-access-to-shared-preferences-567c9f799d7d)
+- [Я сделал Cardoteka и вот как её использовать [кто любит черпать] / Хабр](https://habr.com/ru/articles/783712/)
 - [Cardoteka — техническая начинка и аналитика решений типобезопасной SP [кто любит вдаваться] / Хабр](https://habr.com/ru/articles/801089/)
 - [Приложение викторины: внедрение Cardoteka и основные паттерны проектирования с Riverpod / Хабр](https://habr.com/ru/articles/799437/)
 
@@ -193,28 +195,31 @@ By and large, most often you will use `get`/`set`, and when you need to simulate
 
 The structure of the library is very simple! Below are the main classes you will have to work with.
 
-| Basic elements of Cardoteka | Purpose                                       |
-|-----------------------------|-----------------------------------------------|
-| `Card`                      | Key to the storage to interact with it        |
-| `CardotekaConfig`           | Configuration file for a Cardoteka instance   |
-| `Converter` & `Converters`  | Transforming objects to interact with storage |
+| Basic elements of Cardoteka      | Purpose                                              |
+|----------------------------------|------------------------------------------------------|
+| `Cardoteka` and `CardotekaAsync` | Classes for working with storage                     |
+| `CardotekaConfig`                | Configuration file for a `CardotekaCore` instance    |
+| `Card`                           | Key to the storage to interact with it               |
+| `Converter` & `Converters`       | Transforming objects to interact with storage        |
+| `Watcher`                        | Allows you to listen for changing values in storage  |
+| `Detachability`                  | Allows you to remove linked resources when listening |
 
-### Cardoteka
+### `Cardoteka` and `CardotekaAsync`
 
-Main class for implementing your own storage instance. Contains all the basic methods for working with SharedPreferences in a typed style. Serves as a wrapper over SP. Use as many implementations (and instances) as needed, passing a unique name in the parameters. Use mixins to extend functionality.
+Main class for implementing your own storage instance. Contains all the basic methods for working with SharedPreferences in a typed style. Serves as a wrapper over SP. Use as many implementations (and instances) as needed, passing a unique name in the parameters. Use mixins to extend functionality. Use `Cardoteka` for synchronous data reading (pre-caching via `init`), and `CardotekaAsync` for asynchronous data access (without cache).
 
-| Mixin for `Cardoteka`    | Purpose                                     |
-|--------------------------|---------------------------------------------|
-| `Watcher`<-`WatcherImpl` | To implement wiretapping based on callbacks |
-| `AccessToSP`             | To access the original `SharedPreferences`  |
-| `CRUD`                   | To simulate crud operations                 |
+| Mixin for `CardotekaCore` | Purpose                                     |
+|---------------------------|---------------------------------------------|
+| `Watcher`<-`WatcherImpl`  | To implement wiretapping based on callbacks |
+| `CRUD`                    | To simulate crud operations                 |
 
+Use `import package:cardoteka/access_to_sp.dart` to access classes of the original `shared_preferences`.
 
-### Card
+### `Card`
 
 Every instance of Cardoteka needs cards. The card contains the characteristics of your key (name, default value, type) that is used to access the storage. It is convenient to implement using the `enum` enumeration, but you can also use the usual `class`, which is certainly less convenient and more error-prone. Important: `Card.name` is used as a key within the SP, so if the name is changed, the data will be lost (virtually, but not physically).
 
-### Converter
+### `Converter`
 
 Converters are used to convert your object into a simple type that can be stored in storage. There are 5 basic types available:
 
@@ -246,14 +251,15 @@ If the default value type specified in the card is not the Dart base type, you m
 | ->`ListConverter`           | `List<E>` as `List<String>`            |
 | ->`MapConverter`            | `Map<K, V>` as `List<String>`          |
 
-### Watcher
+### `Watcher`
 
 I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a `callback` that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters, you can specify:
+- `onChange` -> to notify when a value is changed in storage (without comparison)
 - `onRemove` ->  to notify when a value is removed from storage (`remove` or `removeAll` methods)
 - `detacher` -> when listening no longer makes sense
 - `fireImmediately` -> to fire `callback` at the moment the `attach` method is called
 
-Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage.
+Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage. For `CardotekaAsync`, this method will first return the default value, and then return the actual value after the asynchronous operation is performed. Therefore, the `fireImmediately` flag is only relevant for `Cardoteka` instances. This behavior may change, keep an eye on [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38).
 
 It is important to emphasize that you can implement your own solution based on `Watcher`.
 
@@ -316,7 +322,7 @@ final appCardoteka = AppCardoteka(
 );
 ```
 
-### ChangeNotifier
+### `ChangeNotifier`
 
 There are several architectural options for using `Cardoteka` in conjunction with `ChangeNotifier`. Below we will consider the variant in which the `Cardoteka.attach` binding is used in the class constructor:
 
@@ -414,7 +420,7 @@ class _RecentActivityAppState extends State<RecentActivityApp> {
 
 ![](https://github.com/PackRuble/cardoteka/blob/dev/res/changenotifier_with_cardoteka.png)
 
-### ValueNotifier
+### `ValueNotifier`
 
 Everything is very similar (and not surprising) to example with `ChangeNotifier`. However, we will consider a different architectural technique and take `attach`-connection outside the notifier. Let's define a notifier to implement the business logic to manage a user's premium subscription:
 ```dart
@@ -483,7 +489,7 @@ What happened?
 
 That is, roughly speaking, we can have very many notifiers with wiretapping attached  that will automatically update the state after the values in the storage change.
 
-### Cubit (bloc)
+### `Cubit` (bloc)
 
 This is about using it in conjunction with the [bloc](https://pub.dev/packages/bloc) package. First we need to implement "detachability" (there are several options, all see [here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/cubit_with_cardoteka.dart)). It is more convenient if you determine it in the "general" place and will be used everywhere:
 
@@ -555,7 +561,7 @@ What happened?
 4. What does the `onNewTheme` method call...
 5. And `CubitThemeMode` emit new state `ThemeMode.light`.
 
-### Provider (riverpod)
+### `Provider` (riverpod)
 
 This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. First, you need to create a "Cardoteka" provider for your storage instance and your desired state provider:
 
@@ -610,7 +616,7 @@ Future<void> main() async {
 }
 ```
 
-### Notifier (riverpod)
+### `Notifier` (riverpod)
 
 This is about using it in conjunction with the [riverpod](https://pub.dev/packages/riverpod) package. Create a notifier to work with the current locale:
 
@@ -894,19 +900,20 @@ You can contact me or check out my activities on the following platforms:
 [telegram_badge]: https://img.shields.io/badge/Telegram_channel-❤️-_?style=plastic&logo=telegram&color=33cccc
 [telegram_link]: https://t.me/+AkGV73kZi_Q1YTMy
 
-[pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic
+[pub_likes]: https://img.shields.io/pub/likes/cardoteka?style=plastic&logo=flutter&color=c24641
+[pub_badge]: https://img.shields.io/pub/v/cardoteka.svg?style=plastic&logo=dart
 [pub_link]: https://pub.dev/packages/cardoteka
 
 [codecov_badge]: https://img.shields.io/codecov/c/github/PackRuble/cardoteka?style=plastic&color=00cc00&logo=codecov
 [codecov_link]: https://app.codecov.io/gh/PackRuble/cardoteka
 
-[license_badge]: https://img.shields.io/github/license/PackRuble/cardoteka?style=plastic&color=996600
+[license_badge]: https://img.shields.io/github/license/PackRuble/cardoteka?style=plastic&logo=apache&color=996600
 [license_link]: https://github.com/PackRuble/cardoteka/blob/dev/LICENSE
 
 [code_size_badge]: https://img.shields.io/github/languages/code-size/PackRuble/cardoteka?style=plastic&color=339966
 [repo_link]: https://github.com/PackRuble/cardoteka
 
-[repo_star_badge]: https://img.shields.io/github/stars/PackRuble/cardoteka?style=plastic
+[repo_star_badge]: https://img.shields.io/github/stars/packruble/cardoteka?style=plastic&logo=github&color=DAA520
 [repo_star_link]: https://github.com/PackRuble/cardoteka/network/dependents
 
 [pub_like_icon]: https://pub.dev/static/hash-ffjootqp/img/like-active.svg
