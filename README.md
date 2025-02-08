@@ -11,6 +11,8 @@
 
 ⭐️ The best type-safe wrapper over SharedPreferences.
 
+> Put a ![][pub_like_icon] on [Pub][pub_link] and favorite ⭐ on [Github][repo_link] to keep up with changes and not miss new releases!
+
 ## Advantages
 
 Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) instead of the original [`shared_preferences`](https://pub.dev/packages/shared_preferences)? The reasons are as follows:
@@ -34,6 +36,8 @@ Why should I prefer to use [`cardoteka`](https://pub.dev/packages/cardoteka) ins
     * [ValueNotifier](#valuenotifier)
     * [Cubit (bloc)](#cubit-bloc)
     * [Provider (riverpod)](#provider-riverpod)
+    * [Notifier (riverpod)](#notifier-riverpod)
+  * [Analogy in `SharedPreferencesWithCache` \ `SharedPreferencesAsync`](#analogy-in-sharedpreferenceswithcache--sharedpreferencesasync)
   * [Saving null values](#saving-null-values)
   * [Structure](#structure)
     * [Cardoteka](#cardoteka-1)
@@ -599,6 +603,22 @@ With this mini application, we can select locale, see localized text, and reset 
 
 The `AsyncNotifier` is used in the same way.
 
+## Analogy in `SharedPreferencesWithCache` \ `SharedPreferencesAsync`
+
+| `SharedPreferencesWithCache` or `SharedPreferencesAsync` | Method \ return signature | `Cardoteka`         | `CardotekaAsync`              |
+|----------------------------------------------------------|---------------------------|---------------------|-------------------------------|
+| `get*`                                                   | `get`                     | `V`                 | `FutureOr<V>`                 |
+| —                                                        | `getOrNull`               | `V?`                | `FutureOr<V?>`                |
+| `set*`                                                   | `set`                     | `Future<bool>`      | `FutureOr<bool>`              |
+| —                                                        | `setOrNull`               | `Future<bool>`      | `FutureOr<bool>`              |
+| `remove`                                                 | `remove`                  | `Future<bool>`      | `Future<bool>`                |
+| `clear`                                                  | `removeAll`               | `Future<bool>`      | `Future<bool>`                |
+| `containsKey`                                            | `containsCard`            | `bool`              | `FutureOr<bool>`              |
+| `keys` and `getKeys`                                     | `getStoredCards`          | `Set<Card>`         | `FutureOr<Set<Card>>`         |
+| —                                                        | `getStoredEntries`        | `Map<Card, Object>` | `FutureOr<Map<Card, Object>>` |
+| `reloadCache`                                            | `reloadCache`             | `Future<void>`      | —                             |
+
+
 ## Saving null values
 
 If your card can contain a null value, then use the `getOrNull` and `setOrNull` methods. It works like this:
@@ -733,3 +753,5 @@ You can contact me or check out my activities on the following platforms:
 
 [repo_star_badge]: https://img.shields.io/github/stars/PackRuble/cardoteka?style=plastic
 [repo_star_link]: https://github.com/PackRuble/cardoteka/network/dependents
+
+[pub_like_icon]: https://pub.dev/static/hash-ffjootqp/img/like-active.svg
