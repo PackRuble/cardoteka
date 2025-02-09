@@ -35,7 +35,7 @@ Future<void> main() async {
 
   cardoteka.attach(
     card,
-    (value) => premiumNR.value = value,
+    onChange: (value) => premiumNR.value = value,
     onRemove: () => premiumNR.value = card.defaultValue,
     detacher: premiumNR.onDetach, // a line that allows you to fix memory leaks
   );

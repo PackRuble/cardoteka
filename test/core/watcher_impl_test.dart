@@ -57,7 +57,7 @@ Future<void> main() async {
             late final void Function() detacher;
             cardoteka.attach(
               card,
-              (cbValue) => expect(
+              onChange: (cbValue) => expect(
                 cbValue,
                 actionForResultInCallback[counter++].$2,
                 reason: tekaReason(
@@ -95,7 +95,7 @@ Future<void> main() async {
           for (final card in cardoteka.cards) {
             final value = cardoteka.attach(
               card,
-              (_) {},
+              onChange: (_) {},
               onRemove: null,
               detacher: (_) {},
             );
@@ -129,7 +129,7 @@ Future<void> main() async {
 
             final value = cardoteka.attach(
               card,
-              (_) {},
+              onChange: (_) {},
               onRemove: null,
               detacher: (_) {},
             );
@@ -153,7 +153,8 @@ Future<void> main() async {
           for (final card in cardoteka.cards) {
             final count = 1 + Random().nextInt(10);
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, onRemove: null, detacher: (_) {});
+              cardoteka.attach(card,
+                  onChange: (_) {}, onRemove: null, detacher: (_) {});
             }
 
             expect(
@@ -178,10 +179,14 @@ Future<void> main() async {
             final count = 1 + Random().nextInt(10);
 
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, onRemove: null,
-                  detacher: (onDetach) {
-                detachers[i] = onDetach;
-              });
+              cardoteka.attach(
+                card,
+                onChange: (_) {},
+                onRemove: null,
+                detacher: (onDetach) {
+                  detachers[i] = onDetach;
+                },
+              );
             }
 
             for (var i = 0; i < count; ++i) {
@@ -212,11 +217,15 @@ Future<void> main() async {
             final count = 1 + Random().nextInt(10);
 
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, onRemove: null,
-                  detacher: (onDetach) {
-                detachers[card] ??= [];
-                detachers[card]!.add(onDetach);
-              });
+              cardoteka.attach(
+                card,
+                onChange: (_) {},
+                onRemove: null,
+                detacher: (onDetach) {
+                  detachers[card] ??= [];
+                  detachers[card]!.add(onDetach);
+                },
+              );
             }
           }
 
@@ -251,7 +260,7 @@ Future<void> main() async {
             bool onRemoveCall = false;
             cardoteka.attach(
               card,
-              (_) => callBackCall = true,
+              onChange: (_) => callBackCall = true,
               onRemove: () => onRemoveCall = true,
               detacher: (_) {},
               fireImmediately: false,
@@ -279,7 +288,7 @@ Future<void> main() async {
             bool onRemoveCall = false;
             cardoteka.attach(
               card,
-              (_) => callBackCall = true,
+              onChange: (_) => callBackCall = true,
               onRemove: () => onRemoveCall = true,
               detacher: (_) {},
               fireImmediately: true,
@@ -318,7 +327,7 @@ Future<void> main() async {
             bool onRemoveCall = false;
             cardoteka.attach(
               card,
-              (_) => callbackCall = true,
+              onChange: (_) => callbackCall = true,
               onRemove: () => onRemoveCall = true,
               detacher: (_) {},
               fireImmediately: false,

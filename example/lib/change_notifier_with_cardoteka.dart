@@ -14,7 +14,7 @@ class ActivityNotifier with ChangeNotifier, DetacherChangeNotifier {
   ActivityNotifier() {
     cardoteka.attach(
       card,
-      (value) {
+      onChange: (value) {
         recentActivity = value;
         notifyListeners();
       },

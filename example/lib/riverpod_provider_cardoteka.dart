@@ -12,7 +12,7 @@ const AppSettings<HomePageState> card =
 final homePageStateProvider = Provider<HomePageState>(
   (ref) => ref.watch(cardotekaProvider).attach(
         card,
-        (value) => ref.state = value,
+        onChange: (value) => ref.state = value,
         onRemove: () => ref.state = HomePageState.unknown,
         detacher: ref.onDispose,
       ),

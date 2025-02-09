@@ -22,7 +22,7 @@ class LocaleNotifier extends Notifier<AppLocale> {
 
     return _storage.attach(
       card,
-      (value) => state = value,
+      onChange: (value) => state = value,
       detacher: ref.onDispose,
       onRemove: () => state = card.defaultValue,
     );

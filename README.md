@@ -254,11 +254,11 @@ If the default value type specified in the card is not the Dart base type, you m
 
 ### `Watcher`
 
-I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a `callback` that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters, you can specify:
+I will mention `Watcher` and its implementation `WatcherImpl` separately. This is a very nice option that allows you to update your state based on the attached callback. The most important method is `attach`. Its essence is the ability to attach a `onChange` callback that will be triggered whenever a value is stored (`set` or `setOrNull` methods) in the storage. As parameters, you can specify:
 - `onChange` -> to notify when a value is changed in storage (without comparison)
 - `onRemove` ->  to notify when a value is removed from storage (`remove` or `removeAll` methods)
 - `detacher` -> when listening no longer makes sense
-- `fireImmediately` -> to fire `callback` at the moment the `attach` method is called
+- `fireImmediately` -> to fire `onChange` at the moment the `attach` method is called
 
 Calling the `attach` method returns the actual value from storage OR the default value by card if none exists in storage. For `CardotekaAsync`, this method will first return the default value, and then return the actual value after the asynchronous operation is performed. Therefore, the `fireImmediately` flag is only relevant for `Cardoteka` instances. This behavior may change, keep an eye on [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38).
 
@@ -344,7 +344,7 @@ class ActivityNotifier with ChangeNotifier, DetacherChangeNotifier {
   ActivityNotifier() {
     cardoteka.attach(
       card,
-      (value) {
+      onChange: (value) {
         recentActivity = value;
         notifyListeners();
       },
@@ -465,7 +465,7 @@ Future<void> main() async {
 
   cardoteka.attach(
     card,
-    (value) => premiumNR.value = value,
+    onChange: (value) => premiumNR.value = value,
     onRemove: () => premiumNR.value = card.defaultValue,
     detacher: premiumNR.onDetach, // a line that allows you to fix memory leaks
   );
@@ -489,7 +489,7 @@ What happened?
 6. We save the new value to cardoteka, and after triggering watcher..:
 7. console-> 3️⃣State is premium?: value=false
 
-That is, roughly speaking, we can have very many notifiers with wiretapping attached  that will automatically update the state after the values in the storage change.
+That is, roughly speaking, we can have very many notifiers with callbacks attached  that will automatically update the state after the values in the storage change.
 
 ### `Cubit` (bloc)
 
@@ -547,7 +547,7 @@ Future<void> main() async {
   final cubit = CubitThemeMode(themeMode);
   cardoteka.attach(
     card,
-    cubit.onNewTheme,
+    onChange: cubit.onNewTheme,
     onRemove: () => cubit.onNewTheme(card.defaultValue),
     detacher: cubit.onDetach, // a line that allows you to fix memory leaks
   );
@@ -583,7 +583,7 @@ const AppSettings<HomePageState> card =
 final homePageStateProvider = Provider<HomePageState>(
   (ref) => ref.watch(cardotekaProvider).attach(
     card,
-    (value) => ref.state = value,
+    onChange: (value) => ref.state = value,
     onRemove: () => ref.state = HomePageState.unknown,
     detacher: ref.onDispose,
   ),
@@ -607,7 +607,7 @@ Future<void> main() async {
   homePageState = container.read(homePageStateProvider);
   print('$homePageState');
   // 1. a value was saved to storage
-  // 2. the callback we passed to `attach` is called.
+  // 2. the `onChange` callback we passed to `attach` is called.
   // 3. print-> HomePageState.open
 
   await cardoteka.remove(card);
@@ -648,7 +648,7 @@ class LocaleNotifier extends Notifier<AppLocale> {
 
     return _storage.attach(
       card,
-      (value) => state = value,
+      onChange: (value) => state = value,
       detacher: ref.onDispose,
       onRemove: () => state = card.defaultValue,
     );
@@ -733,7 +733,7 @@ extension AppLocaleX on AppLocale {
 }
 ```
 
-With this mini application, we can select locale, see localized text, and reset locale. And thanks to the `attach`ed callback, all you need to do is save/delete a value in storage so that state of ALL notifiers is updated in a timely manner. All this makes it possible to use a large number of notifiers and not worry that some of them are left with an irrelevant state. Check the launch of this application [here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/riverpod_provider_cardoteka.dart).
+With this mini application, we can select locale, see localized text, and reset locale. And thanks to the `attach`ed `onChange` callback, all you need to do is save/delete a value in storage so that state of ALL notifiers is updated in a timely manner. All this makes it possible to use a large number of notifiers and not worry that some of them are left with an irrelevant state. Check the launch of this application [here](https://github.com/PackRuble/cardoteka/blob/dev/example/lib/riverpod_provider_cardoteka.dart).
 
 The `AsyncNotifier` is used in the same way.
 

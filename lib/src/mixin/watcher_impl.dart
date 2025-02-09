@@ -111,8 +111,8 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   /// does not exist in storage. If the [Card.defaultValue] for the [Card]
   /// was null, [onRemove] will be called instead of [callback].
   V attach<V extends Object?>(
-    Card<V> card,
-    ValueCallback<V> callback, {
+    Card<V> card, {
+    required ValueCallback<V> onChange,
     required void Function()? onRemove,
     required Detacher detacher,
     bool fireImmediately = false,
@@ -122,7 +122,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
         // we create a new callback based on an existing one because
         // type 'void Function(V)' can't be assigned
         //   to 'void Function(Object?)'
-        : callback(value as V);
+        : onChange(value as V);
 
     final callbacksByCard =
         _watchers.putIfAbsent(card, () => <ValueCallback>[]);

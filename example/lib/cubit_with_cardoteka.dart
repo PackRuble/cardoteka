@@ -25,7 +25,7 @@ Future<void> main() async {
   final cubit = CubitThemeMode(themeMode);
   cardoteka.attach(
     card,
-    cubit.onNewTheme,
+    onChange: cubit.onNewTheme,
     onRemove: () => cubit.onNewTheme(card.defaultValue),
     detacher: cubit.onDetach, // a line that allows you to fix memory leaks
   );
@@ -65,7 +65,7 @@ class CubitThemeModeV1 extends Cubit<ThemeMode>
   CubitThemeModeV1() : super(card.defaultValue) {
     cardoteka.attach(
       card,
-      (ThemeMode value) => emit(value),
+      onChange: (ThemeMode value) => emit(value),
       fireImmediately: true,
       onRemove: () => emit(card.defaultValue),
       detacher: onDetach,
@@ -98,7 +98,7 @@ class CubitThemeModeV2 extends Cubit<ThemeMode> with DetacherCubitV2 {
   CubitThemeModeV2() : super(card.defaultValue) {
     cardoteka.attach(
       card,
-      (ThemeMode value) => emit(value),
+      onChange: (ThemeMode value) => emit(value),
       onRemove: () => emit(card.defaultValue),
       fireImmediately: true,
       detacher: onDetach,

@@ -72,7 +72,7 @@ void main() async {
   final log = StringBuffer('All notifications for SettingsCards.themeMode:\n');
   cardoteka.attach(
     SettingsCards.themeMode,
-    (value) => log.writeln('-> $value'),
+    onChange: (value) => log.writeln('-> $value'),
     onRemove: () => log.writeln('-> has been removed from storage'),
     detacher: (onDetach) {
       // pass onDetach to whoever is responsible for the lifetime of the object
