@@ -96,11 +96,12 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   /// cardoteka.attach(
   ///   card,
   ///   (value) => notifier.value = value,
+  ///   onRemove: () => notifier.value = card.defaultValue,
   ///   detacher: notifier.onDispose, // attention to this line
   ///   fireImmediately: true,
   /// );
   /// ```
-  /// A repeated call to _onDetach is completely safe.
+  /// A repeated call to `_onDetach` is completely safe.
   ///
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
@@ -112,7 +113,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   V attach<V extends Object?>(
     Card<V> card,
     ValueCallback<V> callback, {
-    void Function()? onRemove,
+    required void Function()? onRemove,
     required Detacher detacher,
     bool fireImmediately = false,
   }) {
@@ -134,10 +135,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
       }
     });
 
-    // todo(23.12.2024): doc
-    // todo(23.12.2024): такой способ позволяет работать и с `CardotekaAsync`
-    // - однако, хотим ли мы такое поведение?
-    // - иначе нам нужно разделить Watcher и WatcherAsync
+    // issue(08.02.2025): [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38)
     // ignore: discarded_futures
     FutureOr<V?> value = getOrNull(card);
     if (value is V) {

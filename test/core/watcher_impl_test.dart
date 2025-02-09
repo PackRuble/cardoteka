@@ -93,7 +93,12 @@ Future<void> main() async {
         tearDown: tearDownAction,
         () async {
           for (final card in cardoteka.cards) {
-            final value = cardoteka.attach(card, (_) {}, detacher: (_) {});
+            final value = cardoteka.attach(
+              card,
+              (_) {},
+              onRemove: null,
+              detacher: (_) {},
+            );
             expect(
               value,
               card.defaultValue,
@@ -122,7 +127,12 @@ Future<void> main() async {
               TekaTool.getTestValueBasedOnDefaultValue(card),
             );
 
-            final value = cardoteka.attach(card, (_) {}, detacher: (_) {});
+            final value = cardoteka.attach(
+              card,
+              (_) {},
+              onRemove: null,
+              detacher: (_) {},
+            );
             expect(
               value,
               testedValue,
@@ -143,7 +153,7 @@ Future<void> main() async {
           for (final card in cardoteka.cards) {
             final count = 1 + Random().nextInt(10);
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, detacher: (_) {});
+              cardoteka.attach(card, (_) {}, onRemove: null, detacher: (_) {});
             }
 
             expect(
@@ -168,7 +178,8 @@ Future<void> main() async {
             final count = 1 + Random().nextInt(10);
 
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, detacher: (onDetach) {
+              cardoteka.attach(card, (_) {}, onRemove: null,
+                  detacher: (onDetach) {
                 detachers[i] = onDetach;
               });
             }
@@ -201,7 +212,8 @@ Future<void> main() async {
             final count = 1 + Random().nextInt(10);
 
             for (var i = 0; i < count; ++i) {
-              cardoteka.attach(card, (_) {}, detacher: (onDetach) {
+              cardoteka.attach(card, (_) {}, onRemove: null,
+                  detacher: (onDetach) {
                 detachers[card] ??= [];
                 detachers[card]!.add(onDetach);
               });

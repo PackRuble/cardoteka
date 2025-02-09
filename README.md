@@ -171,7 +171,8 @@ Things are different for `CardotekaAsync` because data is asynchronously request
 But which one to use when? It's simple: 
 - if your data is updated by another service (and you can't track it)
 - OR your data is too heavy (lists with instances of classes with a large number of fields are serialized)
-- OR synchronous reading is not that important to you,
+- OR synchronous reading is not that important to you
+ 
 then feel free to use `CardotekaAsync`. Otherwise, use `Cardoteka`.
 
 ## Saving null values
@@ -465,6 +466,7 @@ Future<void> main() async {
   cardoteka.attach(
     card,
     (value) => premiumNR.value = value,
+    onRemove: () => premiumNR.value = card.defaultValue,
     detacher: premiumNR.onDetach, // a line that allows you to fix memory leaks
   );
 
@@ -546,6 +548,7 @@ Future<void> main() async {
   cardoteka.attach(
     card,
     cubit.onNewTheme,
+    onRemove: () => cubit.onNewTheme(card.defaultValue),
     detacher: cubit.onDetach, // a line that allows you to fix memory leaks
   );
 
@@ -758,7 +761,7 @@ After:
 cardoteka.attach(
   card,
   onChange: (value) {/* This parameter is now named */},
-  onRemove: () {/*This parameter is now required */},
+  onRemove: () {/* This parameter is now required */},
 );
 ```
 
