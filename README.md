@@ -770,100 +770,108 @@ Migration version 2 must be carried out if:
 - you previously used `cardoteka` package version `1.*.*`;
 - you previously used `shared_preferences` version `2.3.0` and lower;
 
-To do this, call the `migrate` method on any of your `CardotekaCore` heir instances (although the `CardotekaAsync` instance is preferable because it does not store extra cache in the process):
+Then do the following and it will automatically migrate your data:
 ```dart
-final cardoteka = CardotekaAsync(config: config);
-await cardoteka.migrate();
+await CardotekaMigrator.migrate();
+// and then the usual actions
+await Cardoteka.init();
 ```
+By default, all your entries from the old version of the storage will be moved to the new one (old storage will be cleared). 
 
-By default, all your entries from the old version of the storage will be moved to the new one (old storage will be cleared). If you need more control over the process, you can define your own handler
-for each entry:
+If you need more control over the process, you can define your own handler for each entry:
 ```dart
-await cardoteka.migrate(
-  toV2Handler: (key, value) =>
-      (key, value, removeOld: false, ignore: false),
+await CardotekaMigrator.migrate(
+  toV2Handler: (key, value) => (key, value, removeOld: false, ignore: false),
 );
 ```
 
 If you don't need migration, then either don't call this method, or do this:
 ```dart
-await cardoteka.migrate(toV2Handler: null);
+await CardotekaMigrator.migrate(toV2Handler: null);
 ```
 
-The result `HandlerEntryV2` of executing `toV2Handler` shows what should be done with the given entry. `HandlerEntryV2` represents a record resulting from the execution of a data migration handler.
-```dart
-typedef HandlerEntryV2 = (
-  String key,
-  Object? value, {
-  bool removeOld,
-  bool ignore,
-});
-```
+The result `HandlerEntryV2` of executing `toV2Handler` shows what should be done with the given entry.
+
+`HandlerEntryV2` represents a record resulting from the execution of a data migration handler.
 Her parameters:
 - `key` a new key associated with a value that will be stored in storage.
-- `value` a new value associated with a key that will be stored in storage.
-  If the `HandlerEntryV2.value` is null, no write to the new storage will occur.
+- `value` a new value associated with a key that will be stored in storage. If the `HandlerEntryV2.value` is null, no write to the new storage will occur.
 - `removeOld` allows you to delete an entry from the old storage.
 - `ignore` completely ignores this entry.
 
-Let's deal with some special cases. Suppose you needed to store a key `fcm_vapid_key` in old storage, and you needed to ignore a key `platform_id` and not move it to new storage, and one more key `theme_mode_index` must be renamed and its value changed to a different value. Then, it can be done like this:
+*Let's deal with some special cases*. Suppose you needed:
+- `fcm_vapid_key` save in new storage and leave in old storage
+- `platform_available_memory_mb` ignore for new storage and leave in old storage
+- `theme_mode_index` change name to 'user_settings.themeModeApp' and change value from `1` to `light` and delete from old storage
+
+Moreover, we would like to use the `user_settings.themeModeApp` key later on as `Card` with `Cardoteka`. To do this, add the name specified in `CardotekaConfig` and the dot `.` to the key in the prefix. 
+
+And if your configuration looks like this:
 ```dart
-await cardoteka.migrate(
+const config = CardotekaConfig(
+  name: 'user_settings',
+  cards: [/* .., StorageCard.themeModeApp .., */],
+);
+```
+
+In addition to this, you have used Cardoteka before and there are also keys (cards) stored there that will simply be move to new storage:
+- `user_settings.isPremium`
+- `user_settings.userName`
+
+Everything in general can be done like this:
+```dart
+await CardotekaMigrator.migrate(
   toV2Handler: (key, value) => switch (key) {
     'fsm_vapid_key' => (key, value, removeOld: false, ignore: false),
-    'platform_id' => (key, value, removeOld: false, ignore: true),
+    'platform_available_memory_mb' => (key, value, removeOld: false, ignore: true),
     'theme_mode_index' => (
-        'theme_mode',
+        '${config.name}.themeModeApp',
         switch (value) {
           1 => ThemeMode.light,
           2 => ThemeMode.dark,
           _ => ThemeMode.system,
         }
             .name,
-        removeOld: false,
+        removeOld: true,
         ignore: false,
       ),
+    // for all other keys
     _ => (key, value, removeOld: true, ignore: false),
   },
-);
-// or do so, although in the current case the first spelling is semantically easier:
-await cardoteka.migrate(
-  toV2Handler: (key, value) => (
-    switch (key) { 'theme_mode_index' => 'theme_mode', _ => key },
-    switch (key) {
-      'theme_mode_index' => switch (value) {
-          1 => ThemeMode.light,
-          2 => ThemeMode.dark,
-          _ => ThemeMode.system,
-        }
-            .name,
-      _ => value,
-    },
-    removeOld: switch (key) { 'fsm_vapid_key' => false, _ => true },
-    ignore: switch (key) { 'platform_id' => true, _ => false },
-  ),
 );
 // It was before migration in old storage:
 // {
 //   'fsm_vapid_key': 'BKagOny0KF_2pCJQ3mmoL0ewzQ8rZu',
-//   'platform_id': 383283478123,
+//   'platform_available_memory_mb': 2119.3,
 //   'theme_mode_index': 1,
 // };
+// and at the same time in new storage:
+// {
+//   'user_settings.isPremium': true,
+//   'user_settings.userName': 'Ivan',
+// };
+//
 //
 // Now after migration in old storage:
 // {
 //   'fsm_vapid_key': 'BKagOny0KF_2pCJQ3mmoL0ewzQ8rZu',
-//   'platform_id': 383283478123,
-//   'theme_mode_index': 1,
+//   'platform_available_memory_mb': 2119.3,
 // };
-// And in new storage:
+// and in new storage:
 // {
 //   'fsm_vapid_key': 'BKagOny0KF_2pCJQ3mmoL0ewzQ8rZu',
-//   'theme_mode': 'light',
+//   'user_settings.themeModeApp': 'light',
+//   'user_settings.isPremium': true,
+//   'user_settings.userName': 'Ivan',
+//   '_cardoteka_package_did_migrate_v2': true,
 // };
 ```
 
-Note! Depending on the platform, the old and new storage may overlap. This method potentially takes this into account. The migration will result in an entry with the `_cardoteka_package_did_migrate_v2` key in storage about the status of the current migration.
+Note! Depending on the platform, the old and new storage may overlap.
+This method potentially takes this into account.
+
+The migration will result in an entry with the `_cardoteka_package_did_migrate_v2` key
+in storage about the status of the current migration.
 
 ## Obfuscate
 
