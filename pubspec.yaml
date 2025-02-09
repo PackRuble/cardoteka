@@ -20,7 +20,7 @@ dependencies:
     sdk: flutter
 
   # dart sdk limitation matches - ^3.5.0
-  shared_preferences: ^2.3.4
+  shared_preferences: ^2.5.1
 
   # version is clearly related to the minimum version of the dart sdk
   meta: ^1.15.0
