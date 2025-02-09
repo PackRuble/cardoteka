@@ -12,7 +12,9 @@ final class CardotekaCRUD extends Cardoteka with CRUD, CardotekaTestUtils {
   CardotekaCRUD({required super.config});
 }
 
+// ignore: unreachable_from_main
 final class CardotekaAsyncCRUD extends CardotekaAsync with CRUD {
+  // ignore: unreachable_from_main
   CardotekaAsyncCRUD({required super.config});
 }
 

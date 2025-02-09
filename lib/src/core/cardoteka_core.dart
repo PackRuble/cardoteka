@@ -83,6 +83,7 @@ import 'core_checks.dart' show checkConfiguration;
 ///     - default value. It will be returned when using [CardotekaCore.get],
 ///     if there were no saves in the storage for this card previously.
 ///   - converters if generic type does not match your [Card.type]
+///
 /// 2. Define a class that extends from an inheritor of the [CardotekaCore] class
 /// (synchronous or asynchronous versions). Either pass the configuration
 /// directly to the super class, or use required parameters.
@@ -93,7 +94,7 @@ import 'core_checks.dart' show checkConfiguration;
 /// - [CRUD] to use familiar basic CRUD operations (create, read, update, delete).
 /// This is nothing more than an imitation based on the [CardotekaCore.get],
 /// [CardotekaCore.set] and [CardotekaCore.remove] methods.
-/// - [CardotekaUtilsForTest] for use during tests. // todo(15.01.2025):
+///
 /// 3. Perform initialization (required for synchronous version) and take advantage of
 /// all the features of your cardoteka! Save, read, delete, listen to your saved
 /// data using typed cards.

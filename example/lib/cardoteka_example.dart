@@ -25,6 +25,7 @@ enum SettingsCards<T extends Object?> implements Card<T> {
   String get key => name;
 
   static const converters = <Card, Converter>{
+    // ignore: deprecated_member_use
     userColor: Converters.colorAsInt,
     themeMode: EnumAsStringConverter(ThemeMode.values),
     appLocale: EnumAsStringConverter(AppLocale.values),

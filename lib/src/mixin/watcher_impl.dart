@@ -27,7 +27,8 @@ typedef Detacher = void Function(void Function() onDetach);
 /// final cardoteka = MyCardoteka(...);
 /// final actualValue = cardoteka.attach(
 ///   card,
-///   (value) {...},
+///   onChange: (value) {...},
+///   onRemove: () {...}
 ///   detacher: (onDetach) {...},
 /// );
 /// ```
@@ -64,14 +65,14 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     }
   }
 
-  /// Attach a [ValueCallback] to your [Card]. The [callback] and [onRemove]
+  /// Attach a [ValueCallback] to your [Card]. The [onChange] and [onRemove]
   /// parameters will allow you to track changes to the value in the storage.
   ///
-  /// The [callback] will be called whenever the [Cardoteka.set] or
-  /// [Cardoteka.setOrNull] methods are called.
+  /// The [onChange] will be called whenever the [CardotekaCore.set] or
+  /// [CardotekaCore.setOrNull] methods are called.
   ///
-  /// The [onRemove] will be called whenever the [Cardoteka.remove] or
-  /// [Cardoteka.removeAll] methods are called.
+  /// The [onRemove] will be called whenever the [CardotekaCore.remove] or
+  /// [CardotekaCore.removeAll] methods are called.
   ///
   /// Pass [detacher] to remove the watcher when it becomes irrelevant.
   /// The meaning of this functionality can be described as follows:
@@ -95,21 +96,33 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   ///
   /// cardoteka.attach(
   ///   card,
-  ///   (value) => notifier.value = value,
+  ///   onChange: (value) => notifier.value = value,
   ///   onRemove: () => notifier.value = card.defaultValue,
   ///   detacher: notifier.onDispose, // attention to this line
   ///   fireImmediately: true,
   /// );
   /// ```
-  /// A repeated call to `_onDetach` is completely safe.
+  ///
+  /// For `ChangeNotifier` and its successors, use the [DetacherChangeNotifier] mixin:
+  /// ```dart
+  /// class ActivityNotifier with ChangeNotifier, DetacherChangeNotifier {...}
+  /// ```
+  ///
+  /// For any other notifiers and BLoC-classes, use the [Detachability] mixin.
   ///
   /// The call will return the stored value from storage. If there was no value,
   /// [Card.defaultValue] will be returned.
   ///
-  /// If [fireImmediately] is set to true, the passed [callback] will be executed
+  /// Note: however, in the case of [CardotekaAsync], the first value will always
+  /// be [Card.defaultValue] and the actual value will be returned via [onChange].
+  /// This behavior may change in the future:
+  /// - https://github.com/PackRuble/cardoteka/issues/38
+  ///
+  /// If [fireImmediately] is set to true, the passed [onChange] will be executed
   /// immediately with stored value from storage or defaultValue if the value
   /// does not exist in storage. If the [Card.defaultValue] for the [Card]
   /// was null, [onRemove] will be called instead of [callback].
+  /// Note: for [CardotekaAsync] `fireImmediately` is always true.
   V attach<V extends Object?>(
     Card<V> card, {
     required ValueCallback<V> onChange,

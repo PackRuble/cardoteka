@@ -231,11 +231,6 @@ Future<void> main() async {
     setUp: setUpAction,
     tearDown: tearDownAction,
     () async {
-      final Map dataInOld1 = spOld.getAll();
-      final Map dataInNew1 = await spNew.getAll();
-      print(dataInOld1);
-      print(dataInNew1);
-      print('');
       await CardotekaMigrator.migrate(
         toV2Handler: (key, value) => switch (key) {
           'fsm_vapid_key' => (key, value, removeOld: false, ignore: false),
@@ -282,10 +277,6 @@ Future<void> main() async {
         }),
         reason: 'As planned',
       );
-
-      print(dataInOld);
-      print(dataInNew);
-      print('');
     },
   );
 

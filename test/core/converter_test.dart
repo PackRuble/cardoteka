@@ -50,8 +50,10 @@ final class TestMapConverter extends MapConverter<int, double> {
 void main() {
   group('$Converters', () {
     test('colorAsInt', () {
+      // ignore: deprecated_member_use_from_same_package
       const converter = Converters.colorAsInt;
       const color = Color.fromARGB(0, 0, 0, 0);
+      // ignore: deprecated_member_use
       final colorValue = color.value;
 
       int resultTo = converter.to(color);

@@ -179,8 +179,7 @@ base class CardotekaAsync extends CardotekaCore {
   @override
   Future<Set<Card>> getStoredCards() async {
     final Set<String> storedKeys = await _prefsAsync.getKeys(
-      // todo(22.12.2024):
-      allowList: null,
+      allowList: {for (final card in cards) getStorageKey(card)},
     );
     final resultKeys = <Card>{
       for (final card in cards)

@@ -301,7 +301,9 @@ enum ForestCard<T> implements CardTest<T> {
   String get key => _customKey ?? EnumName(this).name;
 
   static const converters = {
+    // ignore: deprecated_member_use_from_same_package
     currentColorSpruce: Converters.colorAsInt,
+    // ignore: deprecated_member_use_from_same_package
     currentColorSpruceWCK: Converters.colorAsInt,
     lifetimeCedar: Converters.durationAsInt,
   };

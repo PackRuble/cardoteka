@@ -14,10 +14,6 @@ class AssertionErrorImpl extends AssertionError {
   String toString() => 'Assertion failed: $message';
 }
 
-/// TODO:
-/// 1. Translate everything into custom errors.
-/// 2. Do separate class Assertion error (test-friendly)
-
 @internal
 typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
 
@@ -130,8 +126,6 @@ bool checkMatchingConverters(
 
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
-
-    // todo: warning messages to the console if the map is of type int or double + web
 
     final excepted = card.type.dartType;
     Type? afterConverted;
