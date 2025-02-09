@@ -17,7 +17,7 @@ final class CardotekaAsyncCRUD extends CardotekaAsync with CRUD {
 }
 
 void main() {
-  initSP();
+  initMockNewSP();
 
   for (final config in allCardotekaConfigs) {
     late CardotekaCRUD cardoteka;

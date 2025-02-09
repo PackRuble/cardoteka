@@ -13,7 +13,7 @@ final class CardotekaTest extends Cardoteka with CardotekaTestUtils {
 }
 
 void main() {
-  initSP();
+  initMockNewSP();
 
   for (final config in allCardotekaConfigs) {
     late CardotekaTest cardoteka;

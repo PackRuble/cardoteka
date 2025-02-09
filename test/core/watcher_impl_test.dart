@@ -17,7 +17,7 @@ final class CardotekaTest extends Cardoteka
 }
 
 Future<void> main() async {
-  initSP();
+  initMockNewSP();
 
   for (final config in allCardotekaConfigs) {
     late CardotekaTest cardoteka;

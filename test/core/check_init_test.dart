@@ -37,7 +37,7 @@ class CardMockNull<T extends Object?> implements Card<T> {
 }
 
 void main() {
-  initSP();
+  initMockNewSP();
 
   late CardotekaTest cardoteka;
   late Card<Object> card;

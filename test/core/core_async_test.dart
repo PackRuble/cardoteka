@@ -12,7 +12,7 @@ final class CardotekaAsyncTest extends CardotekaAsync {
 }
 
 void main() {
-  initSP();
+  initMockNewSP();
 
   for (final config in allCardotekaConfigs) {
     late CardotekaAsyncTest cardoteka;
