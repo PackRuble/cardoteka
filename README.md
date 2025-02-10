@@ -88,7 +88,7 @@ enum AppSettings<T extends Object?> implements Card<T> {
 }
 ```
 
-2. Perform initialization (once) via `Cardoteka.init` and take advantage of all the features of your cardoteka: save, read, delete, listen to your saved data using typed cards:
+2. Select the cardoteka class required in your case - `Cardoteka` (based on pre-caching) or `CardotekaAsync` for asynchronous data retrieval (see [Sync or Async storage](https://github.com/PackRuble/cardoteka?tab=readme-ov-file#sync-or-async-storage)). For the `Cardoteka` class, perform initialization via `Cardoteka.init` and take advantage of all the features of your cardoteka: save, read, delete, listen to your saved data using typed cards:
 
 ```dart
 Future<void> main() async {

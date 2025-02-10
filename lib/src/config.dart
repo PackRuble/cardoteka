@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import 'card.dart';
 import 'converter.dart';
 
-/// Configuration model for the [Cardoteka] impl.
+/// Configuration model for the [CardotekaCore] impl.
 @immutable
 class CardotekaConfig {
   const CardotekaConfig({
@@ -12,13 +12,13 @@ class CardotekaConfig {
     this.converters,
   });
 
-  /// The name of your [Cardoteka] instance. The [name] must be unique and
+  /// The name of your [CardotekaCore] instance. The [name] must be unique and
   /// not used in other instances.
   ///
   /// Under the hood, the name is used as prefixes for all [cards].
   final String name;
 
-  /// List of all key-cards to access [SharedPreferences] in [Cardoteka].
+  /// List of all key-cards to access SharedPreferences in [Cardoteka] and [CardotekaAsync].
   final List<Card> cards;
 
   /// Map of converters for complex objects (those whose types are not part of
