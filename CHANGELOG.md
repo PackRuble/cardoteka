@@ -11,7 +11,7 @@
 - add: `CRUD.readAsync` method for use with `CardotekaAsync`
 - add: `notifyAll` method for `Watcher` [#17](https://github.com/PackRuble/cardoteka/issues/17)
 - upd: `Converters.colorAsInt` is temporarily deprecated. See more details in [#31](https://github.com/PackRuble/cardoteka/issues/31)
-- add: `CardotekaCore.migrate` method for data migration ([#33](https://github.com/PackRuble/cardoteka/issues/33))
+- add: `CardotekaMigrator.migrate` method for data migration ([#33](https://github.com/PackRuble/cardoteka/issues/33))
 - upd: all examples in `example` folder have been updated
 - upd: some internal methods have been hidden from the IDE prompts to make package easier to use
 - doc: "Notifier (riverpod)", "Analogy in `SharedPreferencesWithCache` and `SharedPreferencesAsync`", "Migration", "Sync or Async storage", "Detachability" sections were added to readme
