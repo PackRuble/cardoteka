@@ -156,7 +156,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
       if (fireImmediately) onChange(value);
       return value;
     } else {
-      Future(() => onChange.call(value as V));
+      Future(() async => onChange.call((await value) as V));
       return card.defaultValue;
     }
   }
