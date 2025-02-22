@@ -77,7 +77,7 @@ import 'core_checks.dart' show checkConfiguration;
 ///   - implement the [Card] interface and define all required fields
 ///   - for each card, identify
 ///     - name (will be used as key. It shouldn't change after),
-///     - <generic> for type designation for default value (optional)
+///     - `<generic>` for type designation for default value (optional)
 ///     - type to which the value will be converted. Select the appropriate one
 ///     from the [DataType] enumeration,
 ///     - default value. It will be returned when using [CardotekaCore.get],
