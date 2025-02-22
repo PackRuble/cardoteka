@@ -20,7 +20,7 @@ dependencies:
     sdk: flutter
 
   # dart sdk limitation matches - ^3.5.0
-  shared_preferences: ^2.5.1
+  shared_preferences: ^2.5.2
 
   # version is clearly related to the minimum version of the dart sdk
   meta: ^1.15.0
@@ -28,7 +28,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lint: ^2.3.0
+  lint: ^2.6.1
 
   # [[shared_preferences] Remove legacy testing section from README · Issue #153108 · flutter/flutter](https://github.com/flutter/flutter/issues/153108#issuecomment-2278510439)
   shared_preferences_platform_interface: any
