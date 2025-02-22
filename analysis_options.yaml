@@ -1,8 +1,4 @@
 include: package:lint/package.yaml
-#
-#analyzer:
-#  exclude:
-#    - 'example/**'
 
 linter:
   rules:
@@ -12,3 +8,4 @@ linter:
     sort_pub_dependencies: false
     require_trailing_commas: false
     curly_braces_in_flow_control_structures: false
+    document_ignores: false

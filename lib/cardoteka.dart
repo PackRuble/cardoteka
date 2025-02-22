@@ -6,7 +6,7 @@
 ///
 /// Wow, it's never been safer than it is right now!
 /// You can see all the available classes below.
-library cardoteka;
+library;
 
 export 'src/card.dart' show Card, DataType;
 export 'src/config.dart' show CardotekaConfig;
