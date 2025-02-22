@@ -1,3 +1,6 @@
+## [2.1.0] - 22-02-2025
+- fix: when `WatcherImpl.attach` is called with `fireImmediately`=true for `Cardoteka`, the callback is called asynchronously ([#44](https://github.com/PackRuble/cardoteka/issues/44))
+
 ## [2.0.0] - 10-02-2025
 
 - upd: minimum supported SDK version to Flutter 3.24.0/Dart 3.5.0

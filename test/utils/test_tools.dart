@@ -13,12 +13,13 @@ Future<void> testWith(
   dynamic Function() body, {
   dynamic Function()? setUp,
   dynamic Function()? tearDown,
+  bool skip = false,
 }) async {
   test(description, () async {
     await setUp?.call();
     await body.call();
     await tearDown?.call();
-  });
+  }, skip: skip);
 }
 
 String tekaReason(String message, Card card) => '''

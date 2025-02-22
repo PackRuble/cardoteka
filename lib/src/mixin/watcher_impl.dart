@@ -153,10 +153,10 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     FutureOr<V?> value = getOrNull(card);
     if (value is V) {
       value = value ?? card.defaultValue;
-      if (fireImmediately) newCallback.call(value);
+      if (fireImmediately) onChange(value);
       return value;
     } else {
-      Future(() async => newCallback.call(await value));
+      Future(() => onChange.call(value as V));
       return card.defaultValue;
     }
   }
