@@ -7,6 +7,15 @@ import 'package:meta/meta.dart' show isTest;
 
 typedef AsyncCallback = Future<void> Function();
 
+enum Teka {
+  sync,
+  async,
+  ;
+
+  bool get isSync => this == sync;
+  bool get isAsync => this == async;
+}
+
 @isTest
 Future<void> testWith(
   Object description,

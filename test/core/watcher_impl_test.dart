@@ -21,8 +21,6 @@ final class CardotekaAsyncTest extends CardotekaAsync
   CardotekaAsyncTest({required super.config});
 }
 
-enum Teka { sync, async }
-
 Future<void> main() async {
   initMockNewSP();
 
@@ -47,7 +45,7 @@ Future<void> main() async {
 
       group('$WatcherImpl+$teka with config: $config', () {
         testWith(
-          '$WatcherImpl.attach -> Checking operations that call a callback',
+          '$WatcherImpl.attach -> Complex',
           setUp: setUpAction,
           tearDown: tearDownAction,
           () async {
@@ -59,44 +57,108 @@ Future<void> main() async {
               final Object? defaultValue = card.defaultValue;
               final Object? newValue =
                   TekaTool.getTestValueBasedOnDefaultValue(card);
-              final actionForResultInCallback =
-                  <(AsyncCallback action, Object? expectedValue)>[
-                if (newValue != null)
-                  (() async => cardoteka.set(card, newValue), newValue),
-                (() async => cardoteka.remove(card), defaultValue),
-                (() async => cardoteka.setOrNull(card, newValue), newValue),
-                (() async => cardoteka.removeAll(), defaultValue),
-              ];
-              int counter = 0;
+
+              Object? onChangeValue;
+              bool onRemoveCalled = false;
 
               late final void Function() detacher;
               cardoteka.attach(
                 card,
-                onChange: (cbValue) => expect(
-                  cbValue,
-                  actionForResultInCallback[counter++].$2,
-                  reason: tekaReason(
-                    'The callback should return a new value as soon as it changes in the store'
-                    '$actionForResultInCallback, when count is $counter',
-                    card,
-                  ),
-                ),
-                onRemove: () => actionForResultInCallback[counter++].$2,
+                onChange: (value) => onChangeValue = value,
+                onRemove: () => onRemoveCalled = true,
                 detacher: (onDetach) => detacher = onDetach,
               );
 
-              await Future.wait(
-                  actionForResultInCallback.map((e) => e.$1.call()));
+              if (teka.isAsync) {
+                // load the asynchronous queue
+                await null;
+
+                expect(
+                  onChangeValue,
+                  defaultValue,
+                  reason: tekaReason(
+                    '2 call `onChange`',
+                    card,
+                  ),
+                );
+
+                onChangeValue = null;
+                onRemoveCalled = false;
+              }
+
+              // ---
+
+              if (newValue != null) {
+                await cardoteka.set(card, newValue);
+
+                expect(
+                  onChangeValue,
+                  newValue,
+                  reason: tekaReason(
+                    '3 call `onChange`',
+                    card,
+                  ),
+                );
+
+                onChangeValue = null;
+              }
+
+              // ---
+
+              await cardoteka.remove(card);
 
               expect(
-                actionForResultInCallback,
-                hasLength(counter),
+                onRemoveCalled,
+                isTrue,
                 reason: tekaReason(
-                  'All operations must trigger the callback!\n'
-                  'watchers: ${cardoteka.getWatchers()}',
+                  '4 call `onRemove`',
                   card,
                 ),
               );
+
+              onRemoveCalled = false;
+
+              // ---
+
+              await cardoteka.setOrNull(card, newValue);
+
+              expect(
+                newValue == null ? onRemoveCalled : onChangeValue,
+                // ignore: prefer_if_null_operators
+                newValue == null ? isTrue : newValue,
+                reason: tekaReason(
+                  '5 call ${newValue == null ? '`onRemove`' : '`onChange`'}',
+                  card,
+                ),
+              );
+
+              onChangeValue = null;
+              onRemoveCalled = false;
+
+              // ---
+
+              await cardoteka.removeAll();
+
+              expect(
+                onRemoveCalled,
+                isTrue,
+                reason: tekaReason(
+                  '6 call `onRemove`',
+                  card,
+                ),
+              );
+
+              // ---
+
+              expect(
+                cardoteka.watchersDebug,
+                hasLength(1),
+                reason: tekaReason(
+                  'Detacher length = 1, but ${cardoteka.getWatchers()}',
+                  card,
+                ),
+              );
+
               detacher.call();
             }
           },
@@ -314,9 +376,9 @@ Future<void> main() async {
 
               expect(
                 callBackCall,
-                isTrue,
+                teka == Teka.sync,
                 reason: tekaReason(
-                  'when fireImmediately=true callback must be called immediately!',
+                  'when fireImmediately=true callback must be called!',
                   card,
                 ),
               );
@@ -334,7 +396,7 @@ Future<void> main() async {
         );
 
         testWith(
-          '$WatcherImpl.attach -> fireImmediately=true triggers synchronously and immediately',
+          '$WatcherImpl.attach -> fireImmediately=true triggers ${teka == Teka.async ? 'A' : ''}synchronously and immediately',
           setUp: setUpAction,
           tearDown: tearDownAction,
           () {
@@ -351,9 +413,9 @@ Future<void> main() async {
 
               expect(
                 callBackCall,
-                isTrue,
+                teka == Teka.sync,
                 reason: tekaReason(
-                  'when fireImmediately=true callback must be called synchronously and immediately',
+                  'when fireImmediately=true callback must be called ${teka == Teka.async ? 'A' : ''}synchronously',
                   card,
                 ),
               );
@@ -388,7 +450,8 @@ Future<void> main() async {
                 );
                 expect(
                   callbackCall,
-                  isFalse,
+                  // onChange is always called for asynchronous teka
+                  teka == Teka.async,
                   reason: tekaReason(
                       "callbackCall should not have been called!", card),
                 );
