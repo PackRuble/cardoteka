@@ -27,7 +27,7 @@ base mixin CRUD on CardotekaCore {
   Future<bool> create<V extends Object>(
     Card<V> card, [
     V? value,
-  ]) async =>
+  ]) =>
       set<V>(card, value ?? card.defaultValue);
 
   /// Calls [Cardoteka.get] method.
@@ -50,14 +50,14 @@ base mixin CRUD on CardotekaCore {
       super.get<V>(card);
 
   /// Calls [Cardoteka.set] method.
-  Future<bool> update<V extends Object>(Card<V> card, V value) async =>
+  Future<bool> update<V extends Object>(Card<V> card, V value) =>
       set<V>(card, value);
 
   /// Calls [Cardoteka.remove] method.
-  Future<bool> delete(Card card) async => remove(card);
+  Future<bool> delete(Card card) => remove(card);
 
   /// Calls [Cardoteka.removeAll] method.
-  Future<bool> clear() async => removeAll();
+  Future<bool> clear() => removeAll();
 
   @override
   @protected

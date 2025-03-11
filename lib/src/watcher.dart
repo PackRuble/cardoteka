@@ -16,5 +16,7 @@ abstract interface class Watcher {
   void notify<V extends Object?>(Card<V> card, V value);
 
   /// Allows to notify all listeners with the new values.
+  // classes implementing this interface must have this feature
+  // ignore: avoid_futureor_void
   FutureOr<void> notifyAll();
 }

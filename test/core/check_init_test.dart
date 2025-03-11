@@ -59,7 +59,7 @@ void main() {
   });
 
   group('$Cardoteka.assertCheckInit()', () {
-    test("throw when don't call initialization", () async {
+    test("throw when don't call initialization", () {
       void Function() resultFunc = () => cardoteka.assertCheckInit();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
@@ -74,55 +74,55 @@ void main() {
   });
 
   group('throw when try call data-methods without initialization', () {
-    test('get', () async {
+    test('get', () {
       void Function() resultFunc = () => cardoteka.get(card);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('getOrNull', () async {
+    test('getOrNull', () {
       void Function() resultFunc = () => cardoteka.getOrNull(card);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('set', () async {
+    test('set', () {
       void Function() resultFunc =
-          () => cardoteka.set(card, 'defaultValue_test');
+          () async => await cardoteka.set(card, 'defaultValue_test');
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('setOrNull', () async {
+    test('setOrNull', () {
       void Function() resultFunc =
-          () => cardoteka.setOrNull(card, 'card_value');
+          () async => await cardoteka.setOrNull(card, 'card_value');
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('setOrNull when card.value=null', () async {
+    test('setOrNull when card.value=null', () {
       void Function() resultFunc =
-          () => cardoteka.setOrNull<Object>(cardNull, null);
+          () async => await cardoteka.setOrNull<Object>(cardNull, null);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('remove', () async {
-      void Function() resultFunc = () => cardoteka.remove(card);
+    test('remove', () {
+      void Function() resultFunc = () async => await cardoteka.remove(card);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('removeAll', () async {
-      void Function() resultFunc = () => cardoteka.removeAll();
+    test('removeAll', () {
+      void Function() resultFunc = () async => await cardoteka.removeAll();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('getStoredCards', () async {
+    test('getStoredCards', () {
       void Function() resultFunc = () => cardoteka.getStoredCards();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('containsCard', () async {
+    test('containsCard', () {
       void Function() resultFunc = () => cardoteka.containsCard(card);
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);
     });
-    test('getStoredEntries', () async {
+    test('getStoredEntries', () {
       void Function() resultFunc = () => cardoteka.getStoredEntries();
       expect(resultFunc, throwsAssertionError);
       expect(cardoteka.isInitialized, false);

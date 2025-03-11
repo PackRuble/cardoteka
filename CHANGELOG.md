@@ -1,3 +1,6 @@
+## [2.1.1] - 11-03-2025
+- fix: regressed issue [#44](https://github.com/PackRuble/cardoteka/issues/44) peppered with tests
+
 ## [2.1.0] - 22-02-2025
 - fix: when `WatcherImpl.attach` is called with `fireImmediately`=true for `Cardoteka`, the callback is called asynchronously ([#44](https://github.com/PackRuble/cardoteka/issues/44))
 

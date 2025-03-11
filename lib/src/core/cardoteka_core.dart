@@ -191,7 +191,7 @@ abstract base class CardotekaCore {
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> set<V extends Object>(Card<V?> card, V value) {
     watcher?.notify<V?>(card, value);
 
     return setValueToStorage<V>(card, value);

@@ -35,8 +35,7 @@ class TimeConverter implements Converter<Time, int> {
   int to(Time object) => object.value.millisecondsSinceEpoch;
 }
 
-class List2DConverterStub
-    implements Converter<List<List<Object?>>, String> {
+class List2DConverterStub implements Converter<List<List<Object?>>, String> {
   const List2DConverterStub();
   @override
   List<List<Object?>> from(_) => [[], []];
