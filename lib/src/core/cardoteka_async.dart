@@ -67,7 +67,7 @@ base class CardotekaAsync extends CardotekaCore {
       await getValueFromStorage<V>(card) ?? card.defaultValue;
 
   @override
-  Future<V?> getOrNull<V extends Object?>(Card<V?> card) async =>
+  Future<V?> getOrNull<V extends Object?>(Card<V?> card) =>
       getValueFromStorage<V>(card);
 
   @internal
@@ -88,7 +88,7 @@ base class CardotekaAsync extends CardotekaCore {
   @internal
   @protected
   @override
-  Future<Object?> getObjectFromStorage(String key, DataType type) async =>
+  Future<Object?> getObjectFromStorage(String key, DataType type) =>
       switch (type) {
         DataType.string => _prefsAsync.getString(key),
         DataType.int => _prefsAsync.getInt(key),
@@ -102,7 +102,7 @@ base class CardotekaAsync extends CardotekaCore {
   /// Works similarly to the [SharedPreferencesAsync.setBool] method and
   /// others of the same name.
   @override
-  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> set<V extends Object>(Card<V?> card, V value) {
     watcher?.notify<V?>(card, value);
 
     return setValueToStorage<V>(card, value);
@@ -170,7 +170,7 @@ base class CardotekaAsync extends CardotekaCore {
   ///
   /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
   @override
-  Future<bool> containsCard(Card card) async =>
+  Future<bool> containsCard(Card card) =>
       _prefsAsync.containsKey(getStorageKey(card));
 
   /// {@macro cardoteka.CardotekaCore.getStoredCards}

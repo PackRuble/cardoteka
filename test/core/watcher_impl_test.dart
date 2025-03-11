@@ -169,7 +169,7 @@ Future<void> main() async {
           setUp: setUpAction,
           tearDown: tearDownAction,
           skip: teka == Teka.async,
-          () async {
+          () {
             for (final card in cardoteka.cards) {
               final value = cardoteka.attach(
                 card,
@@ -229,7 +229,7 @@ Future<void> main() async {
           '$WatcherImpl.attach -> Registering several callbacks',
           setUp: setUpAction,
           tearDown: tearDownAction,
-          () async {
+          () {
             for (final card in cardoteka.cards) {
               final count = 1 + Random().nextInt(10);
               for (var i = 0; i < count; ++i) {
@@ -253,7 +253,7 @@ Future<void> main() async {
           '$WatcherImpl.attach -> detacher: one card, many callbacks',
           setUp: setUpAction,
           tearDown: tearDownAction,
-          () async {
+          () {
             for (final card in cardoteka.cards) {
               final detachers = <int, void Function()>{};
               final count = 1 + Random().nextInt(10);
@@ -291,7 +291,7 @@ Future<void> main() async {
           '$WatcherImpl.attach -> detacher: many cards, many callbacks',
           setUp: setUpAction,
           tearDown: tearDownAction,
-          () async {
+          () {
             final detachers = <Card, List<void Function()>>{};
             for (final card in cardoteka.cards) {
               final count = 1 + Random().nextInt(10);
@@ -334,7 +334,7 @@ Future<void> main() async {
           '$WatcherImpl.attach -> fireImmediately=false + onRemove',
           setUp: setUpAction,
           tearDown: tearDownAction,
-          () async {
+          () {
             for (final card in cardoteka.cards) {
               bool callBackCall = false;
               bool onRemoveCall = false;
@@ -362,7 +362,7 @@ Future<void> main() async {
           '$WatcherImpl.attach -> fireImmediately=true + onRemove',
           setUp: setUpAction,
           tearDown: tearDownAction,
-          () async {
+          () {
             for (final card in cardoteka.cards) {
               bool callBackCall = false;
               bool onRemoveCall = false;

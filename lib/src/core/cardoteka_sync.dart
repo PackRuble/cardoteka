@@ -82,6 +82,9 @@ base class Cardoteka extends CardotekaCore {
   /// final сardoteka = MyCardoteka(...);
   /// final result = сardoteka.get(...);
   /// ```
+  // The result explicitly indicates that the given method can be executed in
+  // a synchronous manner. However, this is in no way under the control of the user.
+  // ignore: avoid_futureor_void
   static FutureOr<void> init() async {
     if (!_isInitialized) {
       _prefs = await SharedPreferencesWithCache.create(
@@ -143,14 +146,14 @@ base class Cardoteka extends CardotekaCore {
   /// Works similarly to the [SharedPreferencesWithCache.setBool] method and
   /// others of the same name.
   @override
-  Future<bool> set<V extends Object>(Card<V?> card, V value) async {
+  Future<bool> set<V extends Object>(Card<V?> card, V value) {
     _assertCheckInit();
 
     return super.set<V>(card, value);
   }
 
   @override
-  Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) async {
+  Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) {
     _assertCheckInit();
 
     return super.setOrNull<V>(card, value);
@@ -216,7 +219,7 @@ base class Cardoteka extends CardotekaCore {
   }
 
   @override
-  Future<bool> removeAll() async {
+  Future<bool> removeAll() {
     _assertCheckInit();
 
     // We don't use the `_prefs.clear()` method because `prefs`
