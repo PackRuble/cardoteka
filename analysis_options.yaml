@@ -1,4 +1,9 @@
-include: package:lint/package.yaml
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - "packages/cardoteka/test/**" # todo(13.12.2025, @PackRuble): temp
+    - "example/**" # todo(13.12.2025, @PackRuble): temp
 
 linter:
   rules:

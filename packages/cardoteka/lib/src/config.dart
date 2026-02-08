@@ -7,16 +7,16 @@ import 'converter.dart';
 @immutable
 class CardotekaConfig {
   const CardotekaConfig({
-    required this.name,
+    required this.prefix,
     required this.cards,
     this.converters,
   });
 
-  /// The name of your [CardotekaCore] instance. The [name] must be unique and
+  /// The name of your [CardotekaCore] instance. The [prefix] must be unique and
   /// not used in other instances.
   ///
   /// Under the hood, the name is used as prefixes for all [cards].
-  final String name;
+  final String prefix;
 
   /// List of all key-cards to access SharedPreferences in [Cardoteka] and [CardotekaAsync].
   final List<Card> cards;
@@ -29,7 +29,7 @@ class CardotekaConfig {
 
   @override
   String toString() => '$CardotekaConfig('
-      '\n  name=$name,'
+      '\n  prefix=$prefix,'
       '\n  cards=$cards,'
       '\n  converters=$converters,'
       '\n)';

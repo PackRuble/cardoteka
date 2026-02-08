@@ -1,4 +1,3 @@
-import 'package:cardoteka/access_to_sp.dart';
 import 'package:cardoteka/cardoteka.dart';
 import 'package:flutter/material.dart' hide Card;
 import 'package:flutter_test/flutter_test.dart';

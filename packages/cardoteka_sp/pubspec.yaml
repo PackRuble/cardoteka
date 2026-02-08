@@ -1,0 +1,47 @@
+name: cardoteka_sp
+description: Shared Preferences for Cardoteka.
+
+homepage: https://t.me/+AkGV73kZi_Q1YTMy
+repository: https://github.com/PackRuble/cardoteka
+issue_tracker: https://github.com/PackRuble/cardoteka/issues
+
+version: 0.0.1
+
+environment:
+  sdk: ^3.6.0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cardoteka:
+
+  # dart sdk limitation matches - ^3.5.0
+  shared_preferences: ^2.5.2
+
+  # version is clearly related to the minimum version of the dart sdk
+  meta: ^1.15.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  lints: ^6.1.0
+
+  # [[shared_preferences] Remove legacy testing section from README · Issue #153108 · flutter/flutter](https://github.com/flutter/flutter/issues/153108#issuecomment-2278510439)
+  shared_preferences_platform_interface: any
+
+screenshots:
+  - description: 'Cardoteka is a better type-safe wrapper over SharedPreferences.'
+    path: ../../res/cardoteka_banner.png
+
+funding:
+  - https://t.me/+AkGV73kZi_Q1YTMy
+
+topics:
+  - shared-preferences
+  - storage
+  - cardoteka
+  - database
+  - persistence

@@ -117,7 +117,7 @@ abstract base class CardotekaCore {
   UnmodifiableListView<Card> get cards => UnmodifiableListView(config.cards);
 
   /// Configuration file containing important information about the [Card]s.
-  /// - [CardotekaConfig.name] is used to prefix the key in storage for
+  /// - [CardotekaConfig.prefix] is used to prefix the key in storage for
   /// each of the [CardotekaCore] instances;
   /// - [CardotekaConfig.cards] list of all card keys for accessing the storage.
   /// Access via [cards] if necessary.
@@ -135,11 +135,13 @@ abstract base class CardotekaCore {
   @visibleForTesting
   Watcher? get watcher => null;
 
-  /// Get a [CardotekaConfig.name]-based key from the [config] and [Card.key]
+  /// Get a [CardotekaConfig.prefix]-based key from the [config] and [Card.key]
   /// to use in storage.
   @internal
   @protected
-  String getStorageKey(Card card) => '${config.name}.${card.key}';
+  String getStorageKey(Card card) => '${config.prefix}'
+      '${config.prefix.isEmpty ? '' : '.'}'
+      '${card.key}';
 
   /// Get converter for the [Card] card. Returns null if there is no converter.
   @internal

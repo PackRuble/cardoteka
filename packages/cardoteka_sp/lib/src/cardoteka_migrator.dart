@@ -1,10 +1,9 @@
+import 'package:cardoteka/cardoteka.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences;
 
-import '../card.dart';
-import '../config.dart';
-import 'cardoteka_async.dart';
+import 'cardoteka_sp_async.dart';
 
 /// {@template cardoteka.HandlerEntryV2}
 /// [HandlerEntryV2] represents a record resulting from the execution of a data migration handler.
@@ -153,12 +152,13 @@ final class CardotekaMigrator {
   }) async {
     if (toV2Handler != null) {
       final spNew = CardotekaAsync(
+        storage: CardotekaSpAsync(const StorageConfig()),
         // configuration will not be used in operation
-        config: const CardotekaConfig(name: '', cards: []),
+        config: const CardotekaConfig(prefix: '', cards: []),
       );
 
       bool? didMigrate =
-          // ignore: invalid_use_of_protected_member
+          // ignore: invalid_use_of_protected_member, invalid_use_of_internal_member
           await spNew.getObjectFromStorage(didMigrateV2key, DataType.bool)
               as bool?;
       didMigrate ??= false;

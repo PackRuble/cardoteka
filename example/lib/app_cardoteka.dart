@@ -1,4 +1,5 @@
 import 'package:cardoteka/cardoteka.dart';
+import 'package:cardoteka_sp/cardoteka_sp.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 
 enum AppLocale { ru, de, en, pl, uk }
@@ -35,8 +36,9 @@ enum AppSettings<T extends Object?> implements Card<T> {
 
 final class AppCardoteka = Cardoteka with WatcherImpl;
 final appCardoteka = AppCardoteka(
+  storage: CardotekaSpSync(const StorageConfig()),
   config: const CardotekaConfig(
-    name: 'app_settings',
+    prefix: 'app_settings',
     cards: AppSettings.values,
     converters: AppSettings.converters,
   ),

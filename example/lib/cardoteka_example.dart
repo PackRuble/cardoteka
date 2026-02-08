@@ -34,11 +34,11 @@ enum SettingsCards<T extends Object?> implements Card<T> {
 }
 
 final class SettingsCardoteka extends Cardoteka with WatcherImpl {
-  SettingsCardoteka({required super.config});
+  SettingsCardoteka({required super.config, required super.storage});
 }
 
 final class SettingsAsync extends CardotekaAsync {
-  SettingsAsync({required super.config});
+  SettingsAsync({required super.config, required super.storage});
 }
 
 void main() async {

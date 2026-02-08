@@ -18,7 +18,7 @@ import 'dart:core'
         override;
 import 'dart:ui' show Color;
 
-import 'package:cardoteka/src/extensions/enum_ext.dart';
+import 'extensions/enum_ext.dart';
 
 ///  Use to convert a element to a element of allowed types.
 abstract class Converter<Element extends Object?, ElementFrom extends Object> {

@@ -1,9 +1,8 @@
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart'
-    show SharedPreferencesAsync;
 
 import '../card.dart';
 import 'cardoteka_core.dart';
+import 'storage/cardoteka_storage_async.dart';
 
 /// Asynchronous implementation of a Cardoteka representing a wrapper over [SharedPreferencesAsync].
 ///
@@ -45,7 +44,10 @@ import 'cardoteka_core.dart';
 base class CardotekaAsync extends CardotekaCore {
   /// {@macro cardoteka.CardotekaCore.constructor}
   /// and create an instance of the [CardotekaAsync].
-  CardotekaAsync({required super.config});
+  CardotekaAsync({
+    required super.config,
+    required CardotekaStorageAsync storage,
+  }) : _storage = storage;
 
   /// A reference to an instance of [SharedPreferencesAsync] from the package
   /// [shared_preferences](https://pub.dev/packages/shared_preferences)
@@ -56,7 +58,7 @@ base class CardotekaAsync extends CardotekaCore {
   /// the 'package:cardoteka/access_to_sp.dart' import.
   /// This can also be useful in cases of gradual migration or quick testing
   /// of some hypotheses.
-  static final _prefsAsync = SharedPreferencesAsync();
+  final CardotekaStorageAsync _storage;
 
   /// {@macro cardoteka.CardotekaCore.get}
   ///
@@ -90,11 +92,11 @@ base class CardotekaAsync extends CardotekaCore {
   @override
   Future<Object?> getObjectFromStorage(String key, DataType type) =>
       switch (type) {
-        DataType.string => _prefsAsync.getString(key),
-        DataType.int => _prefsAsync.getInt(key),
-        DataType.double => _prefsAsync.getDouble(key),
-        DataType.bool => _prefsAsync.getBool(key),
-        DataType.stringList => _prefsAsync.getStringList(key),
+        DataType.string => _storage.getString(key),
+        DataType.int => _storage.getInt(key),
+        DataType.double => _storage.getDouble(key),
+        DataType.bool => _storage.getBool(key),
+        DataType.stringList => _storage.getStringList(key),
       };
 
   /// {@macro cardoteka.CardotekaCore.set}
@@ -118,12 +120,12 @@ base class CardotekaAsync extends CardotekaCore {
     final resultValue = getConverter(card)?.to(value) ?? value;
     final key = getStorageKey(card);
     await switch (card.type) {
-      DataType.bool => _prefsAsync.setBool(key, resultValue as bool),
-      DataType.int => _prefsAsync.setInt(key, resultValue as int),
-      DataType.double => _prefsAsync.setDouble(key, resultValue as double),
-      DataType.string => _prefsAsync.setString(key, resultValue as String),
+      DataType.bool => _storage.setBool(key, resultValue as bool),
+      DataType.int => _storage.setInt(key, resultValue as int),
+      DataType.double => _storage.setDouble(key, resultValue as double),
+      DataType.string => _storage.setString(key, resultValue as String),
       DataType.stringList =>
-        _prefsAsync.setStringList(key, (resultValue as List).cast<String>())
+        _storage.setStringList(key, (resultValue as List).cast<String>())
     };
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
@@ -138,15 +140,15 @@ base class CardotekaAsync extends CardotekaCore {
     Object? result = Object();
 
     final void _ = await switch (value) {
-      final bool value => _prefsAsync.setBool(key, value),
-      final int value => _prefsAsync.setInt(key, value),
-      final double value => _prefsAsync.setDouble(key, value),
-      final String value => _prefsAsync.setString(key, value),
+      final bool value => _storage.setBool(key, value),
+      final int value => _storage.setInt(key, value),
+      final double value => _storage.setDouble(key, value),
+      final String value => _storage.setString(key, value),
       final List value => value.isNotEmpty
           ? value.first is String
-              ? _prefsAsync.setStringList(key, value.cast<String>())
+              ? _storage.setStringList(key, value.cast<String>())
               : result = null
-          : _prefsAsync.setStringList(key, []),
+          : _storage.setStringList(key, []),
       _ => result = null,
     };
 
@@ -161,7 +163,7 @@ base class CardotekaAsync extends CardotekaCore {
   Future<bool> remove(Card card) async {
     watcher?.notify(card, null);
 
-    await _prefsAsync.remove(getStorageKey(card));
+    await _storage.remove(getStorageKey(card));
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
   }
@@ -171,14 +173,14 @@ base class CardotekaAsync extends CardotekaCore {
   /// Works similarly to the [SharedPreferencesAsync.containsKey] method of the same name.
   @override
   Future<bool> containsCard(Card card) =>
-      _prefsAsync.containsKey(getStorageKey(card));
+      _storage.containsKey(getStorageKey(card));
 
   /// {@macro cardoteka.CardotekaCore.getStoredCards}
   ///
   /// Works similarly to the [SharedPreferencesAsync.getKeys] method of the same name.
   @override
   Future<Set<Card>> getStoredCards() async {
-    final Set<String> storedKeys = await _prefsAsync.getKeys(
+    final Set<String> storedKeys = await _storage.getKeys(
       allowList: {for (final card in cards) getStorageKey(card)},
     );
     final resultKeys = <Card>{

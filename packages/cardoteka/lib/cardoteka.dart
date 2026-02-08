@@ -22,8 +22,11 @@ export 'src/converter.dart'
         MapConverter;
 export 'src/core/cardoteka_async.dart' show CardotekaAsync;
 export 'src/core/cardoteka_core.dart' show CardotekaCore;
-export 'src/core/cardoteka_migrator.dart' show CardotekaMigrator;
 export 'src/core/cardoteka_sync.dart' show Cardoteka;
+export 'src/core/storage/cardoteka_storage_async.dart'
+    show CardotekaStorageAsync;
+export 'src/core/storage/cardoteka_storage_sync.dart' show CardotekaStorage;
+export 'src/core/storage/storage_config.dart' show StorageConfig;
 export 'src/mixin/crud_simulation.dart' show CRUD;
 export 'src/mixin/detachability.dart'
     show Detachability, DetacherChangeNotifier;

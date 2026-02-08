@@ -1,0 +1,37 @@
+name: cardoteka_json
+description: Json files for Cardoteka.
+
+homepage: https://t.me/+AkGV73kZi_Q1YTMy
+repository: https://github.com/PackRuble/cardoteka
+issue_tracker: https://github.com/PackRuble/cardoteka/issues
+
+version: 0.0.1
+
+environment:
+  sdk: ^3.6.0
+
+resolution: workspace
+
+dependencies:
+  cardoteka:
+
+  # dart sdk limitation matches - ^3.5.0
+  # version is clearly related to the minimum version of the dart sdk
+  meta: ^1.15.0
+
+dev_dependencies:
+  test: ^1.26.3
+
+screenshots:
+  - description: 'Cardoteka is a better type-safe wrapper over SharedPreferences.'
+    path: ../../res/cardoteka_banner.png
+
+funding:
+  - https://t.me/+AkGV73kZi_Q1YTMy
+
+topics:
+  - json
+  - storage
+  - cardoteka
+  - database
+  - persistence
