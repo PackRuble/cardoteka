@@ -10,4 +10,5 @@ workspace:
   - packages/cardoteka_json
 
 dev_dependencies:
-  lints: ^6.1.0
+  lint_rules_for_dart:
+    path: ../lint_rules_for_dart

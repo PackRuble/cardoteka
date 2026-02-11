@@ -12,8 +12,9 @@ dependencies:
     sdk: flutter
   cardoteka:
     path: ../packages/cardoteka
-  cardoteka_sp:
-    path: ../packages/cardoteka_sp
+    # todo(08.02.2026, @PackRuble):
+#  cardoteka_sp:
+#    path: ../packages/cardoteka_sp
   flutter_riverpod: ^2.6.1
   riverpod: ^2.6.1
   bloc: ^9.0.0

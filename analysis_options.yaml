@@ -1,4 +1,4 @@
-include: package:lints/recommended.yaml
+include: package:lint_rules_for_dart/package.yaml
 
 analyzer:
   exclude:
@@ -7,9 +7,21 @@ analyzer:
 
 linter:
   rules:
-    unawaited_futures: true
-    discarded_futures: true
-    always_use_package_imports: false
+    public_member_api_docs: false
+    flutter_style_todos: false
+    lines_longer_than_80_chars: false
+    specify_nonobvious_local_variable_types: false
+    always_specify_types: false
+    unnecessary_async: false
     sort_pub_dependencies: false
-    curly_braces_in_flow_control_structures: false
-    document_ignores: false
+    # todo(11.02.2026, @PackRuble): check all
+#    unawaited_futures: true
+#    discarded_futures: true
+#    always_use_package_imports: false
+#    sort_pub_dependencies: false
+#    curly_braces_in_flow_control_structures: false
+#    document_ignores: false
+
+formatter:
+  trailing_commas: preserve
+  page_width: 80
