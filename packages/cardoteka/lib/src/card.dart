@@ -5,21 +5,34 @@ import 'package:meta/meta.dart' show reopen, visibleForTesting;
 // coverage:ignore-file
 
 /// Type of data to be saved.
-enum DataType {
+enum DataType<T extends dc.Object> {
   /// Represents type [dc.bool].
-  bool,
+  bool<dc.bool>(),
 
   /// Represents type [dc.int].
-  int,
+  int<dc.int>(),
 
   /// Represents type [dc.double].
-  double,
+  double<dc.double>(),
 
   /// Represents type [dc.String].
-  string,
+  string<dc.String>(),
 
   /// Represents type [dc.List]<[dc.String]>.
-  stringList,
+  stringList<dc.bool>(),
+  ;
+
+  // todo(09.02.2026, @PackRuble): add list, map
+  static DataType typeBy(dc.Object value) {
+    return switch (value) {
+      dc.bool() => DataType.bool,
+      dc.int() => DataType.int,
+      dc.double() => DataType.double,
+      dc.String() => DataType.string,
+      dc.List<dc.String>() => DataType.stringList,
+      _ => throw dc.ArgumentError('Unsupported DataType'),
+    };
+  }
 }
 
 /// Cards for using the [CardotekaCore] implementation.

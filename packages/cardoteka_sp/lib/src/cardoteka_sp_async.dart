@@ -4,77 +4,61 @@ import 'package:cardoteka/cardoteka.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferencesAsync;
 
+// todo(11.02.2026, @PackRuble): rename SpStorageAsync
 class CardotekaSpAsync implements CardotekaStorageAsync {
-  CardotekaSpAsync(this.config);
-
-  @override
-  final StorageConfig config;
-
   static final _prefsAsync = SharedPreferencesAsync();
 
   @override
-  Future<Set<String>> getKeys({Set<String>? allowList}) async {
-    return await _prefsAsync.getKeys(allowList: allowList);
+  Future<Set<String>> getKeys({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    // todo(09.02.2026, @PackRuble): common assert allowKeys|ignoreKeys
+    // todo(09.02.2026, @PackRuble): use ignoreKeys
+    return _prefsAsync.getKeys(allowList: allowKeys);
   }
 
   @override
-  Future<Map<String, Object?>> getAll({Set<String>? allowList}) async {
-    return await _prefsAsync.getAll(allowList: allowList);
+  Future<Map<String, Object?>> getAll({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    // todo(09.02.2026, @PackRuble): common assert allowKeys|ignoreKeys
+    // todo(09.02.2026, @PackRuble): use ignoreKeys
+    return _prefsAsync.getAll(allowList: allowKeys);
   }
 
   @override
-  Future<bool?> getBool(String key) async {
-    return await _prefsAsync.getBool(key);
+  Future<T?> get<T extends Object>(String key, DataType<T> type) async {
+    final result = await switch (type) {
+      DataType.string => _prefsAsync.getString(key),
+      DataType.int => _prefsAsync.getInt(key),
+      DataType.double => _prefsAsync.getDouble(key),
+      DataType.bool => _prefsAsync.getBool(key),
+      DataType.stringList => _prefsAsync.getStringList(key),
+    };
+    return result as T?;
   }
 
   @override
-  Future<int?> getInt(String key) async {
-    return await _prefsAsync.getInt(key);
-  }
-
-  @override
-  Future<double?> getDouble(String key) async {
-    return await _prefsAsync.getDouble(key);
-  }
-
-  @override
-  Future<String?> getString(String key) async {
-    return await _prefsAsync.getString(key);
-  }
-
-  @override
-  Future<List<String>?> getStringList(String key) async {
-    return await _prefsAsync.getStringList(key);
+  Future<void> set<T extends Object>(
+    String key,
+    T? value,
+    DataType<T> type,
+  ) async {
+    await switch (type) {
+      DataType.bool => _prefsAsync.setBool(key, value as bool),
+      DataType.int => _prefsAsync.setInt(key, value as int),
+      DataType.double => _prefsAsync.setDouble(key, value as double),
+      DataType.string => _prefsAsync.setString(key, value as String),
+      DataType.stringList =>
+        _prefsAsync.setStringList(key, (value as List).cast<String>())
+    };
   }
 
   @override
   Future<bool> containsKey(String key) async {
-    return await _prefsAsync.containsKey(key);
-  }
-
-  @override
-  Future<void> setBool(String key, bool value) async {
-    await _prefsAsync.setBool(key, value);
-  }
-
-  @override
-  Future<void> setInt(String key, int value) async {
-    await _prefsAsync.setInt(key, value);
-  }
-
-  @override
-  Future<void> setDouble(String key, double value) async {
-    await _prefsAsync.setDouble(key, value);
-  }
-
-  @override
-  Future<void> setString(String key, String value) async {
-    await _prefsAsync.setString(key, value);
-  }
-
-  @override
-  Future<void> setStringList(String key, List<String> value) async {
-    await _prefsAsync.setStringList(key, value);
+    return _prefsAsync.containsKey(key);
   }
 
   @override
@@ -83,7 +67,17 @@ class CardotekaSpAsync implements CardotekaStorageAsync {
   }
 
   @override
-  Future<void> clear({Set<String>? allowList}) async {
-    await _prefsAsync.clear(allowList: allowList);
+  Future<void> clear({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    // todo(09.02.2026, @PackRuble): common assert allowKeys|ignoreKeys
+
+    if (ignoreKeys != null) {
+      final allKeys = await getKeys();
+      allowKeys = allKeys.difference(ignoreKeys);
+    }
+
+    await _prefsAsync.clear(allowList: allowKeys);
   }
 }

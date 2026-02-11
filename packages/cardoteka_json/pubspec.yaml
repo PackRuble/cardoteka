@@ -13,11 +13,11 @@ environment:
 resolution: workspace
 
 dependencies:
-  cardoteka:
+  cardoteka: any
+  cross_file: ^0.3.5+2
+  rfc_6901: ^0.2.1
 
-  # dart sdk limitation matches - ^3.5.0
-  # version is clearly related to the minimum version of the dart sdk
-  meta: ^1.15.0
+  meta: 1.17.0
 
 dev_dependencies:
   test: ^1.26.3

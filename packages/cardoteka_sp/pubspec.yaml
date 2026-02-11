@@ -19,7 +19,7 @@ dependencies:
   cardoteka:
 
   # dart sdk limitation matches - ^3.5.0
-  shared_preferences: ^2.5.2
+  shared_preferences: ^2.5.4
 
   # version is clearly related to the minimum version of the dart sdk
   meta: ^1.15.0

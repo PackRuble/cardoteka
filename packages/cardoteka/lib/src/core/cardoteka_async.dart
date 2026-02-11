@@ -91,13 +91,7 @@ base class CardotekaAsync extends CardotekaCore {
   @protected
   @override
   Future<Object?> getObjectFromStorage(String key, DataType type) =>
-      switch (type) {
-        DataType.string => _storage.getString(key),
-        DataType.int => _storage.getInt(key),
-        DataType.double => _storage.getDouble(key),
-        DataType.bool => _storage.getBool(key),
-        DataType.stringList => _storage.getStringList(key),
-      };
+      _storage.get(key, type);
 
   /// {@macro cardoteka.CardotekaCore.set}
   ///
@@ -119,14 +113,7 @@ base class CardotekaAsync extends CardotekaCore {
   ) async {
     final resultValue = getConverter(card)?.to(value) ?? value;
     final key = getStorageKey(card);
-    await switch (card.type) {
-      DataType.bool => _storage.setBool(key, resultValue as bool),
-      DataType.int => _storage.setInt(key, resultValue as int),
-      DataType.double => _storage.setDouble(key, resultValue as double),
-      DataType.string => _storage.setString(key, resultValue as String),
-      DataType.stringList =>
-        _storage.setStringList(key, (resultValue as List).cast<String>())
-    };
+    await _storage.set(key, resultValue, card.type);
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
     return true;
   }
@@ -137,23 +124,10 @@ base class CardotekaAsync extends CardotekaCore {
     String key,
     V value,
   ) async {
-    Object? result = Object();
-
-    final void _ = await switch (value) {
-      final bool value => _storage.setBool(key, value),
-      final int value => _storage.setInt(key, value),
-      final double value => _storage.setDouble(key, value),
-      final String value => _storage.setString(key, value),
-      final List value => value.isNotEmpty
-          ? value.first is String
-              ? _storage.setStringList(key, value.cast<String>())
-              : result = null
-          : _storage.setStringList(key, []),
-      _ => result = null,
-    };
+    await _storage.set(key, value, DataType.typeBy(value));
 
     // fixdep(16.01.2025): [The methods for removing and setting values return bool, but this is a fiction (always return `true`) · Issue #32 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/32)
-    return result == null ? null : true;
+    return true;
   }
 
   /// {@macro cardoteka.CardotekaCore.remove}
@@ -181,7 +155,7 @@ base class CardotekaAsync extends CardotekaCore {
   @override
   Future<Set<Card>> getStoredCards() async {
     final Set<String> storedKeys = await _storage.getKeys(
-      allowList: {for (final card in cards) getStorageKey(card)},
+      allowKeys: {for (final card in cards) getStorageKey(card)},
     );
     final resultKeys = <Card>{
       for (final card in cards)

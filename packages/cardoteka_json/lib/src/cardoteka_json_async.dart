@@ -1,120 +1,127 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:typed_data' show Uint8List;
 
 import 'package:cardoteka/cardoteka.dart';
+import 'package:cross_file/cross_file.dart' show XFile;
+import 'package:rfc_6901/rfc_6901.dart';
 
+// todo(11.02.2026, @PackRuble): temporarily impl based on rfc_6901
 class CardotekaJsonAsync implements CardotekaStorageAsync {
-  CardotekaJsonAsync(this.config) : _file = File(config.path!)..createSync();
+  CardotekaJsonAsync(this.path);
 
-  @override
-  final StorageConfig config;
+  // todo(11.02.2026, @PackRuble): need to create file?
 
-  final File _file;
+  final String path;
 
-  Future<Map<String, dynamic>> get _data async {
-    final data = await _file.readAsString();
-    if (data.isEmpty) return {};
-    return jsonDecode(data) as Map<String, dynamic>;
+  // todo(11.02.2026, @PackRuble): return Map
+  dynamic _getDecodedData() async {
+    final file = XFile(path);
+    final source = await file.readAsString();
+    final result = jsonDecode(source);
+    return result;
   }
 
-  Future<void> _save(Map<String, dynamic> data) async {
-    const encoder = JsonEncoder.withIndent('  ');
-    final prettyData = encoder.convert(data);
-    await _file.writeAsString(prettyData);
-  }
+  Future<void> _saveData(Object? data) async {
+    final result = jsonEncode(data);
 
-  @override
-  Future<Set<String>> getKeys({Set<String>? allowList}) async {
-    final data = await _data;
+    final file = XFile(
+      path,
+      bytes: Uint8List.fromList(result.codeUnits),
+      // todo(09.02.2026, @PackRuble): specify all params
+    );
 
-    return data.keys.toSet();
-  }
-
-  @override
-  Future<Map<String, Object?>> getAll({Set<String>? allowList}) async {
-    final data = await _data;
-
-    return data;
+    await file.saveTo(path);
   }
 
   @override
-  Future<bool?> getBool(String key) async {
-    final data = await _data;
+  Future<Set<String>> getKeys({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    final all = await getAll(allowKeys: allowKeys, ignoreKeys: ignoreKeys);
 
-    return data[key] as bool?;
+    return all.keys.toSet();
   }
 
   @override
-  Future<int?> getInt(String key) async {
-    final data = await _data;
+  Future<Map<String, Object?>> getAll({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    // todo(09.02.2026, @PackRuble): common assert allowKeys|ignoreKeys
+    // todo(09.02.2026, @PackRuble): use ignoreKeys
 
-    return data[key] as int?;
+    final data = await _getDecodedData();
+    return (data as Map).cast<String, Object?>();
   }
 
   @override
-  Future<double?> getDouble(String key) async {
-    final data = await _data;
+  Future<T?> get<T extends Object>(String key, DataType<T> type) async {
+    final data = await _getDecodedData();
 
-    return data[key] as double?;
+    final pointer = JsonPointer('/$key');
+    final result = pointer.read(data, orElse: () => null);
+
+    return result as T?;
   }
 
   @override
-  Future<String?> getString(String key) async {
-    final data = await _data;
+  Future<void> set<T extends Object>(
+    String key,
+    T? value,
+    DataType<T> type,
+  ) async {
+    final data = await _getDecodedData();
 
-    return data[key] as String?;
-  }
+    final pointer = JsonPointer('/$key');
+    final result = pointer.write(data, value);
 
-  @override
-  Future<List<String>?> getStringList(String key) async {
-    final data = await _data;
-
-    return (data[key] as List?)?.cast<String>().toList();
+    await _saveData(result);
   }
 
   @override
   Future<bool> containsKey(String key) async {
-    return (await getKeys(allowList: <String>{key})).isNotEmpty;
+    final data = await _getDecodedData();
+
+    final pointer = JsonPointer('/$key');
+    final value = pointer.read(data, orElse: () => null);
+    return value != null;
   }
-
-  Future<void> _set(String key, dynamic value) async {
-    final data = await _data;
-    data[key] = value;
-
-    await _save(data);
-
-    return;
-  }
-
-  @override
-  Future<void> setBool(String key, bool value) => _set(key, value);
-
-  @override
-  Future<void> setInt(String key, int value) => _set(key, value);
-
-  @override
-  Future<void> setDouble(String key, double value) => _set(key, value);
-
-  @override
-  Future<void> setString(String key, String value) => _set(key, value);
-
-  @override
-  Future<void> setStringList(String key, List<String> value) =>
-      _set(key, value);
 
   @override
   Future<void> remove(String key) async {
-    final data = await _data;
-    data.remove(key);
+    final data = await _getDecodedData();
 
-    await _save(data);
+    final pointer = JsonPointer('/$key');
+    final result = pointer.remove(data);
 
-    return;
+    await _saveData(result);
   }
 
   @override
-  Future<void> clear({Set<String>? allowList}) async {
-    await _save({});
+  Future<void> clear({
+    Set<String>? allowKeys,
+    Set<String>? ignoreKeys,
+  }) async {
+    // todo(09.02.2026, @PackRuble): common assert allowKeys|ignoreKeys
+
+    final data = await _getDecodedData();
+
+    Set<String> resultKeys;
+    final allKeys = await getKeys();
+    if (ignoreKeys != null) {
+      resultKeys = allKeys.difference(ignoreKeys);
+    } else {
+      resultKeys = allKeys;
+    }
+
+    var result = data;
+    for (final key in resultKeys) {
+      final pointer = JsonPointer('/$key');
+      result = pointer.remove(result);
+    }
+
+    await _saveData(result);
   }
 }

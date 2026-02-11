@@ -152,7 +152,7 @@ final class CardotekaMigrator {
   }) async {
     if (toV2Handler != null) {
       final spNew = CardotekaAsync(
-        storage: CardotekaSpAsync(const StorageConfig()),
+        storage: CardotekaSpAsync(),
         // configuration will not be used in operation
         config: const CardotekaConfig(prefix: '', cards: []),
       );

@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cardoteka/cardoteka.dart';
+import 'package:cross_file/cross_file.dart';
 
-class CardotekaJsonWithCache implements CardotekaStorage {
-  CardotekaJsonWithCache(this.config) : _file = File(config.path!)..create();
+class CardotekaJson implements CardotekaStorage {
+  CardotekaJson(this.config) : _file = XFile(config.path!);
 
   @override
   final StorageConfig config;
 
-  final File _file;
+  final XFile _file;
 
   /// Cache containing in-memory data.
   final _cache = <String, Object?>{};
@@ -22,11 +22,11 @@ class CardotekaJsonWithCache implements CardotekaStorage {
   }
 
   Future<void> _save(Map<String, dynamic> data) async {
-    await _file.writeAsString(jsonEncode(data));
+    await _file.saveTo(jsonEncode(data));
   }
 
   @override
-  Future<CardotekaJsonWithCache> create() async {
+  Future<CardotekaJson> create() async {
     await reloadCache();
     return this;
   }

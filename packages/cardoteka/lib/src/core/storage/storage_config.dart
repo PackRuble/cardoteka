@@ -1,3 +1,4 @@
+// todo(11.02.2026, @PackRuble): remove
 class StorageConfig {
   const StorageConfig({
     this.path,
