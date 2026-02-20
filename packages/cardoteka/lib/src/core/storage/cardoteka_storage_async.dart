@@ -1,18 +1,22 @@
 import 'dart:async';
 
-import '../../card.dart';
+import '../../card.dart' show DataType;
 
 abstract interface class CardotekaStorageAsync {
   const CardotekaStorageAsync();
 
+  /// If [onlyKeys]=null then everything except [exceptKeys] will be returned.
+  ///
+  /// If [onlyKeys]=non-null then all specified [onlyKeys]
+  /// except [exceptKeys] will be returned.
   Future<Set<String>> getKeys({
-    Set<String>? allowKeys,
-    Set<String>? ignoreKeys,
+    Set<String>? onlyKeys,
+    Set<String>? exceptKeys,
   });
 
-  Future<Map<String, Object?>> getAll({
-    Set<String>? allowKeys,
-    Set<String>? ignoreKeys,
+  Future<Map<String, dynamic>> getAll({
+    Set<String>? onlyKeys,
+    Set<String>? exceptKeys,
   });
 
   Future<T?> get<T extends Object>(String key, DataType<T> type);
@@ -23,8 +27,6 @@ abstract interface class CardotekaStorageAsync {
 
   Future<void> remove(String key);
 
-  Future<void> clear({
-    Set<String>? allowKeys,
-    Set<String>? ignoreKeys,
-  });
+  /// If [onlyKeys]=null, then the entire storage will be cleared.
+  Future<void> clear({Set<String>? onlyKeys});
 }
