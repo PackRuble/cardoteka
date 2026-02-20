@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+// todo(20.02.2026, @PackRuble):
+// import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:meta/meta.dart';
 
 import '../card.dart';
@@ -13,7 +14,8 @@ extension DataTypeExt on DataType {
         DataType.int => int,
         DataType.double => double,
         DataType.string => String,
-        DataType.stringList => List<String>
+        DataType.stringList => List<String>,
+        DataType.object => Object,
       };
 
   /// Checks that the type of the specified value is the same as the valid value.
@@ -22,16 +24,18 @@ extension DataTypeExt on DataType {
   /// https://dart.dev/guides/language/numbers
   @internal
   bool isCorrectType<T extends Object>(T value) {
-    if (kIsWeb &&
+    if (
+        // kIsWeb &&
         (value is double || value is int) &&
-        (this == DataType.bool || this == DataType.int)) return true;
+            (this == DataType.bool || this == DataType.int)) return true;
 
     return switch (this) {
       DataType.bool => value is bool,
       DataType.int => value is int,
       DataType.double => value is double,
       DataType.string => value is String,
-      DataType.stringList => value is List<String>
+      DataType.stringList => value is List<String>,
+      DataType.object => true,
     };
   }
 }

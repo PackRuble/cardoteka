@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show ChangeNotifier;
+// todo(20.02.2026, @PackRuble):
+// import 'package:flutter/foundation.dart' show ChangeNotifier;
 import 'package:meta/meta.dart';
 
 /// Signature of callbacks that have no arguments and return no data.
@@ -26,20 +27,20 @@ mixin class Detachability {
 }
 
 /// Designed to be able to collect dispose-callbacks for [ChangeNotifier].
-mixin DetacherChangeNotifier on ChangeNotifier implements Detachability {
-  final _detachability = Detachability();
-
-  @override
-  void onDetach(void Function() cb) => _detachability.onDetach(cb);
-
-  @override
-  @protected
-  void detach() => _detachability.detach();
-
-  @override
-  @mustCallSuper
-  void dispose() {
-    detach();
-    super.dispose();
-  }
-}
+// mixin DetacherChangeNotifier on ChangeNotifier implements Detachability {
+//   final _detachability = Detachability();
+//
+//   @override
+//   void onDetach(void Function() cb) => _detachability.onDetach(cb);
+//
+//   @override
+//   @protected
+//   void detach() => _detachability.detach();
+//
+//   @override
+//   @mustCallSuper
+//   void dispose() {
+//     detach();
+//     super.dispose();
+//   }
+// }

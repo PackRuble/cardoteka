@@ -19,7 +19,9 @@ enum DataType<T extends dc.Object> {
   string<dc.String>(),
 
   /// Represents type [dc.List]<[dc.String]>.
-  stringList<dc.bool>(),
+  stringList<dc.List<dc.String>>(),
+
+  object<dc.Object>(),
   ;
 
   // todo(09.02.2026, @PackRuble): add list, map
@@ -30,8 +32,17 @@ enum DataType<T extends dc.Object> {
       dc.double() => DataType.double,
       dc.String() => DataType.string,
       dc.List<dc.String>() => DataType.stringList,
-      _ => throw dc.ArgumentError('Unsupported DataType'),
+      _ => throw dc.ArgumentError('Unsupported DataType: ${value.runtimeType}'),
     };
+  }
+
+  T? cast(dc.Object? value) {
+    if (value == null) return null;
+
+    return switch (this) {
+      DataType.stringList => (value as dc.List).cast<dc.String>(),
+      _ => value,
+    } as T;
   }
 }
 
