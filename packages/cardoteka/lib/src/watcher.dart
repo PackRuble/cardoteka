@@ -15,6 +15,8 @@ abstract interface class Watcher {
   @internal
   void notify<V extends Object?>(Card<V> card, V value);
 
+  // todo(20.02.2026, @PackRuble): deleted records must be processed separately
+
   /// Allows to notify all listeners with the new values.
   // classes implementing this interface must have this feature
   // ignore: avoid_futureor_void

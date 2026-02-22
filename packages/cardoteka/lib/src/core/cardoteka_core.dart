@@ -10,7 +10,8 @@ import '../watcher.dart';
 import 'core_checks.dart' show checkConfiguration;
 
 /// {@template cardoteka.CardotekaCore}
-/// A wrapper around the `shared_preferences` package that serves as a base class for subsequent `Cardoteka` specific implementations.
+/// A generic interface for synchronous, asynchronous and other implementations
+/// of `Cardoteka`.
 ///
 /// Allows the use of typed [Card]'s to access storage.
 ///
@@ -54,6 +55,7 @@ import 'core_checks.dart' show checkConfiguration;
 ///
 /// And then in general terms:
 /// ```dart
+// todo(20.02.2026, @PackRuble):
 /// main() async {
 ///   final cardoteka = CardotekaAsync(
 ///     config: CardotekaConfig(
@@ -80,7 +82,7 @@ import 'core_checks.dart' show checkConfiguration;
 ///     - `<generic>` for type designation for default value (optional)
 ///     - type to which the value will be converted. Select the appropriate one
 ///     from the [DataType] enumeration,
-///     - default value. It will be returned when using [CardotekaCore.get],
+///     - default value. It will be returned when using [CardotekaCore.getOrDefault],
 ///     if there were no saves in the storage for this card previously.
 ///   - converters if generic type does not match your [Card.type]
 ///
@@ -92,7 +94,7 @@ import 'core_checks.dart' show checkConfiguration;
 /// - [WatcherImpl] to implement listening for changes to values in your storage.
 /// Use your implementation if necessary, extending from [Watcher].
 /// - [CRUD] to use familiar basic CRUD operations (create, read, update, delete).
-/// This is nothing more than an imitation based on the [CardotekaCore.get],
+/// This is nothing more than an imitation based on the [CardotekaCore.getOrDefault],
 /// [CardotekaCore.set] and [CardotekaCore.remove] methods.
 ///
 /// 3. Perform initialization (required for synchronous version) and take advantage of
@@ -111,18 +113,15 @@ abstract base class CardotekaCore {
   }) :
         // fixdep(22.05.2023): this behavior is not yet available for const classes
         // [Allow run-time-only assertion checking in constant constructors · Issue #2581 · dart-lang/language](https://github.com/dart-lang/language/issues/2581)
-        assert(checkConfiguration(config));
+        assert(
+          checkConfiguration(config),
+          'The configuration contains errors.',
+        );
 
   /// List of [Card]'s for accessing the storage.
   UnmodifiableListView<Card> get cards => UnmodifiableListView(config.cards);
 
-  /// Configuration file containing important information about the [Card]s.
-  /// - [CardotekaConfig.prefix] is used to prefix the key in storage for
-  /// each of the [CardotekaCore] instances;
-  /// - [CardotekaConfig.cards] list of all card keys for accessing the storage.
-  /// Access via [cards] if necessary.
-  /// - [CardotekaConfig.converters] are used to convert a complex object to the base
-  /// types defined in the [DataType] enumeration.
+  /// {@macro cardoteka.CardotekaConfig}
   @internal
   @protected
   final CardotekaConfig config;
@@ -135,45 +134,39 @@ abstract base class CardotekaCore {
   @visibleForTesting
   Watcher? get watcher => null;
 
-  /// Get a [CardotekaConfig.prefix]-based key from the [config] and [Card.key]
-  /// to use in storage.
-  @internal
-  @protected
-  String getStorageKey(Card card) => '${config.prefix}'
-      '${config.prefix.isEmpty ? '' : '.'}'
-      '${card.key}';
-
-  /// Get converter for the [Card] card. Returns null if there is no converter.
+  /// Get converter for the [Card]. Returns null if there is no converter.
   @internal
   @protected
   Converter? getConverter(Card card) => config.converters?[card];
 
+  /// {@template cardoteka.CardotekaCore.getOrNull}
+  /// Get value from storage using [Card]<[V]?>.
+  ///
+  /// If the record was not in the storage, then null will be returned. If you
+  /// need to return a default value [Card.defaultValue] when there is no record
+  /// in storage, use the [getOrDefault] method.
+  /// {@endtemplate}
+  FutureOr<V?> get<V extends Object?>(Card<V> card);
+
   /// {@template cardoteka.CardotekaCore.get}
-  /// Get value from storage using [Card]<[Object]>.
+  /// Get value from storage using [Card]<[V]>.
   ///
   /// The default behavior assumes that if in storage does not have
-  /// a record with the provided card, then `defaultValue` will be returned.
+  /// a record with the provided card, then [Card.defaultValue] will be returned.
   ///
   /// The returned object is always non-nullable.
   ///
   /// If you need to return a null-value when there is no record in storage
   ///   OR
-  /// your card is of nullable type [Card]<[Object?]>,
-  ///   then use the [getOrNull] method.
+  /// your card is of nullable type [Card]<[V]?>,
+  ///   then use the [get] method.
   /// {@endtemplate}
-  FutureOr<V> get<V extends Object>(Card<V> card);
-
-  /// Get value from storage using [Card]<[Object?]>.
-  ///
-  /// If the record was not in the storage, then null will be returned. If you
-  /// need to return a default value [Card.defaultValue] when there is no record
-  /// in storage, use the [get] method.
-  FutureOr<V?> getOrNull<V extends Object?>(Card<V?> card);
+  FutureOr<V> getOrDefault<V extends Object?>(Card<V> card);
 
   /// Internal method to retrieve data from storage.
   @internal
   @protected
-  FutureOr<V?> getValueFromStorage<V>(Card<V?> card);
+  FutureOr<V?> getValueFromStorage<V extends Object?>(Card<V> card);
 
   /// {@template cardoteka.CardotekaCore.set}
   /// Save new value in storage using [Card].
@@ -186,43 +179,17 @@ abstract base class CardotekaCore {
   /// {@endtemplate}
   ///
   /// What you need to know:
-  /// - type of [card] and [value] must match.
+  /// - types [Card.type] and [value] must match;
   /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
-  /// to simulate storing null.
+  /// to simulate storing null;
   /// - [watcher] will be notified anyway (if it is not null).
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  Future<bool> set<V extends Object>(Card<V?> card, V value) {
-    watcher?.notify<V?>(card, value);
+  Future<void> set<V extends Object?>(Card<V> card, V value) async {
+    watcher?.notify<V>(card, value);
 
-    return setValueToStorage<V>(card, value);
-  }
-
-  /// Save new value in storage using [Card], which can be of nullable type
-  /// for [Card.defaultValue]. This method allows you to simulate saving
-  /// of nullable values by saving or deleting them from storage. It means:
-  /// - if you set null for a given [card] then the value will be removed
-  /// from storage
-  /// - any other value will be saved as usual.
-  ///
-  /// {@macro cardoteka.note_specify_generic}
-  ///
-  /// What you need to know:
-  /// - type of [card] and [value] must match OR [value]=null.
-  /// - use the regular [set] method if you won't be working with nullable values.
-  /// - [watcher] will be notified anyway (if it is not null).
-  ///
-  /// If successful, it will return true:
-  /// - if [value]==null, then the value was successfully removed
-  /// - in any other case, the value was successfully saved
-  Future<bool> setOrNull<V extends Object>(Card<V?> card, V? value) async {
-    if (value == null) {
-      return await remove(card);
-    } else {
-      watcher?.notify<V?>(card, value);
-      return setValueToStorage<V>(card, value);
-    }
+    await setValueToStorage<V>(card, value);
   }
 
   /// Internal method to save data in storage.
@@ -230,7 +197,7 @@ abstract base class CardotekaCore {
   /// Returns true if the value was successfully saved.
   @internal
   @protected
-  Future<bool> setValueToStorage<V extends Object>(Card<V?> card, V value);
+  Future<void> setValueToStorage<V extends Object?>(Card<V> card, V value);
 
   /// Internal method to save object in storage.
   /// The [V] can be a type:
@@ -244,7 +211,7 @@ abstract base class CardotekaCore {
   ///
   /// Returns true if the value was successfully saved.
   @internal
-  Future<bool?> setObjectToStorage<V extends Object>(String key, V value);
+  Future<void> setObjectToStorage<V extends Object>(String key, V? value);
 
   /// Internal method to get object from storage. The returned value can be:
   /// - [bool]
@@ -261,7 +228,7 @@ abstract base class CardotekaCore {
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  Future<bool> remove(Card card);
+  Future<void> remove(Card card);
 
   /// Iteratively removes all values associated with the provided [cards]
   /// from storage.
@@ -269,11 +236,8 @@ abstract base class CardotekaCore {
   /// The [watcher] will be notified anyway (if it is not null).
   ///
   /// Returns true only if the result was true for each card.
-  Future<bool> removeAll() async {
-    final results = await Future.wait([for (final card in cards) remove(card)]);
-    final overallResult = results.fold(true, (prev, el) => prev && el);
-    return overallResult;
-  }
+  // todo(21.02.2026, @PackRuble): add onlyKeys
+  Future<void> removeAll();
 
   /// {@template cardoteka.CardotekaCore.containsCard}
   /// Returns true if storage contains the given [card].
@@ -291,7 +255,8 @@ abstract base class CardotekaCore {
   FutureOr<Map<Card, Object>> getStoredEntries();
 
   @override
-  String toString() => '$runtimeType('
+  String toString() => ''
+      '$runtimeType('
       '\n  config=$config,'
       '\n  watcher=$watcher,'
       '\n)';

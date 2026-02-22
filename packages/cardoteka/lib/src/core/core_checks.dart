@@ -24,7 +24,7 @@ typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
 bool checkConfiguration(CardotekaConfig config) {
   checkKeys(config.cards);
   checkConverterForComplexObject(config.cards, config.converters);
-  checkMatchingConverters(config.converters);
+  checkMatchConverterForCard(config.converters);
   checkProvidedDataType(config.cards, config.converters);
 
   return true;
@@ -113,7 +113,7 @@ bool checkConverterForComplexObject(
 /// Note: We cannot guarantee verification of the [double] and [int] types in the web.
 /// Also, we cannot check [Null] values (for all platforms).
 @internal
-bool checkMatchingConverters(
+bool checkMatchConverterForCard(
   CardToConverters? converters,
 ) {
   if (converters?.isEmpty ?? true) return true;

@@ -5,7 +5,7 @@ import 'package:meta/meta.dart' show reopen, visibleForTesting;
 // coverage:ignore-file
 
 /// Type of data to be saved.
-enum DataType<T extends dc.Object> {
+enum DataType<V extends dc.Object> {
   /// Represents type [dc.bool].
   bool<dc.bool>(),
 
@@ -25,7 +25,7 @@ enum DataType<T extends dc.Object> {
   ;
 
   // todo(09.02.2026, @PackRuble): add list, map
-  static DataType typeBy(dc.Object value) {
+  static DataType<V> typeBy<V extends dc.Object>(V value) {
     return switch (value) {
       dc.bool() => DataType.bool,
       dc.int() => DataType.int,
@@ -33,19 +33,20 @@ enum DataType<T extends dc.Object> {
       dc.String() => DataType.string,
       dc.List<dc.String>() => DataType.stringList,
       _ => throw dc.ArgumentError('Unsupported DataType: ${value.runtimeType}'),
-    };
+    } as DataType<V>;
   }
 
-  T? cast(dc.Object? value) {
+  V? cast(dc.Object? value) {
     if (value == null) return null;
 
     return switch (this) {
       DataType.stringList => (value as dc.List).cast<dc.String>(),
       _ => value,
-    } as T;
+    } as V;
   }
 }
 
+// todo(22.02.2026, @PackRuble): doc
 /// Cards for using the [CardotekaCore] implementation.
 ///
 /// You may not specify a generic when implementing, in which case the type

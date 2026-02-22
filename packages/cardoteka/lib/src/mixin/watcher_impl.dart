@@ -6,6 +6,7 @@ import '../card.dart';
 import '../core/cardoteka_core.dart';
 import '../watcher.dart';
 
+//
 // ignore_for_file: prefer_function_declarations_over_variables
 
 /// Signature for callbacks that report that a new value has been set in the storage.
@@ -60,7 +61,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
 
     if (allWatcherCards.isNotEmpty) {
       for (final card in allWatcherCards) {
-        notify(card, getOrNull(card));
+        notify(card, get(card));
       }
     }
   }
@@ -131,6 +132,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     bool fireImmediately = false,
   }) {
     final newCallback = (Object? value) => value == null
+        // todo(22.02.2026, @PackRuble): now is it change action
         ? onRemove?.call()
         // we create a new callback based on an existing one because
         // type 'void Function(V)' can't be assigned
@@ -149,8 +151,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     });
 
     // issue(08.02.2025): [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38)
-    // ignore: discarded_futures
-    final FutureOr<V?> valueOr = getOrNull(card);
+    final FutureOr<V?> valueOr = get(card);
     if (valueOr is! Future<V?>) {
       final V result = valueOr as V ?? card.defaultValue;
       if (fireImmediately) onChange(result);
@@ -191,6 +192,7 @@ base mixin WatcherImplDebug on WatcherImpl {
     }
 
     if (console) {
+      //
       // ignore: avoid_print
       print('''
 All listeners are represented at the moment:
