@@ -3,7 +3,7 @@
 import 'package:cardoteka/cardoteka.dart' show Card, Converter, DataType;
 import 'package:cardoteka/src/extensions/data_type_ext.dart';
 import 'package:flutter_test/flutter_test.dart' show test;
-import 'package:meta/meta.dart' show isTest;
+import 'package:meta/meta.dart' show awaitNotRequired, isTest;
 
 typedef AsyncCallback = Future<void> Function();
 
@@ -16,6 +16,7 @@ enum Teka {
   bool get isAsync => this == async;
 }
 
+@awaitNotRequired
 @isTest
 Future<void> testWith(
   Object description,
@@ -53,6 +54,7 @@ class TekaTool {
     return !card.type.isCorrectType(defaultValue);
   }
 
+  // todo(22.02.2026, @PackRuble): do deprecated, use const default values
   static Object? getTestValueBasedOnDefaultValue(
     Card<Object?> card, [
     Map<Card, Converter>? converters,
@@ -69,6 +71,7 @@ class TekaTool {
       DataType.double => (value as double) + 1.11111,
       DataType.bool => !(value as bool),
       DataType.stringList => (value as List<String>) + ['_test'],
+      DataType.object => Object(),
     };
 
     return converter?.from(testValue) ?? testValue;

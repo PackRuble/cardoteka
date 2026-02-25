@@ -1,47 +1,29 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings, avoid_redundant_argument_values
-
 import 'dart:math';
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:cardoteka/src/mixin/watcher_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../init_sp.dart';
+import '../source/cardoteka_impl.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-final class CardotekaTest extends Cardoteka
-    with WatcherImpl, WatcherImplDebug, CardotekaTestUtils {
-  CardotekaTest({required super.config});
-}
-
-final class CardotekaAsyncTest extends CardotekaAsync
-    with WatcherImpl, WatcherImplDebug {
-  CardotekaAsyncTest({required super.config});
-}
-
 Future<void> main() async {
-  initMockNewSP();
-
   for (final config in allCardotekaConfigs) {
     for (final teka in Teka.values) {
       late WatcherImplDebug cardoteka;
 
       Future<void> setUpAction() async {
         if (teka case Teka.sync) {
-          cardoteka = CardotekaTest(config: config);
-          await Cardoteka.init();
+          cardoteka =
+              CardotekaWatcherTest(config: config, storage: MemoryStorage());
         } else {
-          cardoteka = CardotekaAsyncTest(config: config);
+          cardoteka = CardotekaAsyncWatcherTest(
+              config: config, storage: MemoryStorage());
         }
       }
 
-      Future<void> tearDownAction() async {
-        if (cardoteka case CardotekaTest()) {
-          (cardoteka as CardotekaTest).deInit();
-        }
-      }
+      Future<void> tearDownAction() async {}
 
       group('$WatcherImpl+$teka with config: $config', () {
         testWith(
@@ -120,10 +102,11 @@ Future<void> main() async {
 
               // ---
 
-              await cardoteka.setOrNull(card, newValue);
+              await cardoteka.set(card, newValue);
 
               expect(
                 newValue == null ? onRemoveCalled : onChangeValue,
+                //
                 // ignore: prefer_if_null_operators
                 newValue == null ? isTrue : newValue,
                 reason: tekaReason(
@@ -202,7 +185,7 @@ Future<void> main() async {
 
               final testedValue =
                   TekaTool.getTestValueBasedOnDefaultValue(card);
-              await cardoteka.setOrNull(
+              await cardoteka.set(
                 card,
                 TekaTool.getTestValueBasedOnDefaultValue(card),
               );
@@ -311,7 +294,6 @@ Future<void> main() async {
 
             for (final MapEntry(key: card, value: callbacks)
                 in detachers.entries) {
-              // ignore: sdk_version_since
               for (final (index, cb) in callbacks.indexed) {
                 expect(
                   cardoteka.watchersDebug[card],
@@ -424,7 +406,7 @@ Future<void> main() async {
         );
 
         testWith(
-          '$WatcherImpl.attach -> $Cardoteka.setOrNull-remove-$WatcherImpl.onRemove',
+          '$WatcherImpl.attach -> $Cardoteka.set-remove-$WatcherImpl.onRemove',
           setUp: setUpAction,
           tearDown: tearDownAction,
           () async {
@@ -441,7 +423,7 @@ Future<void> main() async {
 
               final testedValue = TekaTool.getTestValueBasedOnDefaultValue(
                   card, config.converters);
-              await cardoteka.setOrNull(card, testedValue);
+              await cardoteka.set(card, testedValue);
               if (testedValue == null) {
                 expect(
                   onRemoveCall,
@@ -453,7 +435,7 @@ Future<void> main() async {
                   // onChange is always called for asynchronous teka
                   teka == Teka.async,
                   reason: tekaReason(
-                      "callbackCall should not have been called!", card),
+                      'callbackCall should not have been called!', card),
                 );
               } else {
                 expect(
@@ -465,7 +447,7 @@ Future<void> main() async {
                 expect(
                   callbackCall,
                   isTrue,
-                  reason: tekaReason("callbackCall should be called!", card),
+                  reason: tekaReason('callbackCall should be called!', card),
                 );
               }
 
@@ -481,7 +463,7 @@ Future<void> main() async {
                 callbackCall,
                 isFalse,
                 reason: tekaReason(
-                    "callbackCall should not have been called!", card),
+                    'callbackCall should not have been called!', card),
               );
             }
           },

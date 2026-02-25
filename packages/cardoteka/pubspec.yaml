@@ -18,13 +18,17 @@ environment:
 resolution: workspace
 
 dependencies:
-  # dart sdk limitation matches - ^3.5.0
+  flutter:
+    sdk: flutter
 
   # version is clearly related to the minimum version of the dart sdk
   meta: ^1.15.0
 
 dev_dependencies:
-  test: ^1.26.3
+
+  #  for testing
+  flutter_test:
+    sdk: flutter
 
 screenshots:
   - description: 'Cardoteka is a better type-safe wrapper over SharedPreferences.'

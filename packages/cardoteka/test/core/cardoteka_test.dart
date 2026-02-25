@@ -1,33 +1,58 @@
 import 'dart:collection' show UnmodifiableListView;
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:cardoteka/src/core/cardoteka_sync.dart' show CardotekaTestUtils;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../init_sp.dart';
+import '../source/cardoteka_impl.dart';
 import '../source/cards.dart';
 import '../utils/test_tools.dart';
 
-final class CardotekaTest extends Cardoteka with CardotekaTestUtils {
-  CardotekaTest({required super.config});
-}
-
 void main() {
-  initMockNewSP();
+  late CardotekaTest cardoteka;
+
+  Future<void> tearDownAction() async {}
+
+  // todo(22.02.2026, @PackRuble): test by types with complex object
+  // todo(22.02.2026, @PackRuble): test sync|async storage with incorrect cardoteka
+
+  test(
+    '$Cardoteka.get->getOrDefault check static types',
+    () {
+      cardoteka = CardotekaTest(
+        // ignore config
+        config: const CardotekaConfig(cards: []),
+        storage: MemoryStorage(),
+      );
+
+      const card = SingleCard<int>('age', 56, DataType.int);
+      const cardNull = SingleCard<int?>('age', null, DataType.int);
+      const cardDefaultNonNull = SingleCard<int?>('age', 45, DataType.int);
+
+      final result = cardoteka.get(card);
+      final resultOrNull1 = cardoteka.get(cardNull);
+      final resultOrNull2 = cardoteka.get(cardDefaultNonNull);
+      expect(result, isA<int?>());
+      expect(resultOrNull1, isA<int?>());
+      expect(resultOrNull2, isA<int?>());
+
+      final resultDefault = cardoteka.getOrDefault(card);
+      final resultOrNullDefault = cardoteka.getOrDefault(cardNull);
+      expect(resultDefault, isA<int>());
+      expect(resultOrNullDefault, isA<int?>());
+
+      final
+          // is logical, since the type is derived from the specified
+          int? resultOrDefault = cardoteka.getOrDefault(cardDefaultNonNull);
+      expect(resultOrDefault, isA<int>());
+    },
+  );
 
   for (final config in allCardotekaConfigs) {
-    late CardotekaTest cardoteka;
     Future<void> setUpAction() async {
-      cardoteka = CardotekaTest(config: config);
-      await Cardoteka.init();
-    }
-
-    Future<void> tearDownAction() async {
-      cardoteka.deInit();
+      cardoteka = CardotekaTest(config: config, storage: MemoryStorage());
     }
 
     group('$config', () {
-      // ignore_for_file: discarded_futures
       testWith(
         '$Cardoteka.watcher--> watcher==null',
         setUp: setUpAction,
@@ -55,22 +80,8 @@ void main() {
               config.converters,
             );
 
-            if (testValue == null) continue;
-            final isSuccess = await cardoteka.set(
-              card,
-              testValue,
-            );
-            expect(
-              isSuccess,
-              isTrue,
-              reason: tekaReason(
-                'The value must be stored!',
-                card,
-              ),
-            );
+            await cardoteka.set(card, testValue);
 
-            // the [get] method should not receive cards that may have a nullable value
-            if (card is! Card<Object>) continue;
             final getValue = cardoteka.get(card);
             expect(
               getValue,
@@ -85,7 +96,7 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.set-getOrNull-> saving and then retrieving the value or null',
+        '$Cardoteka.set-getOrDefault-> saving and then retrieving the value or defaultValue',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () async {
@@ -94,27 +105,15 @@ void main() {
               card,
               config.converters,
             );
-            if (testValue == null) continue;
 
-            final isSuccess = await cardoteka.set(
-              card,
-              testValue,
-            );
-            expect(
-              isSuccess,
-              isTrue,
-              reason: tekaReason(
-                'The value must be stored!',
-                card,
-              ),
-            );
+            await cardoteka.set(card, testValue);
 
-            final getValue = cardoteka.getOrNull(card);
+            final getValue = cardoteka.getOrDefault(card);
             expect(
               getValue,
               testValue,
               reason: tekaReason(
-                'Should get the value that was saved earlier!',
+                'Should get the value that was saved earlier or default value!',
                 card,
               ),
             );
@@ -123,7 +122,7 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.setOrNull-get-> saving and then retrieving the value',
+        '$Cardoteka.set-get-> saving and then retrieving the value or null',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () async {
@@ -133,30 +132,11 @@ void main() {
               config.converters,
             );
 
-            final isSuccess = await cardoteka.setOrNull(
+            await cardoteka.set(
               card,
               testValue,
             );
 
-            if (testValue == null) {
-              expect(
-                isSuccess,
-                isTrue,
-                reason: tekaReason(
-                  'A successful deletion should occur because it simulates the saving of a null-value',
-                  card,
-                ),
-              );
-            } else {
-              expect(
-                isSuccess,
-                isTrue,
-                reason: tekaReason('The value must be stored!', card),
-              );
-            }
-
-            // the [get] method should not receive cards that may have a nullable value
-            if (card is! Card<Object>) continue;
             final getValue = cardoteka.get(card);
             expect(
               getValue,
@@ -171,52 +151,19 @@ void main() {
       );
 
       testWith(
-        '$Cardoteka.setOrNull-getOrNull-> saving and then retrieving the value or null',
+        "$Cardoteka.getOrDefault-> Returns default value if haven't saved values before",
         setUp: setUpAction,
         tearDown: tearDownAction,
-        () async {
+        () {
           for (final card in cardoteka.cards) {
-            final testValue = TekaTool.getTestValueBasedOnDefaultValue(
-              card,
-              config.converters,
-            );
-
-            final isSuccess = await cardoteka.setOrNull(
-              card,
-              testValue,
-            );
-            if (testValue == null) {
-              expect(
-                isSuccess,
-                isTrue,
-                reason: tekaReason(
-                  'A successful deletion should occur because it simulates the saving of a null-value',
-                  card,
-                ),
-              );
-            } else {
-              expect(
-                isSuccess,
-                isTrue,
-                reason: tekaReason('The value must be stored!', card),
-              );
-            }
-
-            final getValue = cardoteka.getOrNull(card);
-            expect(
-              getValue,
-              testValue,
-              reason: tekaReason(
-                'Should get the value that was saved earlier!',
-                card,
-              ),
-            );
+            final result = cardoteka.getOrDefault(card);
+            expect(result, card.defaultValue);
           }
         },
       );
 
       testWith(
-        '$Cardoteka.containsCard--> setOrNull-containsCard-remove-containsCard',
+        '$Cardoteka.containsCard--> set-containsCard-remove-containsCard',
         setUp: setUpAction,
         tearDown: tearDownAction,
         () async {
@@ -226,28 +173,11 @@ void main() {
               config.converters,
             );
 
-            final isSuccess = await cardoteka.setOrNull(
+            await cardoteka.set(
               card,
               testValue,
             );
             bool isContains = cardoteka.containsCard(card);
-
-            // means that [testValue] was null.
-            // Therefore, the value is deleted from the store.
-            if (testValue == null) {
-              expect(
-                isContains,
-                isFalse,
-                reason: tekaReason('The value should not be in storage!', card),
-              );
-              continue;
-            } else {
-              expect(
-                isSuccess,
-                isTrue,
-                reason: tekaReason('The value must be stored!', card),
-              );
-            }
 
             expect(
               isContains,
@@ -258,8 +188,7 @@ void main() {
               ),
             );
 
-            final isSuccessRemove = await cardoteka.remove(card);
-            expect(isSuccessRemove, isTrue);
+            await cardoteka.remove(card);
 
             isContains = cardoteka.containsCard(card);
             expect(
@@ -289,23 +218,8 @@ void main() {
 
           expect(
             actualCards,
-            isA<UnmodifiableListView>(),
+            isA<UnmodifiableListView<dynamic>>(),
             reason: 'The list must be of type $UnmodifiableListView',
-          );
-        },
-      );
-
-      testWith(
-        '$Cardoteka.isInitialized',
-        setUp: setUpAction,
-        tearDown: tearDownAction,
-        () {
-          final actualInitialize = cardoteka.isInitialized;
-
-          expect(
-            actualInitialize,
-            isTrue,
-            reason: 'The storage must be initialized!',
           );
         },
       );
@@ -330,17 +244,12 @@ void main() {
             );
 
             beenSavedCards.add(card);
-            await cardoteka.set(card, testValue!);
+            await cardoteka.set(card, testValue);
           }
 
           final savedCards = cardoteka.getStoredCards().toList();
           for (final card in beenSavedCards) {
-            final resultRemove = await cardoteka.remove(card);
-            expect(
-              resultRemove,
-              isTrue,
-              reason: 'The result of removing must be true',
-            );
+            await cardoteka.remove(card);
 
             savedCards.remove(card);
             final resultGetCards = cardoteka.getStoredCards().toList();
@@ -380,8 +289,7 @@ void main() {
             );
 
             beenSavedCards.add(card);
-            final resultSet = await cardoteka.set(card, testValue!);
-            expect(resultSet, isTrue, reason: tekaReason('set != false', card));
+            await cardoteka.set(card, testValue);
           }
 
           var resultGetCards = cardoteka.getStoredCards().toList();
@@ -391,12 +299,7 @@ void main() {
             reason: 'All saved cards should be in $resultGetCards!',
           );
 
-          final resultRemoveAll = await cardoteka.removeAll();
-          expect(
-            resultRemoveAll,
-            isTrue,
-            reason: 'All saved cards should be removed!',
-          );
+          await cardoteka.removeAll();
 
           resultGetCards = cardoteka.getStoredCards().toList();
           expect(
@@ -427,8 +330,7 @@ void main() {
             );
 
             beenSavedCards[card] = testValue!;
-            final resultSet = await cardoteka.set(card, testValue);
-            expect(resultSet, isTrue, reason: tekaReason('set != false', card));
+            await cardoteka.set(card, testValue);
           }
 
           var resultGetStoredEntries = cardoteka.getStoredEntries();

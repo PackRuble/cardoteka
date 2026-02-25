@@ -1,6 +1,7 @@
 import 'dart:ui' show Color;
 
 import 'package:cardoteka/cardoteka.dart';
+import 'package:cardoteka/cardoteka_flutter.dart';
 import 'package:cardoteka/src/card.dart' show CardAbstract;
 
 import 'models.dart';
@@ -11,26 +12,34 @@ mixin AdditionalTestValue<T> {
 
 abstract class CardTest<T> = CardAbstract<T> with AdditionalTestValue<T>;
 
-final allCardotekaConfigs = [
+final class SingleCard<V extends Object?> implements Card<V> {
+  const SingleCard(this.key, this.defaultValue, this.type);
+
+  @override
+  final V defaultValue;
+
+  @override
+  final String key;
+
+  @override
+  final DataType type;
+}
+
+const allCardotekaConfigs = [
   CardotekaConfig(
-    name: '$BarStoolParts',
     cards: BarStoolParts.values,
   ),
   CardotekaConfig(
-    name: '$FishCard',
     cards: FishCard.values,
   ),
   CardotekaConfig(
-    name: '$PrimitiveTypeCards',
     cards: PrimitiveTypeCards.values,
     converters: PrimitiveTypeCards.converters,
   ),
   CardotekaConfig(
-    name: '$SettingsCard',
     cards: SettingsCard.values,
   ),
   CardotekaConfig(
-    name: '$ForestCard',
     cards: ForestCard.values,
     converters: ForestCard.converters,
   ),
@@ -128,7 +137,7 @@ enum FishCard<T extends Object?> implements Card<T> {
   String get key => name;
 }
 
-const primitiveCards = [
+const primitiveCards = <PrimitiveTypeCards>[
   PrimitiveTypeCards.cardBool,
   PrimitiveTypeCards.cardInt,
   PrimitiveTypeCards.cardDouble,
@@ -136,21 +145,21 @@ const primitiveCards = [
   PrimitiveTypeCards.cardStringListEmpty,
   PrimitiveTypeCards.cardStringList,
 ];
-const primitiveNullableCards = [
+const primitiveNullableCards = <PrimitiveTypeCards>[
   PrimitiveTypeCards.cardBoolNull,
   PrimitiveTypeCards.cardBoolMayNull,
   PrimitiveTypeCards.cardStringListNull,
   PrimitiveTypeCards.cardStringListMayNull,
 ];
 
-const primitiveCardsWithDefaultValueIsNull = [
+const primitiveCardsWithDefaultValueIsNull = <PrimitiveTypeCards>[
   PrimitiveTypeCards.cardBoolNull,
   PrimitiveTypeCards.cardStringListNull,
   PrimitiveTypeCards.cardTimeComplexNull,
   PrimitiveTypeCards.cardModelComplexNull,
 ];
 
-const primitiveComplexCards = [
+const primitiveComplexCards = <PrimitiveTypeCards>[
   PrimitiveTypeCards.card2DList,
   PrimitiveTypeCards.cardTimeComplexNull,
   PrimitiveTypeCards.cardModelComplex,
@@ -174,7 +183,7 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
   cardStringListMayNull<List<String>?>(DataType.stringList, ['']),
 
   /// Complex [defaultValue] in cards
-  card2DList<List<List>>(DataType.string, [[], []]),
+  card2DList<List<List<dynamic>>>(DataType.string, [[], []]),
   cardTimeComplexNull<Time?>(DataType.int, null),
   cardModelComplex<Model>(DataType.string, Model()),
   cardModelComplexNull<Model?>(DataType.string, null);
@@ -300,11 +309,9 @@ enum ForestCard<T> implements CardTest<T> {
   @override
   String get key => _customKey ?? EnumName(this).name;
 
-  static const converters = {
-    // ignore: deprecated_member_use_from_same_package
-    currentColorSpruce: Converters.colorAsInt,
-    // ignore: deprecated_member_use_from_same_package
-    currentColorSpruceWCK: Converters.colorAsInt,
+  static const converters = <Card, Converter>{
+    currentColorSpruce: ColorConverter(),
+    currentColorSpruceWCK: ColorConverter(),
     lifetimeCedar: Converters.durationAsInt,
   };
 }

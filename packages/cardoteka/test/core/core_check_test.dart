@@ -1,3 +1,4 @@
+//
 // ignore_for_file: prefer_final_locals, prefer_const_declarations, prefer_function_declarations_over_variables, unreachable_from_main
 
 import 'package:cardoteka/src/card.dart';
@@ -12,7 +13,6 @@ void main() {
   group('checkConfiguration()', () {
     test('general test of all checks at once', () {
       final config = CardotekaConfig(
-        name: 'PrimitiveTypeCards',
         cards: [...PrimitiveTypeCards.values]
           ..remove(PrimitiveTypeCards.card2DList),
         converters: const {
@@ -43,7 +43,7 @@ void main() {
       expect(resultMap, isEmpty);
     });
 
-    test("have duplicate keys", () {
+    test('have duplicate keys', () {
       final keys = primitiveCards;
       final duplicateCard = primitiveCards[2];
       Function resultFunc = () => checkDuplicateKeys([...keys, duplicateCard]);
@@ -125,7 +125,7 @@ void main() {
       expect(resultFunc, throwsAssertionError);
     });
 
-    test("only primitive|with converters cards", () {
+    test('only primitive|with converters cards', () {
       bool Function() resultFunc = () => checkConverterForComplexObject(
             [...PrimitiveTypeCards.values]
               ..remove(PrimitiveTypeCards.card2DList),
@@ -142,15 +142,15 @@ void main() {
 
   group('checkMatchingConverters()', () {
     test('converters empty|null', () {
-      bool Function() resultFunc = () => checkMatchingConverters(null);
+      bool Function() resultFunc = () => checkMatchConverterForCard(null);
       expect(resultFunc(), isTrue);
 
-      resultFunc = () => checkMatchingConverters(const {});
+      resultFunc = () => checkMatchConverterForCard(const {});
       expect(resultFunc(), isTrue);
     });
 
     test('card.defaultValue is null', () {
-      bool Function() resultFunc = () => checkMatchingConverters(const {
+      bool Function() resultFunc = () => checkMatchConverterForCard(const {
             PrimitiveTypeCards.cardTimeComplexNull: TimeConverter(),
             PrimitiveTypeCards.cardModelComplexNull: ModelConverter(),
           });
@@ -158,7 +158,7 @@ void main() {
     });
 
     test('types match', () {
-      bool Function() resultFunc = () => checkMatchingConverters(
+      bool Function() resultFunc = () => checkMatchConverterForCard(
             const {
               PrimitiveTypeCards.cardModelComplex: ModelConverter(),
             },
@@ -167,7 +167,7 @@ void main() {
     });
 
     test("types don't match", () {
-      bool Function() resultFunc = () => checkMatchingConverters(
+      bool Function() resultFunc = () => checkMatchConverterForCard(
             const {
               PrimitiveTypeCards.cardModelComplex: TimeConverter(),
             },

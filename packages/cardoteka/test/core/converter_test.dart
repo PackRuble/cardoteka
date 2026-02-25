@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_final_locals, unreachable_from_main
 
 import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' show Color, ThemeMode;
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_test/flutter_test.dart';
 
 class TestItem {
@@ -49,21 +49,22 @@ final class TestMapConverter extends MapConverter<int, double> {
 
 void main() {
   group('$Converters', () {
-    test('colorAsInt', () {
-      // ignore: deprecated_member_use_from_same_package
-      const converter = Converters.colorAsInt;
-      const color = Color.fromARGB(0, 0, 0, 0);
-      // ignore: deprecated_member_use
-      final colorValue = color.value;
-
-      int resultTo = converter.to(color);
-      expect(resultTo, colorValue);
-      expect(resultTo, isA<int>());
-
-      Color resultFrom = converter.from(colorValue);
-      expect(resultFrom, color);
-      expect(resultFrom, isA<Color>());
-    });
+    // todo(21.02.2026, @PackRuble): move
+    // test('colorAsInt', () {
+    //   // ignore: deprecated_member_use_from_same_package
+    //   const converter = Converters.colorAsInt;
+    //   const color = Color.fromARGB(0, 0, 0, 0);
+    //   // ignore: deprecated_member_use
+    //   final colorValue = color.value;
+    //
+    //   int resultTo = converter.to(color);
+    //   expect(resultTo, colorValue);
+    //   expect(resultTo, isA<int>());
+    //
+    //   Color resultFrom = converter.from(colorValue);
+    //   expect(resultFrom, color);
+    //   expect(resultFrom, isA<Color>());
+    // });
 
     test('uriAsString', () {
       const converter = Converters.uriAsString;
