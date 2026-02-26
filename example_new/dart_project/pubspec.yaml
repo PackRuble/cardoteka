@@ -1,0 +1,11 @@
+name: dart_project
+description: An application using cardoteka.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  cardoteka:
+    path: ../../packages/cardoteka
