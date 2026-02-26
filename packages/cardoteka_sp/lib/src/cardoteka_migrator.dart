@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences;
 
-import 'cardoteka_sp_async.dart';
+import 'sp_storage_async.dart';
 
 /// {@template cardoteka.HandlerEntryV2}
 /// [HandlerEntryV2] represents a record resulting from the execution of a data migration handler.
@@ -152,9 +152,9 @@ final class CardotekaMigrator {
   }) async {
     if (toV2Handler != null) {
       final spNew = CardotekaAsync(
-        storage: CardotekaSpAsync(),
+        storage: SpStorageAsync(),
         // configuration will not be used in operation
-        config: const CardotekaConfig(prefix: '', cards: []),
+        config: const CardotekaConfig(cards: []),
       );
 
       bool? didMigrate =
