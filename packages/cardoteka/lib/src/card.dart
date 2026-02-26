@@ -4,6 +4,7 @@ import 'package:meta/meta.dart' show reopen, visibleForTesting;
 
 // coverage:ignore-file
 
+// todo(26.02.2026, @PackRuble): move to separate file
 /// Type of data to be saved.
 enum DataType<V extends dc.Object> {
   /// Represents type [dc.bool].
@@ -18,11 +19,17 @@ enum DataType<V extends dc.Object> {
   /// Represents type [dc.String].
   string<dc.String>(),
 
-  /// Represents type [dc.List]<[dc.String]>.
-  stringList<dc.List<dc.String>>(),
+  /// Represents type [dc.List]<[dc.Object]?>.
+  list<dc.List<dc.Object?>>(),
 
+  /// Represents type [dc.Map]<[dc.String], [dc.Object]?>.
+  map<dc.Map<dc.String, dc.Object?>>(),
+
+  // todo(26.02.2026, @PackRuble): Is it necessary for manual castings (undetermined data)?
   object<dc.Object>(),
   ;
+
+  dc.Type get type => V;
 
   // todo(09.02.2026, @PackRuble): add list, map
   static DataType<V> typeBy<V extends dc.Object>(V value) {
@@ -31,8 +38,10 @@ enum DataType<V extends dc.Object> {
       dc.int() => DataType.int,
       dc.double() => DataType.double,
       dc.String() => DataType.string,
-      dc.List<dc.String>() => DataType.stringList,
-      _ => throw dc.ArgumentError('Unsupported DataType: ${value.runtimeType}'),
+      dc.List<dc.Object?>() => DataType.list,
+      dc.Map<dc.String, dc.Object?>() => DataType.map,
+      dc.Object() => DataType.object,
+      // _ => throw dc.ArgumentError('Unsupported DataType: ${value.runtimeType}'),
     } as DataType<V>;
   }
 
@@ -40,9 +49,10 @@ enum DataType<V extends dc.Object> {
     if (value == null) return null;
 
     return switch (this) {
-      DataType.stringList => (value as dc.List).cast<dc.String>(),
+      DataType.list => (value as dc.List).cast<dc.Object?>(),
+      DataType.map => (value as dc.Map).cast<dc.String, dc.Object?>(),
       _ => value,
-    } as V;
+    } as V?;
   }
 }
 
@@ -88,7 +98,7 @@ abstract interface class Card<V extends dc.Object?> {
   /// Type of data to be saved. Select the one that matches either the type
   /// of your [defaultValue] or the type after using the [Converter.to]
   /// converter method.
-  DataType get type;
+  DataType<dc.Object> get type;
 
   /// The default value for this [Card].
   V get defaultValue;

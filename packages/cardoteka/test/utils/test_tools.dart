@@ -70,7 +70,8 @@ class TekaTool {
       DataType.int => (value as int) * 2,
       DataType.double => (value as double) + 1.11111,
       DataType.bool => !(value as bool),
-      DataType.stringList => (value as List<String>) + ['_test'],
+      DataType.list => (value as List<String>) + ['_test'],
+      DataType.map => {'1': 123},
       DataType.object => Object(),
     };
 

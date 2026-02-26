@@ -37,7 +37,7 @@
 //   Map<String, Object?> getAll() => {for (final key in getKeys()) key: get(key)};
 // }
 //
-// Future<void> main() async {
+Future<void> main() async {
 //   initMockNewSP();
 //
 //   late SharedPreferences spOld;
@@ -328,4 +328,4 @@
 //       );
 //     },
 //   );
-// }
+}

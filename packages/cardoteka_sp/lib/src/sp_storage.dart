@@ -99,7 +99,7 @@ class SpStorage implements CardotekaStorage {
     return result;
   }
 
-  /// Works similarly to the [SharedPreferencesWithCache.getAll] method
+  /// Works similarly to the [SharedPreferencesWithCache.get] method
   /// of the same name.
   @override
   Map<String, dynamic> getAll({
@@ -128,9 +128,10 @@ class SpStorage implements CardotekaStorage {
       DataType.int => _prefs.getInt(key),
       DataType.double => _prefs.getDouble(key),
       DataType.bool => _prefs.getBool(key),
-      DataType.stringList => _prefs.getStringList(key),
-      DataType.object => throw ArgumentError(
-          'The `SharedPreferencesWithCache` does not support storing Object values.',
+      DataType.list => _prefs.getStringList(key),
+      DataType.object => _prefs.get(key),
+      DataType.map => throw ArgumentError(
+          'The shared_preferences does not support type=$type.',
         ),
     };
     return result as V?;
@@ -153,10 +154,10 @@ class SpStorage implements CardotekaStorage {
         DataType.int => _prefs.setInt(key, value as int),
         DataType.double => _prefs.setDouble(key, value as double),
         DataType.string => _prefs.setString(key, value as String),
-        DataType.stringList =>
+        DataType.list =>
           _prefs.setStringList(key, (value as List).cast<String>()),
-        DataType.object || null => throw ArgumentError(
-            'The shared_preferences does not support storing Object values.',
+        DataType.map || DataType.object || null => throw ArgumentError(
+            'The shared_preferences does not support storing Object with type=$type.',
           ),
       };
     }

@@ -173,14 +173,14 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
   cardString<String>(DataType.string, ''),
 
   /// The type of list elements can only be [String].
-  cardStringListEmpty<List<String>>(DataType.stringList, []),
-  cardStringList<List<String>>(DataType.stringList, ['']),
+  cardStringListEmpty<List<String>>(DataType.list, []),
+  cardStringList<List<String>>(DataType.list, ['']),
 
   /// Nullable cards
   cardBoolNull<bool?>(DataType.bool, null),
   cardBoolMayNull<bool?>(DataType.bool, true),
-  cardStringListNull<List<String>?>(DataType.stringList, null),
-  cardStringListMayNull<List<String>?>(DataType.stringList, ['']),
+  cardStringListNull<List<String>?>(DataType.list, null),
+  cardStringListMayNull<List<String>?>(DataType.list, ['']),
 
   /// Complex [defaultValue] in cards
   card2DList<List<List<dynamic>>>(DataType.string, [[], []]),
@@ -211,7 +211,7 @@ enum SettingsCard implements Card<Object> {
   homeIndex(DataType.int, 1),
   relativePathSettings(DataType.string, r'%MYDOCUMENTS%\app_settings\'),
   aspectLayout(DataType.double, 0.32),
-  listCodes(DataType.stringList, ['error', '403', '2030']),
+  listCodes(DataType.list, ['error', '403', '2030']),
   ;
 
   const SettingsCard(this.type, this.defaultValue);
@@ -258,12 +258,12 @@ enum ForestCard<T> implements CardTest<T> {
 
   /// Some other names for the tree are "linden".
   namesLinden<List<String>>(
-    DataType.stringList,
+    DataType.list,
     ['linden', 'lime tree'],
     ['tree'],
   ),
   namesLindenWCK<List<String>>(
-    DataType.stringList,
+    DataType.list,
     [],
     ['tree', 'tree_new', 'tree_meow'],
     'namesLindenWCK_custom_key',

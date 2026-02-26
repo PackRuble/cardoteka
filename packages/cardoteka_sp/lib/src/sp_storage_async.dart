@@ -60,14 +60,16 @@ class SpStorageAsync implements CardotekaStorage {
   /// Works similarly to the [SharedPreferencesAsync].get* methods.
   @override
   Future<V?> get<V extends Object>(String key, DataType<V> type) async {
-    final result = await switch (type) {
-      DataType.string => _prefsAsync.getString(key),
-      DataType.int => _prefsAsync.getInt(key),
-      DataType.double => _prefsAsync.getDouble(key),
-      DataType.bool => _prefsAsync.getBool(key),
-      DataType.stringList => _prefsAsync.getStringList(key),
-      DataType.object =>
-        Future.value((await _prefsAsync.getAll(allowList: {key}))[key]),
+    final result = switch (type) {
+      DataType.string => await _prefsAsync.getString(key),
+      DataType.int => await _prefsAsync.getInt(key),
+      DataType.double => await _prefsAsync.getDouble(key),
+      DataType.bool => await _prefsAsync.getBool(key),
+      DataType.list => await _prefsAsync.getStringList(key),
+      DataType.object => (await _prefsAsync.getAll(allowList: {key}))[key],
+      DataType.map => throw ArgumentError(
+          'The shared_preferences does not support type=$type.',
+        ),
     };
     return result as V?;
   }
@@ -87,10 +89,10 @@ class SpStorageAsync implements CardotekaStorage {
         DataType.int => _prefsAsync.setInt(key, value as int),
         DataType.double => _prefsAsync.setDouble(key, value as double),
         DataType.string => _prefsAsync.setString(key, value as String),
-        DataType.stringList =>
+        DataType.list =>
           _prefsAsync.setStringList(key, (value as List).cast<String>()),
-        DataType.object || null => throw ArgumentError(
-            'The shared_preferences does not support storing Object values.',
+        DataType.map || DataType.object || null => throw ArgumentError(
+            'The shared_preferences does not support storing Object with type=$type.',
           ),
       };
     }

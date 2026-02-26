@@ -6,6 +6,7 @@ import '../card.dart';
 
 /// Extended functionality [DataType].
 @internal
+// todo(26.02.2026, @PackRuble): delete
 extension DataTypeExt on DataType {
   /// Get dart type.
   @internal
@@ -14,7 +15,8 @@ extension DataTypeExt on DataType {
         DataType.int => int,
         DataType.double => double,
         DataType.string => String,
-        DataType.stringList => List<String>,
+        DataType.list => List<String>,
+        DataType.map => Map<String, Object>,
         DataType.object => Object,
       };
 
@@ -34,7 +36,8 @@ extension DataTypeExt on DataType {
       DataType.int => value is int,
       DataType.double => value is double,
       DataType.string => value is String,
-      DataType.stringList => value is List<String>,
+      DataType.list => value is List<String>,
+      DataType.map => value is Map<String, Object?>,
       DataType.object => true,
     };
   }
