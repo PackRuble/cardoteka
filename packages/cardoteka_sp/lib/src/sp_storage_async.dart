@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:cardoteka/cardoteka.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferencesAsync;
+
+import 'from_cardoteka.dart' show CardotekaStorage, DataType;
 
 // todo(21.02.2026, @PackRuble): add card prefix
 

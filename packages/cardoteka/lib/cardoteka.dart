@@ -2,10 +2,7 @@
 //
 // Use of this source code is governed by the license found in the LICENSE file.
 
-/// The best type-safe wrapper over SharedPreferences.
-///
-/// Wow, it's never been safer than it is right now!
-/// You can see all the available classes below.
+/// A generic wrapper for your storage with useful utilities!
 library;
 
 export 'src/card.dart' show Card, DataType;

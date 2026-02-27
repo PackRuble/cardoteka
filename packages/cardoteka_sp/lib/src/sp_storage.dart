@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:cardoteka/cardoteka.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show
         SharedPreferencesOptions,
         SharedPreferencesWithCache,
         SharedPreferencesWithCacheOptions;
+
+import 'from_cardoteka.dart' show CardotekaStorage, DataType;
 
 // todo(21.02.2026, @PackRuble): use prefix
 // todo(22.02.2026, @PackRuble): fix doc
@@ -24,7 +25,7 @@ class SpStorage implements CardotekaStorage {
   /// to use in storage.
   @internal
   @protected
-  String getStorageKey(Card card) => '$prefix'
+  String getStorageKey(card) => '$prefix'
       '${prefix.isEmpty ? '' : '.'}'
       '${card.key}';
 
