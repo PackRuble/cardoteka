@@ -2,7 +2,7 @@ import 'dart:async' show FutureOr;
 
 import 'package:meta/meta.dart' show internal, protected;
 
-import '../../card.dart' show DataType;
+import '../../data_type.dart';
 
 abstract interface class CardotekaStorage {
   const CardotekaStorage();

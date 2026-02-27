@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../card.dart';
+import '../data_type.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';
 

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../card.dart';
+import '../data_type.dart';
 import '../extensions/future_ext.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';

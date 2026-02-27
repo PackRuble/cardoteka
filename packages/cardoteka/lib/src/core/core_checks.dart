@@ -3,7 +3,6 @@ import 'package:meta/meta.dart';
 import '../card.dart';
 import '../config.dart';
 import '../converter.dart';
-import '../extensions/data_type_ext.dart';
 
 /// This implementation allows \n characters to be used.
 @internal
@@ -30,7 +29,7 @@ bool checkConfiguration(CardotekaConfig config) {
   return true;
 }
 
-/// Check if the specified type [DataType] matches the provided type [Card.defaultValue].
+/// Check if the specified type `DataType` matches the provided type [Card.defaultValue].
 /// We do this based on the type of default value provided. If there is
 /// a converter for the given card, we skip the check.
 ///
@@ -51,11 +50,14 @@ bool checkProvidedDataType<T>(
     /// we will check it in [_checkMatchingConverters].
     if (converters?.containsKey(card) ?? false) continue;
 
-    if (!card.type.isCorrectType(value)) {
+    try {
+      card.type.cast(value);
+    } catch (e) {
       throw AssertionErrorImpl('''
 The provided type [${card.type}] does not match the type of the [$card.defaultValue]:
-->Expected type: ${card.type.dartType}
+->Expected type: ${card.type.type}
 ->Actual type: ${card.defaultValue.runtimeType}
+e: $e
 ''');
     }
   }
@@ -127,13 +129,13 @@ bool checkMatchConverterForCard(
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
 
-    final excepted = card.type.dartType;
+    final excepted = card.type.type;
     Type? afterConverted;
     try {
       afterConverted = converter.to(value).runtimeType;
 
       if (excepted != afterConverted) {
-        throw '';
+        throw ArgumentError('');
       }
     } catch (error) {
       throw AssertionErrorImpl('''
@@ -190,7 +192,7 @@ Map<Key, List<Card>> getDuplicateKeys(List<Card> cards) {
   return duplicateKeys;
 }
 
-/// Returns true if the type is valid (one of [DataType]).
+/// Returns true if the type is valid (one of `DataType`).
 ///
 /// Note: in the web double can be equal to int.
 @internal
@@ -200,5 +202,13 @@ bool isSimpleData(Card<Object?> card) {
   // we cannot determine the type for sure if the value is null.
   if (value == null) return true;
 
-  return card.type.isCorrectType(value);
+  try {
+    card.type.cast(value);
+    return true;
+  }
+  //
+  // ignore: avoid_catches_without_on_clauses
+  catch (_) {
+    return false;
+  }
 }

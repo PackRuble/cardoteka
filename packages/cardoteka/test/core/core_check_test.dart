@@ -1,8 +1,7 @@
 //
 // ignore_for_file: prefer_final_locals, prefer_const_declarations, prefer_function_declarations_over_variables, unreachable_from_main
 
-import 'package:cardoteka/src/card.dart';
-import 'package:cardoteka/src/config.dart';
+import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/src/core/core_checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 

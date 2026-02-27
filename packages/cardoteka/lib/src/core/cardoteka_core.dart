@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import '../card.dart';
 import '../config.dart';
 import '../converter.dart';
+import '../data_type.dart';
 import '../watcher.dart';
 import 'core_checks.dart' show checkConfiguration;
 

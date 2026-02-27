@@ -1,7 +1,8 @@
+//
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
 import 'package:cardoteka/cardoteka.dart' show Card, Converter, DataType;
-import 'package:cardoteka/src/extensions/data_type_ext.dart';
+import 'package:cardoteka/src/core/core_checks.dart' show isSimpleData;
 import 'package:flutter_test/flutter_test.dart' show test;
 import 'package:meta/meta.dart' show awaitNotRequired, isTest;
 
@@ -44,14 +45,11 @@ class TekaTool {
     final Object? defaultValue = card.defaultValue;
     if (defaultValue == null) return ifNull;
 
-    return card.type.isCorrectType(defaultValue);
+    return isSimpleData(card);
   }
 
   static bool isNonPrimitiveDefaultValue(Card card, {required bool ifNull}) {
-    final Object? defaultValue = card.defaultValue;
-    if (defaultValue == null) return ifNull;
-
-    return !card.type.isCorrectType(defaultValue);
+    return isPrimitiveDefaultValue(card, ifNull: ifNull);
   }
 
   // todo(22.02.2026, @PackRuble): do deprecated, use const default values
