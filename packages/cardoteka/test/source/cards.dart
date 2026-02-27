@@ -13,7 +13,7 @@ mixin AdditionalTestValue<T> {
 abstract class CardTest<T> = CardAbstract<T> with AdditionalTestValue<T>;
 
 final class SingleCard<V extends Object?> implements Card<V> {
-  const SingleCard(this.key, this.defaultValue, this.type);
+  const SingleCard(this.key, this.defaultValue, this.dartType);
 
   @override
   final V defaultValue;
@@ -22,7 +22,7 @@ final class SingleCard<V extends Object?> implements Card<V> {
   final String key;
 
   @override
-  final DataType type;
+  final DataType dartType;
 }
 
 const allCardotekaConfigs = [
@@ -107,10 +107,10 @@ enum BarStoolParts<T extends Object> implements Card<T> {
   flatWasher<int>(DataType.int, 10 + 1),
   ;
 
-  const BarStoolParts(this.type, this.defaultValue);
+  const BarStoolParts(this.dartType, this.defaultValue);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final T defaultValue;
@@ -125,10 +125,10 @@ enum FishCard<T extends Object?> implements Card<T> {
   perchGhostNull<int?>(DataType.int, null),
   ;
 
-  const FishCard(this.type, this.defaultValue);
+  const FishCard(this.dartType, this.defaultValue);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final T defaultValue;
@@ -188,10 +188,10 @@ enum PrimitiveTypeCards<T extends Object?> implements Card<T> {
   cardModelComplex<Model>(DataType.string, Model()),
   cardModelComplexNull<Model?>(DataType.string, null);
 
-  const PrimitiveTypeCards(this.type, this.defaultValue);
+  const PrimitiveTypeCards(this.dartType, this.defaultValue);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final T defaultValue;
@@ -214,10 +214,10 @@ enum SettingsCard implements Card<Object> {
   listCodes(DataType.list, ['error', '403', '2030']),
   ;
 
-  const SettingsCard(this.type, this.defaultValue);
+  const SettingsCard(this.dartType, this.defaultValue);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final Object defaultValue;
@@ -289,14 +289,14 @@ enum ForestCard<T> implements CardTest<T> {
   ;
 
   const ForestCard(
-    this.type,
+    this.dartType,
     this.defaultValue,
     this.testValue, [
     this._customKey,
   ]);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final T defaultValue;

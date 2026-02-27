@@ -63,7 +63,7 @@ class TekaTool {
     final converter = converters?[card];
     final value = converter?.to(defaultValue) ?? defaultValue;
 
-    final testValue = switch (card.type) {
+    final testValue = switch (card.dartType) {
       DataType.string => (value as String) + '_test',
       DataType.int => (value as int) * 2,
       DataType.double => (value as double) + 1.11111,

@@ -5,10 +5,10 @@ enum SettingsCard<T> implements Card<T> {
   premiumPurchaseDay<DateTime?>(DataType.string, null),
   ;
 
-  const SettingsCard(this.type, this.defaultValue);
+  const SettingsCard(this.dartType, this.defaultValue);
 
   @override
-  final DataType type;
+  final DataType dartType;
 
   @override
   final T defaultValue;

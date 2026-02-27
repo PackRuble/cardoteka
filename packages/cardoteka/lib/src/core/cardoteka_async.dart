@@ -69,7 +69,7 @@ base class CardotekaAsync extends CardotekaCore {
   @protected
   @override
   FutureOr<V?> getValueFromStorage<V extends Object?>(Card<V> card) async {
-    final Object? object = await getObjectFromStorage(card.key, card.type);
+    final Object? object = await getObjectFromStorage(card.key, card.dartType);
 
     if (object == null) {
       return null;
@@ -104,7 +104,7 @@ base class CardotekaAsync extends CardotekaCore {
   ) async {
     final resultValue =
         value != null ? getConverter(card)?.to(value) ?? value : value;
-    await _storage.set(card.key, resultValue, card.type);
+    await _storage.set(card.key, resultValue, card.dartType);
   }
 
   @override

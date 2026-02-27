@@ -85,7 +85,7 @@ import 'core_checks.dart' show checkConfiguration;
 ///     from the [DataType] enumeration,
 ///     - default value. It will be returned when using [CardotekaCore.getOrDefault],
 ///     if there were no saves in the storage for this card previously.
-///   - converters if generic type does not match your [Card.type]
+///   - converters if generic type does not match your [Card.dartType]
 ///
 /// 2. Define a class that extends from an inheritor of the [CardotekaCore] class
 /// (synchronous or asynchronous versions). Either pass the configuration
@@ -180,7 +180,7 @@ abstract base class CardotekaCore {
   /// {@endtemplate}
   ///
   /// What you need to know:
-  /// - types [Card.type] and [value] must match;
+  /// - types [Card.dartType] and [value] must match;
   /// - [value] cannot be `null`. Use [setOrNull] when you want if you want
   /// to simulate storing null;
   /// - [watcher] will be notified anyway (if it is not null).

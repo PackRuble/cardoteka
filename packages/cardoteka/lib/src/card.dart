@@ -13,7 +13,7 @@ import 'data_type.dart';
 /// if [defaultValue]=null then the inferred type will be [dynamic].
 ///
 /// The card consists of:
-/// - [type] -> type of data to be saved;
+/// - [dartType] -> type of data to be saved;
 /// - [key] -> the cardoteka impl uses this key to access SharedPreferences;
 /// - [defaultValue] -> default value for this key (for type [V]).
 ///
@@ -46,7 +46,7 @@ abstract interface class Card<V extends Object?> {
   /// Type of data to be saved. Select the one that matches either the type
   /// of your [defaultValue] or the type after using the [Converter.to]
   /// converter method.
-  DataType<Object> get type;
+  DataType<Object> get dartType;
 
   /// The default value for this [Card].
   V get defaultValue;
@@ -57,7 +57,7 @@ abstract interface class Card<V extends Object?> {
   @override
   String toString() => '$runtimeType(key: $key, '
       'defaultValue: $defaultValue, '
-      'type: $type)';
+      'type: $dartType)';
 }
 
 /// Designed to allow inheritance during testing.

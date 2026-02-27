@@ -69,7 +69,7 @@ base class Cardoteka extends CardotekaCore {
   @protected
   @override
   V? getValueFromStorage<V extends Object?>(Card<V> card) {
-    final Object? object = getObjectFromStorage(card.key, card.type);
+    final Object? object = getObjectFromStorage(card.key, card.dartType);
 
     if (object == null) {
       return null;
@@ -99,7 +99,7 @@ base class Cardoteka extends CardotekaCore {
   ) {
     final resultValue =
         value != null ? getConverter(card)?.to(value) ?? value : value;
-    _storage.set(card.key, resultValue, card.type).sync();
+    _storage.set(card.key, resultValue, card.dartType).sync();
   }
 
   @override

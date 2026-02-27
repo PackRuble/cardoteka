@@ -51,11 +51,11 @@ bool checkProvidedDataType<T>(
     if (converters?.containsKey(card) ?? false) continue;
 
     try {
-      card.type.cast(value);
+      card.dartType.cast(value);
     } catch (e) {
       throw AssertionErrorImpl('''
-The provided type [${card.type}] does not match the type of the [$card.defaultValue]:
-->Expected type: ${card.type.type}
+The provided type [${card.dartType}] does not match the type of the [$card.defaultValue]:
+->Expected type: ${card.dartType.type}
 ->Actual type: ${card.defaultValue.runtimeType}
 e: $e
 ''');
@@ -129,7 +129,7 @@ bool checkMatchConverterForCard(
     // we cannot determine the type for sure if the value is null.
     if (value == null) continue;
 
-    final excepted = card.type.type;
+    final excepted = card.dartType.type;
     Type? afterConverted;
     try {
       afterConverted = converter.to(value).runtimeType;
@@ -203,7 +203,7 @@ bool isSimpleData(Card<Object?> card) {
   if (value == null) return true;
 
   try {
-    card.type.cast(value);
+    card.dartType.cast(value);
     return true;
   }
   //
