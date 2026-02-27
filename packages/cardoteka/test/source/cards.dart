@@ -12,19 +12,6 @@ mixin AdditionalTestValue<T> {
 
 abstract class CardTest<T> = CardAbstract<T> with AdditionalTestValue<T>;
 
-final class SingleCard<V extends Object?> implements Card<V> {
-  const SingleCard(this.key, this.defaultValue, this.dartType);
-
-  @override
-  final V defaultValue;
-
-  @override
-  final String key;
-
-  @override
-  final DataType dartType;
-}
-
 const allCardotekaConfigs = [
   CardotekaConfig(
     cards: BarStoolParts.values,

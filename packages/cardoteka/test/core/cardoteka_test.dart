@@ -24,9 +24,9 @@ void main() {
         storage: MemoryStorage(),
       );
 
-      const card = SingleCard<int>('age', 56, DataType.int);
-      const cardNull = SingleCard<int?>('age', null, DataType.int);
-      const cardDefaultNonNull = SingleCard<int?>('age', 45, DataType.int);
+      const card = Card<int>.single('age', 56, DataType.int);
+      const cardNull = Card<int?>.single('age', null, DataType.int);
+      const cardDefaultNonNull = Card<int?>.single('age', 45, DataType.int);
 
       final result = cardoteka.get(card);
       final resultOrNull1 = cardoteka.get(cardNull);

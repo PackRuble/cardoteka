@@ -1,8 +1,11 @@
-import 'package:meta/meta.dart' show reopen, visibleForTesting;
+import 'package:meta/meta.dart' show internal, reopen, visibleForTesting;
 
 import 'data_type.dart';
 
 // coverage:ignore-file
+
+// Needed in testing and development.
+// ignore_for_file: no_runtimeType_toString
 
 // todo(22.02.2026, @PackRuble): doc
 /// Cards for using the [CardotekaCore] implementation.
@@ -42,17 +45,19 @@ import 'data_type.dart';
 /// For each card you can use a generic type and converters as needed.
 ///
 /// However, a regular `class` will also work.
-abstract interface class Card<V extends Object?> {
+interface class Card<V extends Object?> {
+  const Card.single(this.key, this.defaultValue, this.dartType);
+
   /// Type of data to be saved. Select the one that matches either the type
   /// of your [defaultValue] or the type after using the [Converter.to]
   /// converter method.
-  DataType<Object> get dartType;
+  final DataType<Object> dartType;
 
   /// The default value for this [Card].
-  V get defaultValue;
+  final V defaultValue;
 
   /// The key to access the value in the SharedPreferences store.
-  String get key;
+  final String key;
 
   @override
   String toString() => '$runtimeType(key: $key, '
@@ -62,5 +67,13 @@ abstract interface class Card<V extends Object?> {
 
 /// Designed to allow inheritance during testing.
 @reopen
+@internal
 @visibleForTesting
-abstract class CardAbstract<T> extends Card<T> {}
+abstract class CardAbstract<T> extends Card<T> {
+  @internal
+  CardAbstract.single(
+    super.key,
+    super.defaultValue,
+    super.dartType,
+  ) : super.single();
+}
