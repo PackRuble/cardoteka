@@ -186,7 +186,10 @@ abstract base class CardotekaCore {
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  Future<void> set<V extends Object?>(Card<V> card, V value) async {
+  // is required to explicitly specify that the method to be implemented can be
+  // either synchronous or asynchronous, while returning void
+  // ignore_for_file: avoid_futureor_void
+  FutureOr<void> set<V extends Object?>(Card<V> card, V value) async {
     watcher?.notify<V>(card, value);
 
     await setValueToStorage<V>(card, value);
@@ -197,7 +200,7 @@ abstract base class CardotekaCore {
   /// Returns true if the value was successfully saved.
   @internal
   @protected
-  Future<void> setValueToStorage<V extends Object?>(Card<V> card, V value);
+  FutureOr<void> setValueToStorage<V extends Object?>(Card<V> card, V value);
 
   /// Internal method to save object in storage.
   /// The [V] can be a type:
@@ -211,7 +214,7 @@ abstract base class CardotekaCore {
   ///
   /// Returns true if the value was successfully saved.
   @internal
-  Future<void> setObjectToStorage<V extends Object>(String key, V? value);
+  FutureOr<void> setObjectToStorage<V extends Object>(String key, V? value);
 
   /// Internal method to get object from storage. The returned value can be:
   /// - [bool]
@@ -228,7 +231,7 @@ abstract base class CardotekaCore {
   ///
   /// If successful, it will return true.
   /// {@endtemplate}
-  Future<void> remove(Card card);
+  FutureOr<void> remove(Card card);
 
   /// Iteratively removes all values associated with the provided [cards]
   /// from storage.
@@ -237,7 +240,7 @@ abstract base class CardotekaCore {
   ///
   /// Returns true only if the result was true for each card.
   // todo(21.02.2026, @PackRuble): add onlyKeys
-  Future<void> removeAll();
+  FutureOr<void> removeAll();
 
   /// {@template cardoteka.CardotekaCore.containsCard}
   /// Returns true if storage contains the given [card].

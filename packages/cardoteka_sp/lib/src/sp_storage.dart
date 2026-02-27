@@ -60,7 +60,7 @@ class SpStorage implements CardotekaStorage {
   /// The result explicitly indicates that the given method can be executed in
   /// a synchronous manner. However, this is in no way under the control
   /// of the user.
-  FutureOr<SpStorage> init() async {
+  FutureOr<CardotekaStorage> init() async {
     if (!_isInitialized) {
       _prefs = await SharedPreferencesWithCache.create(
         sharedPreferencesOptions: const SharedPreferencesOptions(),

@@ -2,7 +2,6 @@ include: package:lint_rules_for_dart/package.yaml
 
 analyzer:
   exclude:
-    - "packages/cardoteka/test/**" # todo(13.12.2025, @PackRuble): temp
     - "example/**" # todo(13.12.2025, @PackRuble): temp
 
 linter:
@@ -14,6 +13,8 @@ linter:
     always_specify_types: false
     unnecessary_async: false
     sort_pub_dependencies: false
+    prefer_foreach: false
+    join_return_with_assignment: false
     # todo(11.02.2026, @PackRuble): check all
 #    unawaited_futures: true
 #    discarded_futures: true

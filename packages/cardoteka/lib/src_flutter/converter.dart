@@ -1,6 +1,6 @@
 import 'dart:ui' show Color;
 
-import '../src/converter.dart';
+import '../src/converter.dart' show Converter;
 
 /// Converter for class [Color].
 ///

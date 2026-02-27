@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../card.dart';
+import '../extensions/future_ext.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';
 
@@ -81,53 +80,57 @@ base class Cardoteka extends CardotekaCore {
   @internal
   @protected
   @override
-  Object? getObjectFromStorage(String key, DataType type) =>
-      _storage.get(key, type);
+  Object? getObjectFromStorage(String key, DataType type) {
+    return _storage.get(key, type);
+  }
 
   @override
-  Future<void> set<V extends Object?>(Card<V> card, V value) async {
-    await super.set<V>(card, value);
+  void set<V extends Object?>(Card<V> card, V value) {
+    super.set<V>(card, value).sync();
   }
 
   @internal
   @protected
   @override
-  Future<void> setValueToStorage<V extends Object?>(
+  void setValueToStorage<V extends Object?>(
     Card<V> card,
     V value,
-  ) async {
+  ) {
     final resultValue =
         value != null ? getConverter(card)?.to(value) ?? value : value;
-    await _storage.set(card.key, resultValue, card.type);
+    _storage.set(card.key, resultValue, card.type).sync();
   }
 
   @override
   @protected
-  Future<void> setObjectToStorage<V extends Object>(
+  void setObjectToStorage<V extends Object>(
     String key,
     V? value,
-  ) async =>
-      _storage.set<V>(
-        key,
-        value,
-        value != null ? DataType.typeBy<V>(value) : null,
-      );
-
-  @override
-  Future<void> remove(Card card) async {
-    watcher?.notify(card, null);
-    await _storage.remove(card.key);
+  ) {
+    _storage
+        .set<V>(
+          key,
+          value,
+          value != null ? DataType.typeBy<V>(value) : null,
+        )
+        .sync();
   }
 
   @override
-  Future<void> removeAll() async {
-    await _storage.clear();
-    watcher?.notifyAll();
+  void remove(Card card) {
+    watcher?.notify(card, null);
+    _storage.remove(card.key).sync();
+  }
+
+  @override
+  void removeAll() {
+    _storage.clear().sync();
+    watcher?.notifyAll().sync(); // todo(27.02.2026, @PackRuble): check
   }
 
   @override
   bool containsCard(Card card) {
-    return _storage.containsKey(card.key) as bool;
+    return _storage.containsKey(card.key).sync();
   }
 
   @override
@@ -149,8 +152,8 @@ base class Cardoteka extends CardotekaCore {
   }
 
   /// This method will also notify all [watcher] listeners.
-  Future<void> reloadCache() async {
-    await _storage.reloadCache();
-    await watcher?.notifyAll();
+  void reloadCache() {
+    _storage.reloadCache().sync();
+    watcher?.notifyAll().sync(); // todo(27.02.2026, @PackRuble): check
   }
 }

@@ -55,19 +55,19 @@ base class CardotekaAsync extends CardotekaCore {
   final CardotekaStorage _storage;
 
   @override
-  Future<V> get<V extends Object?>(Card<V> card) async {
+  FutureOr<V> get<V extends Object?>(Card<V> card) async {
     return await getValueFromStorage<V>(card) as V;
   }
 
   @override
-  Future<V> getOrDefault<V extends Object?>(Card<V> card) async {
+  FutureOr<V> getOrDefault<V extends Object?>(Card<V> card) async {
     return await getValueFromStorage<V>(card) ?? card.defaultValue;
   }
 
   @internal
   @protected
   @override
-  Future<V?> getValueFromStorage<V extends Object?>(Card<V> card) async {
+  FutureOr<V?> getValueFromStorage<V extends Object?>(Card<V> card) async {
     final Object? object = await getObjectFromStorage(card.key, card.type);
 
     if (object == null) {
@@ -80,11 +80,15 @@ base class CardotekaAsync extends CardotekaCore {
   @internal
   @protected
   @override
-  Future<Object?> getObjectFromStorage(String key, DataType type) async =>
-      _storage.get(key, type);
+  FutureOr<Object?> getObjectFromStorage(String key, DataType type) async {
+    return _storage.get(key, type);
+  }
 
   @override
-  Future<void> set<V extends Object?>(Card<V> card, V value) async {
+  // is required to explicitly specify that the method to be implemented can be
+  // either synchronous or asynchronous, while returning void
+  // ignore_for_file: avoid_futureor_void
+  FutureOr<void> set<V extends Object?>(Card<V> card, V value) async {
     watcher?.notify<V?>(card, value);
 
     await setValueToStorage<V>(card, value);
@@ -93,7 +97,7 @@ base class CardotekaAsync extends CardotekaCore {
   @internal
   @protected
   @override
-  Future<void> setValueToStorage<V extends Object?>(
+  FutureOr<void> setValueToStorage<V extends Object?>(
     Card<V> card,
     V value,
   ) async {
@@ -104,7 +108,7 @@ base class CardotekaAsync extends CardotekaCore {
 
   @override
   @protected
-  Future<void> setObjectToStorage<V extends Object>(
+  FutureOr<void> setObjectToStorage<V extends Object>(
     String key,
     V? value,
   ) async =>
@@ -115,23 +119,24 @@ base class CardotekaAsync extends CardotekaCore {
       );
 
   @override
-  Future<void> remove(Card card) async {
+  FutureOr<void> remove(Card card) async {
     watcher?.notify(card, null);
 
     await _storage.remove(card.key);
   }
 
   @override
-  Future<void> removeAll() async {
+  FutureOr<void> removeAll() async {
     await _storage.clear();
     watcher?.notifyAll();
   }
 
   @override
-  Future<bool> containsCard(Card card) async => _storage.containsKey(card.key);
+  FutureOr<bool> containsCard(Card card) async =>
+      _storage.containsKey(card.key);
 
   @override
-  Future<Set<Card>> getStoredCards() async {
+  FutureOr<Set<Card>> getStoredCards() async {
     final Set<String> storedKeys = await _storage.getKeys(
       onlyKeys: {for (final card in cards) card.key},
     );
@@ -144,7 +149,7 @@ base class CardotekaAsync extends CardotekaCore {
   }
 
   @override
-  Future<Map<Card, Object>> getStoredEntries() async {
+  FutureOr<Map<Card, Object>> getStoredEntries() async {
     return {
       for (final card in await getStoredCards())
         card: (await getValueFromStorage<Object?>(card))!

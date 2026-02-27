@@ -35,7 +35,7 @@ void main() async {
     // Well, we'll buy it today.
     // ignore_for_file: avoid_print
     await Future.delayed(const .new(seconds: 5), () => print('Bought!'));
-    await cardoteka.set(SettingsCard.premiumPurchaseDay, DateTime.timestamp());
+    cardoteka.set(SettingsCard.premiumPurchaseDay, DateTime.timestamp());
 
     final date = cardoteka.get(SettingsCard.premiumPurchaseDay);
     print('Congratulations, the premium was purchased on $date!');

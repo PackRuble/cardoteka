@@ -23,6 +23,9 @@ abstract interface class CardotekaStorage {
 
   FutureOr<V?> get<V extends Object>(String key, DataType<V> type);
 
+  // is required to explicitly specify that the method to be implemented can be
+  // either synchronous or asynchronous, while returning void
+  // ignore_for_file: avoid_futureor_void
   FutureOr<void> set<V extends Object>(String key, V? value, DataType<V>? type);
 
   FutureOr<bool> containsKey(String key);
@@ -33,7 +36,7 @@ abstract interface class CardotekaStorage {
   FutureOr<void> clear({Set<String>? onlyKeys});
 
   // todo(21.02.2026, @PackRuble):
-  Future<void> reloadCache();
+  FutureOr<void> reloadCache();
 }
 
 class MemoryStorage implements CardotekaStorage {
@@ -120,5 +123,5 @@ class MemoryStorage implements CardotekaStorage {
   @internal
   @protected
   @override
-  Future<void> reloadCache() async {}
+  void reloadCache() {}
 }

@@ -80,7 +80,7 @@ void main() {
               config.converters,
             );
 
-            await cardoteka.set(card, testValue);
+            cardoteka.set(card, testValue);
 
             final getValue = cardoteka.get(card);
             expect(
@@ -106,7 +106,7 @@ void main() {
               config.converters,
             );
 
-            await cardoteka.set(card, testValue);
+            cardoteka.set(card, testValue);
 
             final getValue = cardoteka.getOrDefault(card);
             expect(
@@ -132,7 +132,7 @@ void main() {
               config.converters,
             );
 
-            await cardoteka.set(
+            cardoteka.set(
               card,
               testValue,
             );
@@ -173,7 +173,7 @@ void main() {
               config.converters,
             );
 
-            await cardoteka.set(
+            cardoteka.set(
               card,
               testValue,
             );
@@ -188,7 +188,7 @@ void main() {
               ),
             );
 
-            await cardoteka.remove(card);
+            cardoteka.remove(card);
 
             isContains = cardoteka.containsCard(card);
             expect(
@@ -244,12 +244,12 @@ void main() {
             );
 
             beenSavedCards.add(card);
-            await cardoteka.set(card, testValue);
+            cardoteka.set(card, testValue);
           }
 
           final savedCards = cardoteka.getStoredCards().toList();
           for (final card in beenSavedCards) {
-            await cardoteka.remove(card);
+            cardoteka.remove(card);
 
             savedCards.remove(card);
             final resultGetCards = cardoteka.getStoredCards().toList();
@@ -289,7 +289,7 @@ void main() {
             );
 
             beenSavedCards.add(card);
-            await cardoteka.set(card, testValue);
+            cardoteka.set(card, testValue);
           }
 
           var resultGetCards = cardoteka.getStoredCards().toList();
@@ -299,7 +299,7 @@ void main() {
             reason: 'All saved cards should be in $resultGetCards!',
           );
 
-          await cardoteka.removeAll();
+          cardoteka.removeAll();
 
           resultGetCards = cardoteka.getStoredCards().toList();
           expect(
@@ -330,7 +330,7 @@ void main() {
             );
 
             beenSavedCards[card] = testValue!;
-            await cardoteka.set(card, testValue);
+            cardoteka.set(card, testValue);
           }
 
           var resultGetStoredEntries = cardoteka.getStoredEntries();
@@ -340,7 +340,7 @@ void main() {
             reason: 'All saved cards should be in $resultGetStoredEntries!',
           );
 
-          await cardoteka.removeAll();
+          cardoteka.removeAll();
           resultGetStoredEntries = cardoteka.getStoredEntries();
           expect(
             resultGetStoredEntries,
