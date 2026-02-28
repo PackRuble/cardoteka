@@ -97,8 +97,7 @@ base class Cardoteka extends CardotekaCore {
     Card<V> card,
     V value,
   ) {
-    final resultValue =
-        value != null ? getConverter(card)?.to(value) ?? value : value;
+    final resultValue = getConverter(card)?.to(value) ?? value;
     _storage.set(card.key, resultValue, card.dartType).sync();
   }
 

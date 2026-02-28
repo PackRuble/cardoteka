@@ -16,7 +16,7 @@ export 'src/converter.dart'
         EnumAsStringConverter,
         IterableConverter,
         ListConverter,
-        MapConverter;
+        MapToListConverter;
 export 'src/core/cardoteka.dart' show Cardoteka;
 export 'src/core/cardoteka_async.dart' show CardotekaAsync;
 export 'src/core/cardoteka_core.dart' show CardotekaCore;

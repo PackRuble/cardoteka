@@ -102,8 +102,7 @@ base class CardotekaAsync extends CardotekaCore {
     Card<V> card,
     V value,
   ) async {
-    final resultValue =
-        value != null ? getConverter(card)?.to(value) ?? value : value;
+    final resultValue = getConverter(card)?.to(value) ?? value;
     await _storage.set(card.key, resultValue, card.dartType);
   }
 

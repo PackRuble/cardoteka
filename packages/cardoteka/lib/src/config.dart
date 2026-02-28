@@ -18,13 +18,13 @@ class CardotekaConfig {
   });
 
   /// List of all key-cards to access `CardotekaStorage`.
-  final List<Card> cards;
+  final List<Card<Object?>> cards;
 
   /// Map of converters for complex objects (those whose types are not part of
   /// the basic set to save).
   ///
   /// For each [Card], add a [Converter] if necessary.
-  final Map<Card<Object?>, Converter<Object?, Object>>? converters;
+  final Map<Card<Object?>, Converter<Object?, Object?>>? converters;
 
   @override
   String toString() => ''
