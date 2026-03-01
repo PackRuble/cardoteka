@@ -48,28 +48,6 @@ abstract base class CollectionConverter<
       '$runtimeType(from: $Collection<$Item>, to: $CollectionRaw<$ItemRaw>)';
 }
 
-/// List of all available converters. Provides easy access.
-class Converters {
-  const Converters._();
-
-  static const Converter<Uri?, String?> uriAsString = _UriConverter();
-  static const Converter<Duration?, int?> durationAsInt = _DurationConverter();
-  static const Converter<DateTime?, String?> dateTimeAsString =
-      _DateTimeConverter();
-  static const Converter<DateTime?, int?> dateTimeAsInt =
-      _DateTimeAsIntConverter();
-  static const Converter<num?, double?> numAsDouble = _NumConverter();
-  static const Converter<num?, String?> numAsString = _NumAsStringConverter();
-
-  // fixdep(15.12.2023): there is no way to use something like a generic getter
-  // https://github.com/dart-lang/language/issues/1622
-  static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
-      _EnumConverters.enumAsString<T>(enums);
-
-  static Converter<T, int> enumAsInt<T extends Enum>(Iterable<T> enums) =>
-      _EnumConverters.enumAsInt<T>(enums);
-}
-
 /// Provides converters to convert [Enum].
 ///
 /// Example, save by name:
@@ -89,7 +67,7 @@ class Converters {
 ///
 /// If you want to have a const converter, just create your own or
 /// use [EnumAsStringConverter] or [EnumAsIntConverter].
-extension _EnumConverters on Converters {
+class EnumConverters {
   /// Convert [Enum] to [String]. Not dependent on [Enum.index].
   ///
   /// Warning! This is a [EnumName.name]-dependent converter. This means that
@@ -143,28 +121,30 @@ class EnumAsStringConverter<T extends Enum> implements Converter<T, String> {
 /// Converter for class [Uri].
 ///
 /// Converts [Uri] to [String] using [Uri.toString].
-class _UriConverter implements Converter<Uri?, String?> {
-  const _UriConverter();
+class UriConverter<Obj extends Uri?, ObjRaw extends String?>
+    implements Converter<Obj, ObjRaw> {
+  const UriConverter();
 
   @override
-  Uri? from(String? objRaw) => objRaw != null ? Uri.parse(objRaw) : null;
+  Obj from(ObjRaw objRaw) => (objRaw != null ? Uri.parse(objRaw) : null) as Obj;
 
   @override
-  String? to(Uri? obj) => obj?.toString();
+  ObjRaw to(Obj obj) => obj?.toString() as ObjRaw;
 }
 
 /// Converter for class [Duration].
 ///
 /// Converts [Duration] to [int] using [Duration.inMicroseconds].
-class _DurationConverter implements Converter<Duration?, int?> {
-  const _DurationConverter();
+class DurationConverter<Obj extends Duration?, ObjRaw extends int?>
+    implements Converter<Obj, ObjRaw> {
+  const DurationConverter();
 
   @override
-  Duration? from(int? objRaw) =>
-      objRaw != null ? Duration(microseconds: objRaw) : null;
+  Obj from(ObjRaw objRaw) =>
+      (objRaw != null ? Duration(microseconds: objRaw) : null) as Obj;
 
   @override
-  int? to(Duration? obj) => obj?.inMicroseconds;
+  ObjRaw to(Obj obj) => obj?.inMicroseconds as ObjRaw;
 }
 
 /// Converter for class [DateTime].
@@ -174,56 +154,60 @@ class _DurationConverter implements Converter<Duration?, int?> {
 /// readable.
 ///
 /// Converts [DateTime] to [String] using [DateTime.toIso8601String].
-///
-class _DateTimeConverter implements Converter<DateTime?, String?> {
-  const _DateTimeConverter();
+class DateTimeConverter<Obj extends DateTime?, ObjRaw extends String?>
+    implements Converter<Obj, ObjRaw> {
+  const DateTimeConverter();
 
   @override
-  DateTime? from(String? objRaw) =>
-      objRaw != null ? DateTime.parse(objRaw) : null;
+  Obj from(ObjRaw objRaw) =>
+      (objRaw != null ? DateTime.parse(objRaw) : null) as Obj;
 
   @override
-  String? to(DateTime? obj) => obj?.toIso8601String();
+  ObjRaw to(Obj obj) => obj?.toIso8601String() as ObjRaw;
 }
 
 /// Converter for class [DateTime].
 ///
 /// Converts [DateTime] to [int] using [DateTime.millisecondsSinceEpoch].
-class _DateTimeAsIntConverter implements Converter<DateTime?, int?> {
-  const _DateTimeAsIntConverter();
+class DateTimeAsIntConverter<Obj extends DateTime?, ObjRaw extends int?>
+    implements Converter<Obj, ObjRaw> {
+  const DateTimeAsIntConverter();
 
   @override
-  DateTime? from(int? objRaw) =>
-      objRaw != null ? DateTime.fromMillisecondsSinceEpoch(objRaw) : null;
+  Obj from(ObjRaw objRaw) =>
+      (objRaw != null ? DateTime.fromMillisecondsSinceEpoch(objRaw) : null)
+          as Obj;
 
   @override
-  int? to(DateTime? obj) => obj?.millisecondsSinceEpoch;
+  ObjRaw to(Obj obj) => obj?.millisecondsSinceEpoch as ObjRaw;
 }
 
 /// Converter for class [num].
 ///
 /// Converts [num] to [double] using [num.toDouble].
-class _NumConverter implements Converter<num?, double?> {
-  const _NumConverter();
+class NumConverter<Obj extends num?, ObjRaw extends double?>
+    implements Converter<Obj, ObjRaw> {
+  const NumConverter();
 
   @override
-  num? from(double? objRaw) => objRaw;
+  Obj from(ObjRaw objRaw) => objRaw as Obj;
 
   @override
-  double? to(num? obj) => obj?.toDouble();
+  ObjRaw to(Obj obj) => obj?.toDouble() as ObjRaw;
 }
 
 /// Converter for class [num].
 ///
 /// Converts [num] to [String] using [num.toString].
-class _NumAsStringConverter implements Converter<num?, String?> {
-  const _NumAsStringConverter();
+class NumAsStringConverter<Obj extends num?, ObjRaw extends String?>
+    implements Converter<Obj, ObjRaw> {
+  const NumAsStringConverter();
 
   @override
-  num? from(String? objRaw) => objRaw != null ? num.parse(objRaw) : null;
+  Obj from(ObjRaw objRaw) => (objRaw != null ? num.parse(objRaw) : null) as Obj;
 
   @override
-  String? to(num? obj) => obj?.toString();
+  ObjRaw to(Obj obj) => obj?.toString() as ObjRaw;
 }
 
 /// Converter for class [Iterable].
