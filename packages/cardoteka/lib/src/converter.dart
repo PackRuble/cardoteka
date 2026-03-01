@@ -20,39 +20,32 @@ import 'dart:core'
 import 'extensions/enum_ext.dart';
 
 ///  Use to convert a element to a element of allowed types.
-abstract class Converter<Element extends Object?, ElementFrom extends Object?> {
+abstract class Converter<Obj extends Object?, ObjRaw extends Object?> {
   const Converter();
 
-  Element from(ElementFrom element);
+  Obj from(ObjRaw objRaw);
 
-  ElementFrom to(Element object);
+  ObjRaw to(Obj obj);
 
   @override
-  String toString() => '$runtimeType(from: $Element, to: $ElementFrom)';
+  String toString() => '$runtimeType(from: $Obj, to: $ObjRaw)';
 }
 
 /// Use to convert a collection of elements to a collection of allowed types.
 abstract base class CollectionConverter<
-        Collection extends Object?,
-        Element extends Object?,
-        CollectionFrom extends Object?,
-        ElementFrom extends Object?>
-    implements Converter<Collection, CollectionFrom> {
+    Collection extends Object?,
+    Item extends Object?,
+    CollectionRaw extends Object?,
+    ItemRaw extends Object?> implements Converter<Item, ItemRaw> {
   const CollectionConverter();
 
-  Element objFrom(ElementFrom element);
+  Collection itemsFrom(CollectionRaw itemsRaw);
 
-  ElementFrom objTo(Element object);
-
-  @override
-  Collection from(CollectionFrom elements);
-
-  @override
-  CollectionFrom to(Collection objects);
+  CollectionRaw itemsTo(Collection items);
 
   @override
   String toString() =>
-      '$runtimeType(from: $Collection<$Element>, to: $CollectionFrom<$ElementFrom>)';
+      '$runtimeType(from: $Collection<$Item>, to: $CollectionRaw<$ItemRaw>)';
 }
 
 /// List of all available converters. Provides easy access.
@@ -69,7 +62,7 @@ class Converters {
   static const Converter<num?, String?> numAsString = _NumAsStringConverter();
 
   // fixdep(15.12.2023): there is no way to use something like a generic getter
-  // [Should we have generic getters?](https://github.com/dart-lang/language/issues/1622)
+  // https://github.com/dart-lang/language/issues/1622
   static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
       _EnumConverters.enumAsString<T>(enums);
 
@@ -126,10 +119,10 @@ class EnumAsIntConverter<T extends Enum> implements Converter<T, int> {
   final Iterable<T> _enums;
 
   @override
-  T from(int index) => _enums.byIndexOr(index, orElse: () => _enums.first);
+  T from(int objRaw) => _enums.byIndexOr(objRaw, orElse: () => _enums.first);
 
   @override
-  int to(T data) => data.index;
+  int to(T obj) => obj.index;
 }
 
 /// Converter for class [Enum].
@@ -141,10 +134,10 @@ class EnumAsStringConverter<T extends Enum> implements Converter<T, String> {
   final Iterable<T> _enums;
 
   @override
-  T from(String name) => _enums.byNameOr(name, orElse: () => _enums.first);
+  T from(String objRaw) => _enums.byNameOr(objRaw, orElse: () => _enums.first);
 
   @override
-  String to(T data) => data.name;
+  String to(T obj) => obj.name;
 }
 
 /// Converter for class [Uri].
@@ -154,10 +147,10 @@ class _UriConverter implements Converter<Uri?, String?> {
   const _UriConverter();
 
   @override
-  Uri? from(String? data) => data != null ? Uri.parse(data) : null;
+  Uri? from(String? objRaw) => objRaw != null ? Uri.parse(objRaw) : null;
 
   @override
-  String? to(Uri? object) => object?.toString();
+  String? to(Uri? obj) => obj?.toString();
 }
 
 /// Converter for class [Duration].
@@ -167,11 +160,11 @@ class _DurationConverter implements Converter<Duration?, int?> {
   const _DurationConverter();
 
   @override
-  Duration? from(int? data) =>
-      data != null ? Duration(microseconds: data) : null;
+  Duration? from(int? objRaw) =>
+      objRaw != null ? Duration(microseconds: objRaw) : null;
 
   @override
-  int? to(Duration? object) => object?.inMicroseconds;
+  int? to(Duration? obj) => obj?.inMicroseconds;
 }
 
 /// Converter for class [DateTime].
@@ -186,10 +179,11 @@ class _DateTimeConverter implements Converter<DateTime?, String?> {
   const _DateTimeConverter();
 
   @override
-  DateTime? from(String? data) => data != null ? DateTime.parse(data) : null;
+  DateTime? from(String? objRaw) =>
+      objRaw != null ? DateTime.parse(objRaw) : null;
 
   @override
-  String? to(DateTime? object) => object?.toIso8601String();
+  String? to(DateTime? obj) => obj?.toIso8601String();
 }
 
 /// Converter for class [DateTime].
@@ -199,11 +193,11 @@ class _DateTimeAsIntConverter implements Converter<DateTime?, int?> {
   const _DateTimeAsIntConverter();
 
   @override
-  DateTime? from(int? data) =>
-      data != null ? DateTime.fromMillisecondsSinceEpoch(data) : null;
+  DateTime? from(int? objRaw) =>
+      objRaw != null ? DateTime.fromMillisecondsSinceEpoch(objRaw) : null;
 
   @override
-  int? to(DateTime? object) => object?.millisecondsSinceEpoch;
+  int? to(DateTime? obj) => obj?.millisecondsSinceEpoch;
 }
 
 /// Converter for class [num].
@@ -213,10 +207,10 @@ class _NumConverter implements Converter<num?, double?> {
   const _NumConverter();
 
   @override
-  num? from(double? data) => data;
+  num? from(double? objRaw) => objRaw;
 
   @override
-  double? to(num? object) => object?.toDouble();
+  double? to(num? obj) => obj?.toDouble();
 }
 
 /// Converter for class [num].
@@ -226,90 +220,76 @@ class _NumAsStringConverter implements Converter<num?, String?> {
   const _NumAsStringConverter();
 
   @override
-  num? from(String? data) => data != null ? num.parse(data) : null;
+  num? from(String? objRaw) => objRaw != null ? num.parse(objRaw) : null;
 
   @override
-  String? to(num? object) => object?.toString();
+  String? to(num? obj) => obj?.toString();
 }
 
 /// Converter for class [Iterable].
 ///
-/// Converts [Iterable]<[Element]> to [Iterable]<[Object]> using [Iterable.map].
-abstract base class IterableConverter<Element extends Object?>
+/// Converts [Iterable]<[Item]> to [Iterable]<[ItemRaw]> using [Iterable.map].
+abstract base class IterableConverter<Item extends Object?,
+        ItemRaw extends Object?>
     implements
-        CollectionConverter<Iterable<Element?>?, Element?, Iterable<Object?>?,
-            Object?> {
+        CollectionConverter<Iterable<Item>?, Item, Iterable<ItemRaw>?,
+            ItemRaw> {
   const IterableConverter();
 
   @override
-  Element? objFrom(Object? element);
+  Iterable<Item>? itemsFrom(Iterable<ItemRaw>? itemsRaw) => itemsRaw?.map(from);
 
   @override
-  Object? objTo(Element? object);
-
-  @override
-  Iterable<Element?>? from(Iterable<Object?>? elements) =>
-      elements?.map(objFrom);
-
-  @override
-  Iterable<Object?>? to(Iterable<Element?>? objects) => objects?.map(objTo);
+  Iterable<ItemRaw>? itemsTo(Iterable<Item>? items) => items?.map(to);
 }
 
 /// Converter for class [List].
 ///
-/// Converts [List]<[Element]> to [List]<[ElementFrom]>.
-abstract base class ListConverter<Element extends Object?,
-        ElementFrom extends Object?>
-    implements
-        CollectionConverter<List<Element>?, Element, List<ElementFrom>?,
-            ElementFrom> {
+/// Converts [List]<[Item]> to [List]<[ItemRaw]>.
+abstract base class ListConverter<Item extends Object?, ItemRaw extends Object?>
+    implements CollectionConverter<List<Item>?, Item, List<ItemRaw>?, ItemRaw> {
   const ListConverter();
 
   @override
-  Element objFrom(ElementFrom element);
+  List<Item>? itemsFrom(List<ItemRaw>? itemsRaw) =>
+      itemsRaw != null ? [for (final e in itemsRaw) from(e)] : null;
 
   @override
-  ElementFrom objTo(Element object);
-
-  @override
-  List<Element>? from(List<ElementFrom>? elements) =>
-      elements != null ? [for (final e in elements) objFrom(e)] : null;
-
-  @override
-  List<ElementFrom>? to(List<Element>? objects) =>
-      objects != null ? [for (final o in objects) objTo(o)] : null;
+  List<ItemRaw>? itemsTo(List<Item>? items) =>
+      items != null ? [for (final o in items) to(o)] : null;
 }
 
 /// Converter for class [Map].
 ///
-/// Converts [Map]<[K], [V]> to [List]<[Object]>. [K] is [String].
+/// Converts [Map]<[K], [V]> to [List]<[ItemRaw]>. [K] is [String].
 ///
 /// Use a suitable delimiter for your data to represent the key-value as a `Object`.
-abstract base class MapToListConverter<K extends String, V>
+abstract base class MapToListConverter<K extends String, V extends Object?,
+        ItemRaw extends Object>
     implements
-        CollectionConverter<Map<K, V>?, MapEntry<K, V>?, List<Object?>?,
-            Object?> {
+        CollectionConverter<Map<K, V>?, MapEntry<K, V>, List<ItemRaw>?,
+            ItemRaw> {
   const MapToListConverter();
 
   @override
-  MapEntry<K, V> objFrom(Object? element);
+  MapEntry<K, V> from(ItemRaw objRaw);
 
   @override
-  Object? objTo(MapEntry<K, V>? object);
+  ItemRaw to(MapEntry<K, V> obj);
 
   @override
-  Map<K, V>? from(List<Object?>? elements) {
-    if (elements == null) return null;
+  Map<K, V>? itemsFrom(List<ItemRaw>? itemsRaw) {
+    if (itemsRaw == null) return null;
 
     final result = <K, V>{};
-    for (final e in elements) {
-      final entry = objFrom(e);
+    for (final e in itemsRaw) {
+      final entry = from(e);
       result[entry.key] = entry.value;
     }
     return result;
   }
 
   @override
-  List<Object?>? to(Map<K, V>? objects) =>
-      objects != null ? [for (final o in objects.entries) objTo(o)] : null;
+  List<ItemRaw>? itemsTo(Map<K, V>? items) =>
+      items != null ? [for (final o in items.entries) to(o)] : null;
 }

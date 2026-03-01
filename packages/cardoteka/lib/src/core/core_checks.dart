@@ -14,7 +14,7 @@ class AssertionErrorImpl extends AssertionError {
 }
 
 @internal
-typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object>>;
+typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object?>>;
 
 /// Comprehensive verification of input data.
 ///
