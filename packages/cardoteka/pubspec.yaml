@@ -1,4 +1,5 @@
 name: cardoteka
+# todo(02.03.2026, @PackRuble):
 description: The best type-safe wrapper over SharedPreferences.
   Why so?
   -> strongly typed cards for access to storage
@@ -10,7 +11,7 @@ homepage: https://t.me/+AkGV73kZi_Q1YTMy
 repository: https://github.com/PackRuble/cardoteka
 issue_tracker: https://github.com/PackRuble/cardoteka/issues
 
-version: 2.1.1
+version: 3.0.0-dev.0
 
 environment:
   sdk: ^3.6.0

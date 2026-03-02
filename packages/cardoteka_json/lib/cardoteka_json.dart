@@ -1,4 +1,3 @@
 library;
 
-export 'src/cardoteka_json.dart';
-export 'src/cardoteka_json_async.dart';
+export 'src/json_storage_async.dart';

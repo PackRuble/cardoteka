@@ -16,7 +16,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cardoteka: ^3.0.0
+  cardoteka: ^3.0.0-dev.0
 
   # dart sdk limitation matches - ^3.5.0
   shared_preferences: ^2.5.4

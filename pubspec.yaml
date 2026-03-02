@@ -10,5 +10,6 @@ workspace:
   - packages/cardoteka_json
 
 dev_dependencies:
+  # todo(13.02.2026, @PackRuble): share github
   lint_rules_for_dart:
     path: ../lint_rules_for_dart

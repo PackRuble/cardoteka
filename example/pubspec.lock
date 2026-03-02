@@ -31,7 +31,7 @@ packages:
       path: "../packages/cardoteka"
       relative: true
     source: path
-    version: "3.0.0"
+    version: "3.0.0-dev.0"
   characters:
     dependency: transitive
     description:

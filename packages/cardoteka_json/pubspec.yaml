@@ -13,9 +13,8 @@ environment:
 resolution: workspace
 
 dependencies:
-  cardoteka: any
+  cardoteka: ^3.0.0-dev.0
   cross_file: ^0.3.5+2
-  rfc_6901: ^0.2.1
 
   meta: 1.17.0
 
