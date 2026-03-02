@@ -1,54 +1,11 @@
-// ignore_for_file: prefer_final_locals, unreachable_from_main
-
-import 'package:cardoteka/cardoteka.dart';
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:cardoteka/src/converter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestItem {
-  const TestItem(this.index);
-  final String index;
-}
-
-final class TestIterableConverter extends IterableConverter<TestItem> {
-  const TestIterableConverter();
-
-  @override
-  TestItem objFrom(String data) => TestItem(data);
-
-  @override
-  String objTo(TestItem obj) => obj.index;
-}
-
-final class TestListConverter extends ListConverter<int> {
-  const TestListConverter();
-
-  @override
-  int objFrom(String element) => int.parse(element);
-
-  @override
-  String objTo(int obj) => obj.toString();
-}
-
-/// Values are assumed to be stored as a '---'-delimited string "key$value"
-final class TestMapConverter extends MapConverter<int, double> {
-  const TestMapConverter();
-
-  static const _delimiter = '---';
-
-  @override
-  MapEntry<int, double> objFrom(String element) {
-    final list = element.split(_delimiter);
-
-    return MapEntry(int.parse(list.first), double.parse(list.last));
-  }
-
-  @override
-  String objTo(MapEntry<int, double> obj) =>
-      '${obj.key}$_delimiter${obj.value}';
-}
+import '../source/converters.dart';
+import '../source/models.dart';
 
 void main() {
-  group('$Converters', () {
+  group('$Converter', () {
     // todo(21.02.2026, @PackRuble): move
     // test('colorAsInt', () {
     //   // ignore: deprecated_member_use_from_same_package
@@ -66,240 +23,198 @@ void main() {
     //   expect(resultFrom, isA<Color>());
     // });
 
-    test('uriAsString', () {
-      const converter = Converters.uriAsString;
+    test('$UriConverter', () {
+      const converter = UriConverter<Uri?, String?>();
 
-      Uri uri = Uri.parse('https://pub.dev/packages/cardoteka');
-      String uriRaw = uri.toString();
+      const uriRaw = 'https://pub.dev/packages/cardoteka';
+      final uri = Uri.tryParse(uriRaw);
 
-      String resultTo = converter.to(uri);
-      expect(resultTo, uriRaw);
-      expect(resultTo, isA<String>());
+      dynamic result = converter.to(uri);
+      expect(result, uriRaw);
+      expect(result, isA<String?>());
 
-      Uri resultFrom = converter.from(uriRaw);
-      expect(resultFrom, uri);
-      expect(resultFrom, isA<Uri>());
+      result = converter.from(uriRaw);
+      expect(result, uri);
+      expect(result, isA<Uri?>());
     });
 
-    test('durationAsInt', () {
-      const converter = Converters.durationAsInt;
+    test('$DurationConverter', () {
+      const converter = DurationConverter<Duration, int>();
 
-      Duration duration = const Duration(days: 1);
-      int durationRaw = duration.inMicroseconds;
+      const duration = Duration(days: 1);
+      final durationRaw = duration.inMicroseconds;
 
-      int resultTo = converter.to(duration);
-      expect(resultTo, durationRaw);
-      expect(resultTo, isA<int>());
+      dynamic result = converter.to(duration);
+      expect(result, durationRaw);
+      expect(result, isA<int>());
 
-      Duration resultFrom = converter.from(durationRaw);
-      expect(resultFrom, duration);
-      expect(resultFrom, isA<Duration>());
+      result = converter.from(durationRaw);
+      expect(result, duration);
+      expect(result, isA<Duration>());
     });
 
-    test('dateTimeAsString', () {
-      const converter = Converters.dateTimeAsString;
+    test('$DateTimeConverter', () {
+      const converter = DateTimeConverter<DateTime, String>();
 
-      DateTime datetime = DateTime.now();
-      String datetimeRaw = datetime.toIso8601String();
+      final datetime = DateTime.now();
+      final datetimeRaw = datetime.toIso8601String();
 
-      String resultTo = converter.to(datetime);
-      expect(resultTo, datetimeRaw);
-      expect(resultTo, isA<String>());
+      dynamic result = converter.to(datetime);
+      expect(result, datetimeRaw);
+      expect(result, isA<String>());
 
-      DateTime resultFrom = converter.from(datetimeRaw);
-      expect(resultFrom, datetime);
-      expect(resultFrom, isA<DateTime>());
+      result = converter.from(datetimeRaw);
+      expect(result, datetime);
+      expect(result, isA<DateTime>());
     });
 
-    test('dateTimeAsInt', () {
-      const converter = Converters.dateTimeAsInt;
+    test('$DateTimeAsIntConverter', () {
+      const converter = DateTimeAsIntConverter<DateTime, int>();
 
-      DateTime datetime = DateTime.parse('2023-08-01 10:32:02.398');
-      int datetimeRaw = datetime.millisecondsSinceEpoch;
+      final datetime = DateTime.parse('2023-08-01 10:32:02.398');
+      final datetimeRaw = datetime.millisecondsSinceEpoch;
 
-      int resultTo = converter.to(datetime);
-      expect(resultTo, datetimeRaw);
-      expect(resultTo, isA<int>());
+      dynamic result = converter.to(datetime);
+      expect(result, datetimeRaw);
+      expect(result, isA<int>());
 
-      DateTime resultFrom = converter.from(datetimeRaw);
-      expect(resultFrom, datetime);
-      expect(resultFrom, isA<DateTime>());
+      result = converter.from(datetimeRaw);
+      expect(result, datetime);
+      expect(result, isA<DateTime>());
     });
 
-    test('numAsDouble', () {
-      const converter = Converters.numAsDouble;
+    test('$NumConverter', () {
+      const converter = NumConverter<num, double>();
 
-      num number = 1.10101;
-      double numberRaw = number.toDouble();
+      const num number = 1.13101;
+      final numberRaw = number.toDouble();
 
-      double resultTo = converter.to(number);
-      expect(resultTo, numberRaw);
-      expect(resultTo, isA<double>());
+      dynamic result = converter.to(number);
+      expect(result, numberRaw);
+      expect(result, isA<double>());
 
-      num resultFrom = converter.from(numberRaw);
-      expect(resultFrom, number);
-      expect(resultFrom, isA<num>());
+      result = converter.from(numberRaw);
+      expect(result, number);
+      expect(result, isA<num>());
     });
 
-    test('numAsString', () {
-      const converter = Converters.numAsString;
+    test('$NumAsStringConverter', () {
+      const converter = NumAsStringConverter<num, String>();
 
-      num number = 1.10101;
-      String numberRaw = number.toString();
+      const num number = 1.13101;
+      final numberRaw = number.toString();
 
-      String resultTo = converter.to(number);
-      expect(resultTo, numberRaw);
-      expect(resultTo, isA<String>());
+      dynamic result = converter.to(number);
+      expect(result, numberRaw);
+      expect(result, isA<String>());
 
-      num resultFrom = converter.from(numberRaw);
-      expect(resultFrom, number);
-      expect(resultFrom, isA<num>());
+      result = converter.from(numberRaw);
+      expect(result, number);
+      expect(result, isA<num>());
     });
 
-    test('enumAsString', () {
-      final converter = Converters.enumAsString<ThemeMode>(ThemeMode.values);
+    test('$EnumAsStringConverter', () {
+      const converter = EnumAsStringConverter(Theme.values);
 
-      ThemeMode mode = ThemeMode.dark;
-      String modeRaw = mode.name;
+      const theme = Theme.orange;
+      final themeRaw = theme.name;
 
-      String resultTo = converter.to(mode);
-      expect(resultTo, modeRaw);
-      expect(resultTo, isA<String>());
+      dynamic result = converter.to(theme);
+      expect(result, themeRaw);
+      expect(result, isA<String>());
 
-      ThemeMode resultFrom = converter.from(modeRaw);
-      expect(resultFrom, mode);
-      expect(resultFrom, isA<ThemeMode>());
+      result = converter.from(themeRaw);
+      expect(result, theme);
+      expect(result, isA<Theme>());
     });
 
-    test('enumAsInt', () {
-      final converter = Converters.enumAsInt<ThemeMode>(ThemeMode.values);
+    test('$EnumAsIntConverter', () {
+      const converter = EnumAsIntConverter(Theme.values);
 
-      ThemeMode mode = ThemeMode.dark;
-      int modeRaw = mode.index;
+      const theme = Theme.orange;
+      final themeRaw = theme.index;
 
-      int resultTo = converter.to(mode);
-      expect(resultTo, modeRaw);
-      expect(resultTo, isA<int>());
+      dynamic result = converter.to(theme);
+      expect(result, themeRaw);
+      expect(result, isA<int>());
 
-      ThemeMode resultFrom = converter.from(modeRaw);
-      expect(resultFrom, mode);
-      expect(resultFrom, isA<ThemeMode>());
-    });
-  });
-
-  group('$IterableConverter', () {
-    const converter = TestIterableConverter();
-
-    const countItems = 5;
-    const testItem = TestItem('1');
-    Iterable<TestItem> items = Iterable.generate(countItems, (index) {
-      if (index == countItems) return testItem;
-      return TestItem(index.toString());
+      result = converter.from(themeRaw);
+      expect(result, theme);
+      expect(result, isA<Theme>());
     });
 
-    assert(items.length == countItems);
+    group('$CollectionConverter with $User', () {
+      const testItem = User('Carl', 18);
+      final Iterable<User> items = [
+        testItem,
+        const User('Mark', 21),
+        const User('Bella', 43),
+        const User('Klara', 49),
+      ].map((e) => e);
 
-    test('objTo | objFrom', () {
-      TestItem item = testItem;
-      String itemRaw = item.index;
+      test('$IterableConverter.to->from', () {
+        const converter = UserIterableConverter();
 
-      String resultObjTo = converter.objTo(item);
-      expect(resultObjTo, isA<String>());
-      expect(resultObjTo, itemRaw);
+        const item = testItem;
+        final itemRaw = testItem.toJson();
 
-      TestItem resultFrom = converter.objFrom(itemRaw);
-      expect(resultFrom, isA<TestItem>());
-      expect(resultFrom.index, item.index);
-    });
+        final resultTo = converter.to(item);
+        expect(resultTo, isA<Map<String, dynamic>>());
+        expect(resultTo, itemRaw);
 
-    test('to | from', () {
-      List<String> itemsRaw = items.map((e) => e.index).toList();
+        final resultFrom = converter.from(itemRaw);
+        expect(resultFrom, isA<User>());
+        expect(resultFrom.name, item.name);
+      });
 
-      List<String> resultTo = converter.to(items);
-      expect(resultTo, itemsRaw);
-      expect(resultTo, isList);
-      expect(resultTo, isA<List<String>>());
-      expect(resultTo, contains(testItem.index));
-      expect(resultTo, hasLength(countItems));
+      test('$IterableConverter.itemsTo->itemsFrom', () {
+        const converter = UserIterableConverter();
 
-      Iterable<TestItem> resultFrom = converter.from(itemsRaw);
-      expect(resultFrom, isA<Iterable<TestItem>>());
-      expect(resultFrom.map((e) => e.index), orderedEquals(itemsRaw));
-      expect(resultFrom, hasLength(countItems));
-    });
-  });
+        final itemsRaw = items.map((e) => e.toJson());
 
-  group('$ListConverter', () {
-    const converter = TestListConverter();
+        final resultTo = converter.itemsTo(items);
+        expect(resultTo, itemsRaw);
+        expect(resultTo, isA<Iterable<Map<String, dynamic>>>());
+        expect(resultTo, itemsRaw);
+        expect(resultTo, hasLength(items.length));
 
-    const countItems = 5;
-    const testItem = 12;
-    const testItemIndex = 2;
-    List<int> items = List.generate(countItems, (index) => index + 10);
+        final resultFrom = converter.itemsFrom(itemsRaw);
+        expect(resultFrom, isA<Iterable<User>>());
+        expect(resultFrom, hasLength(items.length));
+      });
 
-    assert(items.length == countItems);
-    assert(testItem == items[testItemIndex]);
+      test('$ListConverter.itemsTo->itemsFrom', () {
+        const converter = UserListConverter();
 
-    test('objTo | objFrom', () {
-      int item = testItem;
-      String itemRaw = item.toString();
+        final itemsRaw = items.map((e) => e.toJson()).toList();
 
-      String resultObjTo = converter.objTo(item);
-      expect(resultObjTo, itemRaw);
+        final resultTo = converter.itemsTo(items.toList());
+        expect(resultTo, itemsRaw);
+        expect(resultTo, isA<List<Map<String, dynamic>>>());
+        expect(resultTo, itemsRaw);
+        expect(resultTo, hasLength(items.length));
 
-      int resultFrom = converter.objFrom(itemRaw);
-      expect(resultFrom, item);
-    });
+        final resultFrom = converter.itemsFrom(itemsRaw);
+        expect(resultFrom, isA<List<User>>());
+        expect(resultFrom, hasLength(items.length));
+      });
 
-    test('to | from', () {
-      List<String> itemsRaw = items.map((e) => '$e').toList();
+      test('$MapUserToListConverter.itemsTo->itemsFrom', () {
+        const converter = MapUserToListConverter();
 
-      List<String> resultTo = converter.to(items);
-      expect(resultTo, itemsRaw);
-      expect(resultTo, isList);
-      expect(resultTo, contains('$testItem'));
-      expect(resultTo, hasLength(countItems));
-      expect(resultTo, orderedEquals(itemsRaw));
+        final itemsMap = Map<String, User>.fromIterable(
+          items,
+          key: (element) => (element as User).name,
+        );
 
-      List<int> resultFrom = converter.from(itemsRaw);
-      expect(resultFrom, hasLength(countItems));
-      expect(resultFrom[testItemIndex], items[testItemIndex]);
-      expect(resultFrom, orderedEquals(items));
-    });
-  });
+        final resultTo = converter.itemsTo(itemsMap);
+        expect(resultTo, isA<List<String>>());
+        expect(resultTo, hasLength(items.length));
 
-  group('$MapConverter', () {
-    const converter = TestMapConverter();
-
-    const countItems = 5;
-    Map<int, double> items =
-        List<double>.generate(countItems, (index) => index * 1.1).asMap();
-
-    test('objTo | objFrom', () {
-      MapEntry<int, double> item = items.entries.first;
-      String itemRaw = '0${TestMapConverter._delimiter}0.0';
-
-      String resultObjTo = converter.objTo(item);
-      expect(resultObjTo, itemRaw);
-
-      MapEntry<int, double> resultFrom = converter.objFrom(itemRaw);
-      expect(resultFrom, equals(resultFrom));
-    });
-
-    test('to | from', () {
-      List<String> itemsRaw = items.entries
-          .map((e) => '${e.key}${TestMapConverter._delimiter}${e.value}')
-          .toList();
-
-      List<String> resultTo = converter.to(items);
-      expect(resultTo, itemsRaw);
-      expect(resultTo, isList);
-      expect(resultTo, hasLength(countItems));
-      expect(resultTo, orderedEquals(itemsRaw));
-
-      Map<int, double> resultFrom = converter.from(itemsRaw);
-      expect(resultFrom, hasLength(countItems));
-      expect(resultFrom, items);
+        final resultFrom = converter.itemsFrom(resultTo);
+        expect(resultFrom, isA<Map<String, User>>());
+        expect(resultFrom, hasLength(items.length));
+      });
     });
   });
 }

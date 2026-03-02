@@ -3,6 +3,7 @@ import 'dart:ui' show Color;
 import 'package:cardoteka/cardoteka.dart';
 import 'package:cardoteka/cardoteka_flutter.dart';
 import 'package:cardoteka/src/card.dart' show CardAbstract;
+import 'package:cardoteka/src/converter.dart';
 
 import 'models.dart';
 
@@ -299,6 +300,6 @@ enum ForestCard<T> implements CardTest<T> {
   static const converters = <Card, Converter>{
     currentColorSpruce: ColorConverter(),
     currentColorSpruceWCK: ColorConverter(),
-    lifetimeCedar: Converters.durationAsInt,
+    lifetimeCedar: DurationConverter(),
   };
 }

@@ -1,14 +1,29 @@
 import 'package:cardoteka/cardoteka.dart' show Converter;
 
+enum Theme { blue, green, orange }
+
+// todo(01.03.2026, @PackRuble): del
 class Model {
   const Model();
+}
+
+class User {
+  const User(this.name, this.age);
+
+  factory User.fromJson(Map<String, dynamic> map) =>
+      User(map['name'] as String, map['age'] as int);
+
+  final String name;
+  final int age;
+
+  Map<String, dynamic> toJson() => {'name': name, 'age': age};
 }
 
 class ModelConverter implements Converter<Model, String> {
   const ModelConverter();
 
   @override
-  Model from(_) => const Model();
+  Model from(item) => const Model();
 
   @override
   String to(_) => '';
@@ -29,7 +44,7 @@ class TimeConverter implements Converter<Time, int> {
   const TimeConverter();
 
   @override
-  Time from(int data) => Time(DateTime.fromMillisecondsSinceEpoch(data));
+  Time from(int item) => Time(DateTime.fromMillisecondsSinceEpoch(item));
 
   @override
   int to(Time object) => object.value.millisecondsSinceEpoch;
@@ -38,7 +53,7 @@ class TimeConverter implements Converter<Time, int> {
 class List2DConverterStub implements Converter<List<List<Object?>>, String> {
   const List2DConverterStub();
   @override
-  List<List<Object?>> from(_) => [[], []];
+  List<List<Object?>> from(item) => [[], []];
 
   @override
   String to(_) => '123';

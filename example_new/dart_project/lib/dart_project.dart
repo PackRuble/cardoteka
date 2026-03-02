@@ -1,6 +1,6 @@
 import 'package:cardoteka/cardoteka.dart';
 
-enum SettingsCard<T> implements Card<T> {
+enum SettingsCard<T extends Object?> implements Card<T> {
   isPremium(DataType.bool, false),
   premiumPurchaseDay<DateTime?>(DataType.string, null),
   ;
@@ -17,7 +17,7 @@ enum SettingsCard<T> implements Card<T> {
   String get key => name;
 
   static const converters = <Card, Converter>{
-    premiumPurchaseDay: Converters.dateTimeAsString,
+    premiumPurchaseDay: DateTimeConverter(),
   };
 }
 
