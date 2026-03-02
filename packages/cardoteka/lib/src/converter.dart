@@ -67,7 +67,7 @@ abstract base class CollectionConverter<
 ///
 /// If you want to have a const converter, just create your own or
 /// use [EnumAsStringConverter] or [EnumAsIntConverter].
-class EnumConverters {
+extension EnumConverters<T extends Enum> on Iterable<T> {
   /// Convert [Enum] to [String]. Not dependent on [Enum.index].
   ///
   /// Warning! This is a [EnumName.name]-dependent converter. This means that
@@ -76,16 +76,14 @@ class EnumConverters {
   ///
   /// For better control of enum names, simply override [EnumName.name]
   /// and assign a constant name.
-  static Converter<T, String> enumAsString<T extends Enum>(Iterable<T> enums) =>
-      EnumAsStringConverter<T>(enums);
+  Converter<T, String> get converterToString => EnumAsStringConverter(this);
 
   /// Convert [Enum] to [int]. Not dependent on [EnumName.name].
   ///
   /// Warning! This is a [Enum.index]-dependent converter. This means that
   /// if your enumeration index changes (for example, if you move your
   /// enumeration value), the first item in the enumeration list will be returned.
-  static Converter<T, int> enumAsInt<T extends Enum>(Iterable<T> enums) =>
-      EnumAsIntConverter<T>(enums);
+  Converter<T, int> get converterToInt => EnumAsIntConverter(this);
 }
 
 /// Converter for class [Enum].
