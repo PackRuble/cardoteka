@@ -120,15 +120,14 @@ base class CardotekaAsync extends CardotekaCore {
 
   @override
   FutureOr<void> remove(Card card) async {
-    watcher?.notify(card, null);
-
+    watcher?.notifyAboutRemove([card]);
     await _storage.remove(card.key);
   }
 
   @override
   FutureOr<void> removeAll() async {
+    watcher?.notifyAboutRemove(cards);
     await _storage.clear();
-    watcher?.notifyAll();
   }
 
   @override
@@ -154,5 +153,19 @@ base class CardotekaAsync extends CardotekaCore {
       for (final card in await getStoredCards())
         card: (await getValueFromStorage<Object?>(card))!
     };
+  }
+
+  // todo(03.03.2026, @PackRuble): replace FutureOr with Future in the implementation,
+  //  since. Future has many useful methods
+  @override
+  FutureOr<void> reloadCache() async {
+    await _storage.reloadCache();
+
+    if (watcher != null) {
+      final storedCards = await getStoredCards();
+      final mayHaveBeenRemoved = cards.toSet().difference(storedCards);
+      watcher?.notifyAboutRemove(mayHaveBeenRemoved.toList());
+      watcher?.notifyAll();
+    }
   }
 }

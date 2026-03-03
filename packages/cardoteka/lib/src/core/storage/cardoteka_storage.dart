@@ -35,7 +35,7 @@ abstract interface class CardotekaStorage {
   /// If [onlyKeys]=null, then the entire storage will be cleared.
   FutureOr<void> clear({Set<String>? onlyKeys});
 
-  // todo(21.02.2026, @PackRuble):
+  // todo(21.02.2026, @PackRuble): add return changes if there were
   FutureOr<void> reloadCache();
 }
 

@@ -116,16 +116,17 @@ base class Cardoteka extends CardotekaCore {
         .sync();
   }
 
+  // todo(03.03.2026, @PackRuble): put the same methods in the base class
   @override
   void remove(Card card) {
-    watcher?.notify(card, null);
+    watcher?.notifyAboutRemove([card]);
     _storage.remove(card.key).sync();
   }
 
   @override
   void removeAll() {
+    watcher?.notifyAboutRemove(cards);
     _storage.clear().sync();
-    watcher?.notifyAll().sync(); // todo(27.02.2026, @PackRuble): check
   }
 
   @override
@@ -151,9 +152,15 @@ base class Cardoteka extends CardotekaCore {
     };
   }
 
-  /// This method will also notify all [watcher] listeners.
+  @override
   void reloadCache() {
     _storage.reloadCache().sync();
-    watcher?.notifyAll().sync(); // todo(27.02.2026, @PackRuble): check
+
+    if (watcher != null) {
+      final storedCards = getStoredCards();
+      final mayHaveBeenRemoved = cards.toSet().difference(storedCards);
+      watcher?.notifyAboutRemove(mayHaveBeenRemoved.toList());
+      watcher?.notifyAll();
+    }
   }
 }

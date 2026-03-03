@@ -258,6 +258,12 @@ abstract base class CardotekaCore {
   /// {@endtemplate}
   FutureOr<Map<Card, Object>> getStoredEntries();
 
+  /// {@template cardoteka.CardotekaCore.getStoredCards}
+  /// A method to update the cache if provided by the storage implementation.
+  /// This method will also notify all [watcher] listeners.
+  /// {@endtemplate}
+  FutureOr<void> reloadCache();
+
   @override
   String toString() => ''
       '$runtimeType('

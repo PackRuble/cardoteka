@@ -32,5 +32,6 @@ export 'src/data_type.dart' show DataType;
 export 'src/extensions/future_ext.dart' show FutureSync;
 export 'src/mixin/crud_simulation.dart' show CRUD;
 export 'src/mixin/detachability.dart' show Detachability;
-export 'src/mixin/watcher_impl.dart' show Detacher, ValueCallback, WatcherImpl;
+export 'src/mixin/watcher_impl.dart'
+    show ChangeValueCallback, Detacher, RemoveRecordCallback, WatcherImpl;
 export 'src/watcher.dart' show Watcher;

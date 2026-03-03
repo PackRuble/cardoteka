@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import 'card.dart';
@@ -15,10 +13,11 @@ abstract interface class Watcher {
   @internal
   void notify<V extends Object?>(Card<V> card, V value);
 
-  // todo(20.02.2026, @PackRuble): deleted records must be processed separately
+  /// Called when a record is removed from storage.
+  @internal
+  void notifyAboutRemove(List<Card> cards);
 
   /// Allows to notify all listeners with the new values.
-  // classes implementing this interface must have this feature
-  // ignore: avoid_futureor_void
-  FutureOr<void> notifyAll();
+  @internal
+  void notifyAll();
 }

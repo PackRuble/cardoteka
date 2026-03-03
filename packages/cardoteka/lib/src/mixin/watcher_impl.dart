@@ -10,7 +10,15 @@ import '../watcher.dart';
 // ignore_for_file: prefer_function_declarations_over_variables
 
 /// Signature for callbacks that report that a new value has been set in the storage.
-typedef ValueCallback<V extends Object?> = void Function(V value);
+typedef ChangeValueCallback<V extends Object?> = void Function(V value);
+
+/// Signature for callbacks that report that a record has been removed from storage.
+typedef RemoveRecordCallback = void Function();
+
+/// A record of callbacks with notification of changes to the storage record.
+@visibleForTesting
+@internal
+typedef RecordCallbacks = (ChangeValueCallback, RemoveRecordCallback?);
 
 /// Signature informs that the `onDetach` function should be called when
 /// the listener is no longer needed. This will remove the linked resources.
@@ -39,34 +47,48 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   Watcher get watcher => this;
 
   /// A collection of [Card]s and callbacks associated with it.
-  late final _watchers = <Card, List<ValueCallback>>{};
+  late final _watchers = <Card, List<RecordCallbacks>>{};
 
   @override
   @internal
   @protected
   @visibleForTesting
   void notify<V extends Object?>(Card<V> card, V value) {
-    final List<ValueCallback<V?>>? callbacksByCard = _watchers[card];
+    final callbacksByCard = _watchers[card];
 
     if (callbacksByCard != null) {
       for (final cb in callbacksByCard) {
-        cb.call(value);
+        cb.$1.call(value);
+      }
+    }
+  }
+
+  @override
+  @internal
+  @protected
+  @visibleForTesting
+  void notifyAboutRemove(List<Card> cards) {
+    for (final card in cards) {
+      final callbacksByCard = _watchers[card];
+
+      if (callbacksByCard != null) {
+        for (final cb in callbacksByCard) {
+          cb.$2?.call();
+        }
       }
     }
   }
 
   @override
   Future<void> notifyAll() async {
-    final Iterable<Card> allWatcherCards = _watchers.keys;
+    final allWatcherCards = _watchers.keys;
 
-    if (allWatcherCards.isNotEmpty) {
-      for (final card in allWatcherCards) {
-        notify(card, get(card));
-      }
+    for (final card in allWatcherCards) {
+      notify(card, get(card));
     }
   }
 
-  /// Attach a [ValueCallback] to your [Card]. The [onChange] and [onRemove]
+  /// Attach a [ChangeValueCallback] to your [Card]. The [onChange] and [onRemove]
   /// parameters will allow you to track changes to the value in the storage.
   ///
   /// The [onChange] will be called whenever the [CardotekaCore.set] or
@@ -126,31 +148,30 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   /// Note: for [CardotekaAsync] `fireImmediately` is always true.
   V attach<V extends Object?>(
     Card<V> card, {
-    required ValueCallback<V> onChange,
-    required void Function()? onRemove,
+    required ChangeValueCallback<V> onChange,
+    required RemoveRecordCallback? onRemove,
     required Detacher detacher,
     bool fireImmediately = false,
   }) {
-    final newCallback = (Object? value) => value == null
-        // todo(22.02.2026, @PackRuble): now is it change action
-        ? onRemove?.call()
-        // we create a new callback based on an existing one because
-        // type 'void Function(V)' can't be assigned
-        //   to 'void Function(Object?)'
-        : onChange(value as V);
+    // we create a new callback based on an existing one because
+    // type 'void Function(V)' can't be assigned
+    //   to 'void Function(Object?)'
+    final onChangeCallback = (Object? value) => onChange(value as V);
+    final onRemoveCallback = onRemove;
+    final RecordCallbacks callbackRecord = (onChangeCallback, onRemoveCallback);
 
-    final callbacksByCard =
-        _watchers.putIfAbsent(card, () => <ValueCallback>[]);
-    callbacksByCard.add(newCallback);
+    final callbacksByCard = _watchers.putIfAbsent(card, () => []);
+    callbacksByCard.add(callbackRecord);
 
     detacher.call(() {
-      callbacksByCard.remove(newCallback);
+      callbacksByCard.remove(callbackRecord);
       if (callbacksByCard.isEmpty) {
         _watchers.remove(card);
       }
     });
 
-    // issue(08.02.2025): [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38)
+    // todo(08.02.2025, @PackRuble): #38 The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value
+    // todo(03.03.2026, @PackRuble): #45  Error: "type 'Null' is not a subtype of type 'String' in type cast" in WatcherImpl.attach
     final FutureOr<V?> valueOr = get(card);
     if (valueOr is! Future<V?>) {
       final V result = valueOr as V ?? card.defaultValue;
@@ -175,7 +196,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
 base mixin WatcherImplDebug on WatcherImpl {
   @visibleForTesting
   @internal
-  Map<Card, List<ValueCallback>> get watchersDebug => _watchers;
+  Map<Card, List<RecordCallbacks>> get watchersDebug => _watchers;
 
   @visibleForTesting
   @internal
