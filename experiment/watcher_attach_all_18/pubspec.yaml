@@ -1,0 +1,18 @@
+name: watcher_attach_all_18
+description: Experiments in Cardoteka.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cardoteka:
+    path: ../../packages/cardoteka
+
+flutter:
+  uses-material-design: true
+
