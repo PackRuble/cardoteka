@@ -146,35 +146,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
   /// does not exist in storage. If the [Card.defaultValue] for the [Card]
   /// was null, [onRemove] will be called instead of [callback].
   /// Note: for [CardotekaAsync] `fireImmediately` is always true.
-  V attach<V extends Object?>(
-    Card<V> card, {
-    required ChangeValueCallback<V> onChange,
-    required RemoveRecordCallback? onRemove,
-    required Detacher detacher,
-    bool fireImmediately = false,
-  }) {
-    final FutureOr<V> valueOr = attachAsync(
-      card,
-      detacher: detacher,
-      onChange: onChange,
-      onRemove: onRemove,
-      fireImmediately: false, // correct
-    );
-
-    // If V == Object, then FutureOr<V> is Future and FutureOr<V> is V.
-    // You can verify this by reading the documentation for FutureOr.
-    // So it is important that if (V == Object) or (V == other type),
-    // then this condition with `valueOr.then`.
-    if (valueOr case Future()) {
-      unawaited(valueOr.then((value) => onChange(value)));
-      return card.defaultValue;
-    } else {
-      if (fireImmediately) onChange(valueOr);
-      return valueOr;
-    }
-  }
-
-  FutureOr<V> attachAsync<V extends Object?>(
+  ({Future<V> future, V value}) attach<V extends Object?>(
     Card<V> card, {
     required ChangeValueCallback<V> onChange,
     required RemoveRecordCallback? onRemove,
@@ -185,8 +157,7 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     // type 'void Function(V)' can't be assigned
     //   to 'void Function(Object?)'
     final onChangeCallback = (Object? value) => onChange(value as V);
-    final onRemoveCallback = onRemove;
-    final RecordCallbacks callbackRecord = (onChangeCallback, onRemoveCallback);
+    final RecordCallbacks callbackRecord = (onChangeCallback, onRemove);
 
     final callbacksByCard = _watchers.putIfAbsent(card, () => []);
     callbacksByCard.add(callbackRecord);
@@ -198,15 +169,35 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
       }
     });
 
-    final value = getOrDefault(card);
-    if (fireImmediately) {
-      return Future(() async {
-        onChange(await value);
-        return value;
-      });
-    } else {
-      return value;
+    bool needCallOnChange = fireImmediately;
+    void callOnChangeOnce(V value) {
+      if (needCallOnChange) {
+        needCallOnChange = false;
+        onChange(value);
+      }
     }
+
+    final valueOr = getOrDefault(card);
+
+    return (
+      future: Future(() async {
+        callOnChangeOnce(await valueOr);
+        return valueOr;
+      }),
+      value: () {
+        // If V == Object, then FutureOr<V> is Future and FutureOr<V> is V.
+        // You can verify this by reading the documentation for FutureOr.
+        // So it is important that if (V == Object) or (V == other type),
+        // then this condition with `valueOr.then`.
+        if (valueOr case Future()) {
+          unawaited(valueOr.then(callOnChangeOnce));
+          return card.defaultValue;
+        } else {
+          callOnChangeOnce(valueOr);
+          return valueOr;
+        }
+      }(),
+    );
   }
 }
 
