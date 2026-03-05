@@ -153,6 +153,34 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
     required Detacher detacher,
     bool fireImmediately = false,
   }) {
+    final FutureOr<V> valueOr = attachAsync(
+      card,
+      detacher: detacher,
+      onChange: onChange,
+      onRemove: onRemove,
+      fireImmediately: false, // correct
+    );
+
+    // If V == Object, then FutureOr<V> is Future and FutureOr<V> is V.
+    // You can verify this by reading the documentation for FutureOr.
+    // So it is important that if (V == Object) or (V == other type),
+    // then this condition with `valueOr.then`.
+    if (valueOr case Future()) {
+      unawaited(valueOr.then((value) => onChange(value)));
+      return card.defaultValue;
+    } else {
+      if (fireImmediately) onChange(valueOr);
+      return valueOr;
+    }
+  }
+
+  FutureOr<V> attachAsync<V extends Object?>(
+    Card<V> card, {
+    required ChangeValueCallback<V> onChange,
+    required RemoveRecordCallback? onRemove,
+    required Detacher detacher,
+    bool fireImmediately = false,
+  }) {
     // we create a new callback based on an existing one because
     // type 'void Function(V)' can't be assigned
     //   to 'void Function(Object?)'
@@ -170,18 +198,14 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
       }
     });
 
-    // todo(08.02.2025, @PackRuble): #38 The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value
-    // todo(03.03.2026, @PackRuble): #45  Error: "type 'Null' is not a subtype of type 'String' in type cast" in WatcherImpl.attach
-    final FutureOr<V?> valueOr = get(card);
-    if (valueOr is! Future<V?>) {
-      final V result = valueOr as V ?? card.defaultValue;
-      if (fireImmediately) onChange(result);
-      return result;
+    final value = getOrDefault(card);
+    if (fireImmediately) {
+      return Future(() async {
+        onChange(await value);
+        return value;
+      });
     } else {
-      unawaited(valueOr.then((value) {
-        onChange(value ?? card.defaultValue);
-      }));
-      return card.defaultValue;
+      return value;
     }
   }
 }
