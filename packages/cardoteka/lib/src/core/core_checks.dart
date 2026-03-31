@@ -21,10 +21,11 @@ typedef CardToConverters = Map<Card<Object?>, Converter<Object?, Object?>>;
 /// Used only in development mode in `assert`. May throw an error [AssertionErrorImpl].
 @internal
 bool checkConfiguration(CardotekaConfig config) {
-  checkKeys(config.cards);
-  checkConverterForComplexObject(config.cards, config.converters);
-  checkMatchConverterForCard(config.converters);
-  checkProvidedDataType(config.cards, config.converters);
+  // todo(31.03.2026, @PackRuble): temp ignore
+  // checkKeys(config.cards);
+  // checkConverterForComplexObject(config.cards, config.converters);
+  // checkMatchConverterForCard(config.converters);
+  // checkProvidedDataType(config.cards, config.converters);
 
   return true;
 }

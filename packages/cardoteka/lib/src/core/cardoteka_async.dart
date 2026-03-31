@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../card.dart';
+import '../converter.dart';
 import '../data_type.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';
@@ -74,7 +75,12 @@ base class CardotekaAsync extends CardotekaCore {
     if (object == null) {
       return null;
     } else {
-      return (getConverter(card)?.from(object) ?? object) as V;
+      return (switch (getConverter(card)) {
+            null => null,
+            final CollectionConverter converter => converter.itemsFrom(object),
+            final Converter converter => converter.from(object),
+          } ??
+          object) as V;
     }
   }
 
@@ -102,7 +108,12 @@ base class CardotekaAsync extends CardotekaCore {
     Card<V> card,
     V value,
   ) async {
-    final resultValue = getConverter(card)?.to(value) ?? value;
+    final resultValue = switch (getConverter(card)) {
+          final CollectionConverter converter => converter.itemsTo(value),
+          final Converter converter => converter.to(value),
+          null => null,
+        } ??
+        value;
     await _storage.set(card.key, resultValue, card.dartType);
   }
 
