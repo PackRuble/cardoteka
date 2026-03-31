@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data' show Uint8List;
+import 'dart:io';
 
 import 'package:cardoteka/cardoteka.dart' show CardotekaStorage, DataType;
-import 'package:cross_file/cross_file.dart' show XFile;
 
 // todo(02.03.2026, @PackRuble): add cache
 // todo(02.03.2026, @PackRuble): doc
@@ -25,7 +24,10 @@ class JsonStorageAsync implements CardotekaStorage {
   /// If [indent] is `null`, the output is encoded as a single line.
   final String? indent;
 
-  XFile get _file => XFile(path);
+  // use XFile
+  // task(30.03.2026, @PackRuble): [Add support for UTF-16 · Issue #266 · dart-lang/core](https://github.com/dart-lang/core/issues/266)
+  // task(30.03.2026, @PackRuble): [[cross_file] `readAsString` assumes bytes are UTF-16 · Issue #165120 · flutter/flutter](https://github.com/flutter/flutter/issues/165120)
+  File get _file => File(path);
 
   Future<Object?> _getValue(String key) async {
     final data = await _getData(onlyKeys: {key});
@@ -39,7 +41,10 @@ class JsonStorageAsync implements CardotekaStorage {
   }) async {
     Map<String, dynamic> result = {};
 
-    final data = jsonDecode(await _file.readAsString()) as Map<String, dynamic>;
+    final raw = await _file.readAsString();
+    if (raw.isEmpty) return {};
+
+    final data = jsonDecode(raw) as Map<String, dynamic>;
 
     if (onlyKeys == null) {
       if (exceptKeys == null) {
@@ -65,18 +70,10 @@ class JsonStorageAsync implements CardotekaStorage {
     return result;
   }
 
-  // todo(15.02.2026, @PackRuble): optimize for point saving to file
   Future<void> _saveData(Object? data) async {
     final jsonEncoder = JsonEncoder.withIndent(indent);
     final result = jsonEncoder.convert(data);
-
-    final file = XFile(
-      path,
-      bytes: Uint8List.fromList(result.codeUnits),
-      // todo(09.02.2026, @PackRuble): specify all params
-    );
-
-    await file.saveTo(path);
+    await _file.writeAsString(result);
   }
 
   @override
@@ -99,10 +96,10 @@ class JsonStorageAsync implements CardotekaStorage {
   }
 
   @override
-  FutureOr<T?> get<T extends Object>(String key, DataType<T> type) async {
+  FutureOr<T?> get<T extends Object>(String key, DataType type) async {
     final data = await _getValue(key);
 
-    return type.cast(data);
+    return data as T?;
   }
 
   @override

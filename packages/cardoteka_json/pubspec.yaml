@@ -13,8 +13,17 @@ environment:
 resolution: workspace
 
 dependencies:
-  cardoteka: ^3.0.0-dev.0
-  cross_file: ^0.3.5+2
+  cardoteka:
+    version: ^3.0.0-dev.0
+# todo(29.03.2026, @PackRuble): for local development
+#    path: ../cardoteka
+
+# task(30.03.2026, @PackRuble): [[cross_file] Platform-aware factories. · Issue #91869 · flutter/flutter](https://github.com/flutter/flutter/issues/91869)
+#  cross_file:
+#    git:
+#      url: https://github.com/bparrishMines/packages.git
+#      path: packages/cross_file/cross_file
+#      ref: new_crossfile
 
   meta: 1.17.0
 
