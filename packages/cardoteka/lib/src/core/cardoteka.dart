@@ -2,7 +2,6 @@ import 'package:meta/meta.dart';
 
 import '../card.dart';
 import '../data_type.dart';
-import '../extensions/future_ext.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';
 
@@ -87,7 +86,9 @@ base class Cardoteka extends CardotekaCore {
 
   @override
   void set<V extends Object?>(Card<V> card, V value) {
-    super.set<V>(card, value).sync();
+    // action will happen synchronously
+    // ignore: discarded_futures
+    super.set<V>(card, value);
   }
 
   @internal
@@ -98,7 +99,7 @@ base class Cardoteka extends CardotekaCore {
     V value,
   ) {
     final resultValue = getConverter(card)?.to(value) ?? value;
-    _storage.set(card.key, resultValue, card.dartType).sync();
+    _storage.set(card.key, resultValue, card.dartType) as V;
   }
 
   @override
@@ -107,31 +108,35 @@ base class Cardoteka extends CardotekaCore {
     String key,
     V? value,
   ) {
-    _storage
-        .set<V>(
-          key,
-          value,
-          value != null ? DataType.typeBy<V>(value) : null,
-        )
-        .sync();
+    // action will happen synchronously
+    // ignore: discarded_futures
+    _storage.set<V>(
+      key,
+      value,
+      value != null ? DataType.typeBy<V>(value) : null,
+    );
   }
 
   // todo(03.03.2026, @PackRuble): put the same methods in the base class
   @override
   void remove(Card card) {
     watcher?.notifyAboutRemove([card]);
-    _storage.remove(card.key).sync();
+    // action will happen synchronously
+    // ignore: discarded_futures
+    _storage.remove(card.key);
   }
 
   @override
   void removeAll() {
     watcher?.notifyAboutRemove(cards);
-    _storage.clear().sync();
+    // action will happen synchronously
+    // ignore: discarded_futures
+    _storage.clear();
   }
 
   @override
   bool containsCard(Card card) {
-    return _storage.containsKey(card.key).sync();
+    return _storage.containsKey(card.key) as bool;
   }
 
   @override
@@ -154,7 +159,9 @@ base class Cardoteka extends CardotekaCore {
 
   @override
   void reloadCache() {
-    _storage.reloadCache().sync();
+    // action will happen synchronously
+    // ignore: discarded_futures
+    _storage.reloadCache();
 
     if (watcher != null) {
       final storedCards = getStoredCards();

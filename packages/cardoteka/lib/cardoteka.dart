@@ -29,7 +29,6 @@ export 'src/core/cardoteka_core.dart' show CardotekaCore;
 export 'src/core/storage/cardoteka_storage.dart'
     show CardotekaStorage, MemoryStorage;
 export 'src/data_type.dart' show DataType;
-export 'src/extensions/future_ext.dart' show FutureSync;
 export 'src/mixin/crud_simulation.dart' show CRUD;
 export 'src/mixin/detachability.dart' show Detachability;
 export 'src/mixin/watcher_impl.dart'
