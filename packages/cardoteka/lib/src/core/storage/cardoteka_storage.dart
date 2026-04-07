@@ -1,7 +1,5 @@
 import 'dart:async' show FutureOr;
 
-import 'package:meta/meta.dart' show internal, protected;
-
 import '../../data_type.dart';
 
 abstract interface class CardotekaStorage {
@@ -37,91 +35,4 @@ abstract interface class CardotekaStorage {
 
   // todo(21.02.2026, @PackRuble): add return changes if there were
   FutureOr<void> reloadCache();
-}
-
-class MemoryStorage implements CardotekaStorage {
-  MemoryStorage({
-    Map<String, dynamic>? initialData,
-  }) : _data = initialData ?? {};
-
-  final Map<String, dynamic> _data;
-
-  @override
-  Set<String> getKeys({
-    Set<String>? onlyKeys,
-    Set<String>? exceptKeys,
-  }) {
-    final all = getAll(onlyKeys: onlyKeys, exceptKeys: exceptKeys);
-
-    return all.keys.toSet();
-  }
-
-  @override
-  Map<String, dynamic> getAll({
-    Set<String>? onlyKeys,
-    Set<String>? exceptKeys,
-  }) {
-    Map<String, dynamic> result = {};
-
-    if (onlyKeys == null) {
-      if (exceptKeys == null) {
-        result = _data;
-      } else {
-        for (final entry in _data.entries) {
-          if (exceptKeys.contains(entry.key)) continue;
-          if (!_data.containsKey(entry.key)) continue;
-
-          result[entry.key] = _data[entry.key];
-        }
-      }
-    } else {
-      final keys = onlyKeys.difference(exceptKeys ?? {});
-
-      for (final key in keys) {
-        if (!_data.containsKey(key)) continue;
-
-        result[key] = _data[key];
-      }
-    }
-
-    return result;
-  }
-
-  @override
-  T? get<T extends Object>(String key, DataType<T> type) {
-    return type.cast(_data[key]);
-  }
-
-  @override
-  void set<T extends Object>(String key, T? value, _) {
-    _data[key] = value;
-  }
-
-  @override
-  bool containsKey(String key) {
-    final keys = getKeys(onlyKeys: {key});
-
-    return keys.isNotEmpty;
-  }
-
-  @override
-  void remove(String key) {
-    _data.remove(key);
-  }
-
-  @override
-  void clear({Set<String>? onlyKeys}) {
-    if (onlyKeys == null) {
-      _data.clear();
-    } else {
-      for (final key in onlyKeys) {
-        _data.remove(key);
-      }
-    }
-  }
-
-  @internal
-  @protected
-  @override
-  void reloadCache() {}
 }
