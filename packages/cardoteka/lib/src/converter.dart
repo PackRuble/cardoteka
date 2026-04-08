@@ -44,8 +44,7 @@ abstract base class CollectionConverter<
   CollectionRaw itemsTo(Collection items);
 
   @override
-  String toString() =>
-      '$runtimeType(from: $Collection<$Item>, to: $CollectionRaw<$ItemRaw>)';
+  String toString() => '$runtimeType(from: $Collection, to: $CollectionRaw)';
 }
 
 /// Provides converters to convert [Enum].
@@ -89,7 +88,7 @@ extension EnumConverters<T extends Enum> on Iterable<T> {
 /// Converter for class [Enum].
 ///
 /// Converts [Enum] to [int] using [Enum.index].
-class EnumAsIntConverter<T extends Enum> implements Converter<T, int> {
+class EnumAsIntConverter<T extends Enum> extends Converter<T, int> {
   const EnumAsIntConverter(this._enums);
 
   final Iterable<T> _enums;
@@ -104,7 +103,7 @@ class EnumAsIntConverter<T extends Enum> implements Converter<T, int> {
 /// Converter for class [Enum].
 ///
 /// Converts [Enum] to [String] using [EnumName.name].
-class EnumAsStringConverter<T extends Enum> implements Converter<T, String> {
+class EnumAsStringConverter<T extends Enum> extends Converter<T, String> {
   const EnumAsStringConverter(this._enums);
 
   final Iterable<T> _enums;
@@ -120,7 +119,7 @@ class EnumAsStringConverter<T extends Enum> implements Converter<T, String> {
 ///
 /// Converts [Uri] to [String] using [Uri.toString].
 class UriConverter<Obj extends Uri?, ObjRaw extends String?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const UriConverter();
 
   @override
@@ -134,7 +133,7 @@ class UriConverter<Obj extends Uri?, ObjRaw extends String?>
 ///
 /// Converts [Duration] to [int] using [Duration.inMicroseconds].
 class DurationConverter<Obj extends Duration?, ObjRaw extends int?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const DurationConverter();
 
   @override
@@ -153,7 +152,7 @@ class DurationConverter<Obj extends Duration?, ObjRaw extends int?>
 ///
 /// Converts [DateTime] to [String] using [DateTime.toIso8601String].
 class DateTimeConverter<Obj extends DateTime?, ObjRaw extends String?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const DateTimeConverter();
 
   @override
@@ -168,7 +167,7 @@ class DateTimeConverter<Obj extends DateTime?, ObjRaw extends String?>
 ///
 /// Converts [DateTime] to [int] using [DateTime.millisecondsSinceEpoch].
 class DateTimeAsIntConverter<Obj extends DateTime?, ObjRaw extends int?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const DateTimeAsIntConverter();
 
   @override
@@ -184,7 +183,7 @@ class DateTimeAsIntConverter<Obj extends DateTime?, ObjRaw extends int?>
 ///
 /// Converts [num] to [double] using [num.toDouble].
 class NumConverter<Obj extends num?, ObjRaw extends double?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const NumConverter();
 
   @override
@@ -198,7 +197,7 @@ class NumConverter<Obj extends num?, ObjRaw extends double?>
 ///
 /// Converts [num] to [String] using [num.toString].
 class NumAsStringConverter<Obj extends num?, ObjRaw extends String?>
-    implements Converter<Obj, ObjRaw> {
+    extends Converter<Obj, ObjRaw> {
   const NumAsStringConverter();
 
   @override
@@ -213,9 +212,8 @@ class NumAsStringConverter<Obj extends num?, ObjRaw extends String?>
 /// Converts [Iterable]<[Item]> to [Iterable]<[ItemRaw]> using [Iterable.map].
 abstract base class IterableConverter<Item extends Object?,
         ItemRaw extends Object?>
-    implements
-        CollectionConverter<Iterable<Item>?, Item, Iterable<ItemRaw>?,
-            ItemRaw> {
+    extends CollectionConverter<Iterable<Item>?, Item, Iterable<ItemRaw>?,
+        ItemRaw> {
   const IterableConverter();
 
   @override
@@ -229,7 +227,7 @@ abstract base class IterableConverter<Item extends Object?,
 ///
 /// Converts [List]<[Item]> to [List]<[ItemRaw]>.
 abstract base class ListConverter<Item extends Object?, ItemRaw extends Object?>
-    implements CollectionConverter<List<Item>?, Item, List<ItemRaw>?, ItemRaw> {
+    extends CollectionConverter<List<Item>?, Item, List<ItemRaw>?, ItemRaw> {
   const ListConverter();
 
   @override
@@ -248,9 +246,8 @@ abstract base class ListConverter<Item extends Object?, ItemRaw extends Object?>
 /// Use a suitable delimiter for your data to represent the key-value as a `Object`.
 abstract base class MapToListConverter<K extends String, V extends Object?,
         ItemRaw extends Object>
-    implements
-        CollectionConverter<Map<K, V>?, MapEntry<K, V>, List<ItemRaw>?,
-            ItemRaw> {
+    extends CollectionConverter<Map<K, V>?, MapEntry<K, V>, List<ItemRaw>?,
+        ItemRaw> {
   const MapToListConverter();
 
   @override
