@@ -51,6 +51,7 @@ base class Cardoteka extends CardotekaCore {
   Cardoteka({
     required super.config,
     required CardotekaStorage storage,
+    super.skipCheckConfig,
   }) : _storage = storage;
 
   final CardotekaStorage _storage;

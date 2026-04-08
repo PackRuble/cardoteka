@@ -51,6 +51,7 @@ base class CardotekaAsync extends CardotekaCore {
   CardotekaAsync({
     required super.config,
     required CardotekaStorage storage,
+    super.skipCheckConfig,
   }) : _storage = storage;
 
   /// Used to access storage.

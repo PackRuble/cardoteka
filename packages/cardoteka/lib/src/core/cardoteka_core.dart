@@ -111,11 +111,11 @@ abstract base class CardotekaCore {
   /// {@endtemplate}
   CardotekaCore({
     required this.config,
+    bool skipCheckConfig = false,
   }) :
-        // fixdep(22.05.2023): this behavior is not yet available for const classes
-        // [Allow run-time-only assertion checking in constant constructors · Issue #2581 · dart-lang/language](https://github.com/dart-lang/language/issues/2581)
+        // task(22.05.2023, @PackRuble): Asserts do not allow you to make the CardotekaCore class constant #64
         assert(
-          checkConfiguration(config),
+          skipCheckConfig || checkConfiguration(config),
           'The configuration contains errors.',
         );
 
