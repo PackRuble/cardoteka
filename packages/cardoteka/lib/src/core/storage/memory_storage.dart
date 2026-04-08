@@ -51,7 +51,7 @@ class MemoryStorage implements CardotekaStorage {
 
   @override
   T? get<T extends Object>(String key, DataType<T> type) {
-    return type.cast(_data[key]);
+    return _data[key] as T?;
   }
 
   @override
