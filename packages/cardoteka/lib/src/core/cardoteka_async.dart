@@ -109,9 +109,9 @@ base class CardotekaAsync extends CardotekaCore {
     V value,
   ) async {
     final resultValue = switch (getConverter(card)) {
+          null => null,
           final CollectionConverter converter => converter.itemsTo(value),
           final Converter converter => converter.to(value),
-          null => null,
         } ??
         value;
     await _storage.set(card.key, resultValue, card.dartType);

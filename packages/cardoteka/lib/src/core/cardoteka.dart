@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../card.dart';
+import '../converter.dart' show CollectionConverter, Converter;
 import '../data_type.dart';
 import 'cardoteka_core.dart';
 import 'storage/cardoteka_storage.dart';
@@ -73,7 +74,12 @@ base class Cardoteka extends CardotekaCore {
     if (object == null) {
       return null;
     } else {
-      return (getConverter(card)?.from(object) ?? object) as V?;
+      return (switch (getConverter(card)) {
+            null => null,
+            final CollectionConverter converter => converter.itemsFrom(object),
+            final Converter converter => converter.from(object),
+          } ??
+          object) as V;
     }
   }
 
@@ -98,8 +104,15 @@ base class Cardoteka extends CardotekaCore {
     Card<V> card,
     V value,
   ) {
-    final resultValue = getConverter(card)?.to(value) ?? value;
-    _storage.set(card.key, resultValue, card.dartType) as V;
+    final resultValue = switch (getConverter(card)) {
+          null => null,
+          final CollectionConverter converter => converter.itemsTo(value),
+          final Converter converter => converter.to(value),
+        } ??
+        value;
+    // action will happen synchronously
+    // ignore: discarded_futures
+    _storage.set(card.key, resultValue, card.dartType);
   }
 
   @override
