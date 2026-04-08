@@ -150,10 +150,10 @@ base class Cardoteka extends CardotekaCore {
   }
 
   @override
-  Map<Card, Object> getStoredEntries() {
+  Map<Card, Object?> getStoredEntries() {
     return {
       for (final Card card in getStoredCards())
-        card: getValueFromStorage<Object?>(card)!
+        card: getValueFromStorage<Object?>(card)
     };
   }
 

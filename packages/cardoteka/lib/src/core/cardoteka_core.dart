@@ -256,7 +256,7 @@ abstract base class CardotekaCore {
   /// {@template cardoteka.CardotekaCore.getStoredCards}
   /// Returns all stored entities from storage.
   /// {@endtemplate}
-  FutureOr<Map<Card, Object>> getStoredEntries();
+  FutureOr<Map<Card, Object?>> getStoredEntries();
 
   /// {@template cardoteka.CardotekaCore.getStoredCards}
   /// A method to update the cache if provided by the storage implementation.

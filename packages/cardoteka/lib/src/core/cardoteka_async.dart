@@ -159,10 +159,10 @@ base class CardotekaAsync extends CardotekaCore {
   }
 
   @override
-  FutureOr<Map<Card, Object>> getStoredEntries() async {
+  FutureOr<Map<Card, Object?>> getStoredEntries() async {
     return {
       for (final card in await getStoredCards())
-        card: (await getValueFromStorage<Object?>(card))!
+        card: (await getValueFromStorage<Object?>(card))
     };
   }
 
