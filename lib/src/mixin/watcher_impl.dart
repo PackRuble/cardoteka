@@ -150,16 +150,19 @@ base mixin WatcherImpl on CardotekaCore implements Watcher {
 
     // issue(08.02.2025): [The `Watcher.attach` for `CardotekaAsync` instance first value returns a default value · Issue #38 · PackRuble/cardoteka](https://github.com/PackRuble/cardoteka/issues/38)
     // ignore: discarded_futures
-    final FutureOr<V?> valueOr = getOrNull(card);
-    if (valueOr is! Future<V?>) {
-      final V result = valueOr as V ?? card.defaultValue;
-      if (fireImmediately) onChange(result);
-      return result;
-    } else {
+    final valueOr = getOrNull(card);
+    // In fact: `valueOr is Future<V?>` and `valueOr is V?` simultaneously
+    // However, if we get into the condition `is Future<V?>`, then we definitely
+    // won’t make a mistake.
+    if (valueOr is Future<V?>) {
       unawaited(valueOr.then((value) {
         onChange(value ?? card.defaultValue);
       }));
       return card.defaultValue;
+    } else {
+      final result = valueOr ?? card.defaultValue;
+      if (fireImmediately) onChange(result);
+      return result;
     }
   }
 }
