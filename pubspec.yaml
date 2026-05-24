@@ -15,15 +15,13 @@ version: 2.1.1
 environment:
   sdk: ^3.5.0
 
+# Package version restrictions match those of dart sdk - ^3.5.0
 dependencies:
   flutter:
     sdk: flutter
 
-  # dart sdk limitation matches - ^3.5.0
-  shared_preferences: ^2.5.2
-
-  # version is clearly related to the minimum version of the dart sdk
-  meta: ^1.15.0
+  shared_preferences: ^2.5.3
+  meta: ^1.18.0
 
 dev_dependencies:
   flutter_test:
