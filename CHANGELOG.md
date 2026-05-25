@@ -1,3 +1,7 @@
+## [2.1.2] - 24-05-2026
+- fix: [Error: "type 'Null' is not a subtype of type 'String' in type cast" in ` WatcherImpl.attach`](https://github.com/PackRuble/cardoteka/issues/45)
+- upd: dependencies (shared_preferences: ^2.5.3, meta: ^1.18.0)
+
 ## [2.1.1] - 11-03-2025
 - fix: regressed issue [#44](https://github.com/PackRuble/cardoteka/issues/44) peppered with tests
 

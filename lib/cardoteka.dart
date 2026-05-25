@@ -1,4 +1,4 @@
-// Copyright (c) 2022-2025 Ruble
+// Copyright (c) 2022-2026 Ruble
 //
 // Use of this source code is governed by the license found in the LICENSE file.
 
